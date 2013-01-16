@@ -3,7 +3,7 @@
 //set name
 global.bot_name = "IRC-PONY";
 //set main entry point path
-global.bot_path = require.main.filename.replace(/\\/g, '/').replace(/\/[^\/]*$/, '');
+global.bot_path = require.main.filename.replace(/\\/g, "/").replace(/\/[^\/]*$/, "");
 
 function Bot() {
 	var bot = this;
@@ -17,8 +17,27 @@ function Bot() {
 		}
 	});
 
-	this.loadConfig = function loadConfig() {
-		dispatcher.emit('load-config');
+	this.loadConfig = function loadConfig(config, callback) {
+		var error = false;
+		if(typeof config === "string") {
+			try {
+				bot.config = require(bot_path + "/" + config);
+			} catch(Error) {
+				error = true;
+				bot.config = {};
+			}
+		} else if(config instanceof Object) {
+			bot.config = config;
+		} else {
+			try {
+				bot.config = require(bot_path + "/config.json");
+			} catch(Error) {
+				error = true;
+				bot.config = {};
+			}
+		}
+
+		if(callback) callback(error, bot.config);
 	};
 
 	this.loadModules = function loadModules() {
