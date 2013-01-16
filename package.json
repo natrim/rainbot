@@ -7,7 +7,7 @@
 		"cheerio": "*",
 		"time": "*",
 		"async": "*",
-		"underscore": "*",
+		"underscore": "*"
 	},
 	"main": "./app.js",
 	"author": "Natrim"
