@@ -1,3 +1,4 @@
 irc-pony.sublime-project
 irc-pony.sublime-workspace
 node_modules/*
+!node_modules/info.txt
