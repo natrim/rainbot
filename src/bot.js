@@ -1,10 +1,10 @@
 'use strict';
 
 //set main entry point path
-global.BOT_PATH = require('path').resolve(__dirname, '..');
+global.BOT_PATH = module.require('path').resolve(__dirname, '..');
 
 function Bot() {
-	var dispatcher = new(require('events').EventEmitter)();
+	var dispatcher = new(module.require('events').EventEmitter)();
 
 	dispatcher.setMaxListeners(0); //remove listener limit
 	dispatcher.on('newListener', function(event, listener) {
@@ -31,7 +31,7 @@ function Bot() {
 
 		if(typeof config === 'string') {
 			try {
-				bot.config = require(BOT_PATH + '/' + config);
+				bot.config = module.require(BOT_PATH + '/' + config);
 			} catch(e) {
 				error = true;
 				bot.config = {};
@@ -40,7 +40,7 @@ function Bot() {
 			bot.config = config;
 		} else {
 			try {
-				bot.config = require(BOT_PATH + '/config.json');
+				bot.config = module.require(BOT_PATH + '/config.json');
 			} catch(e) {
 				error = true;
 				bot.config = {};
@@ -57,7 +57,7 @@ function Bot() {
 
 	this.run = function run(callback) {
 
-		if(callback) bot.once('init', callback);
+		if(callback) callback();
 		bot.emit('init');
 	};
 }
