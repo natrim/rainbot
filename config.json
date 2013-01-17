@@ -1,0 +1,6 @@
+{
+	"bot": {
+		"name": "IRC-PONY",
+		"modules": "modules.json"
+	}
+}

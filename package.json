@@ -9,6 +9,9 @@
 		"async": "*",
 		"underscore": "*"
 	},
+	"devDependencies": {
+		"vows": "*"
+	},
 	"main": "./app.js",
 	"author": "Natrim"
 }

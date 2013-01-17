@@ -1,28 +1,38 @@
-"use strict";
+'use strict';
 
-//set name
-global.bot_name = "IRC-PONY";
 //set main entry point path
-global.bot_path = require.main.filename.replace(/\\/g, "/").replace(/\/[^\/]*$/, "");
+global.BOT_PATH = require('path').resolve(__dirname, '..');
 
 function Bot() {
-	var bot = this;
-	var dispatcher = new(require("events").EventEmitter)();
+	var dispatcher = new(require('events').EventEmitter)();
 
 	dispatcher.setMaxListeners(0); //remove listener limit
-	dispatcher.on("newListener", function(event, listener) {
+	dispatcher.on('newListener', function(event, listener) {
 		var i, name;
-		if(((i = event.indexOf("/")) + 1) && (name = event.substr(0, i))) {
+		if(((i = event.indexOf('/')) + 1) && (name = event.substr(0, i))) {
 			//todo check if module active
 		}
 	});
 
+	//bind event commands
+	this.on = this.addListener = dispatcher.on.bind(dispatcher);
+	this.off = this.removeListener = dispatcher.removeListener.bind(dispatcher);
+	this.once = dispatcher.once.bind(dispatcher);
+	this.emit = dispatcher.emit.bind(dispatcher);
+
+	var bot = this;
+
 	this.loadConfig = function loadConfig(config, callback) {
 		var error = false;
-		if(typeof config === "string") {
+		if(typeof config === 'function' && typeof callback === 'undefined') {
+			callback = config;
+			config = undefined;
+		}
+
+		if(typeof config === 'string') {
 			try {
-				bot.config = require(bot_path + "/" + config);
-			} catch(Error) {
+				bot.config = require(BOT_PATH + '/' + config);
+			} catch(e) {
 				error = true;
 				bot.config = {};
 			}
@@ -30,8 +40,8 @@ function Bot() {
 			bot.config = config;
 		} else {
 			try {
-				bot.config = require(bot_path + "/config.json");
-			} catch(Error) {
+				bot.config = require(BOT_PATH + '/config.json');
+			} catch(e) {
 				error = true;
 				bot.config = {};
 			}
@@ -40,12 +50,15 @@ function Bot() {
 		if(callback) callback(error, bot.config);
 	};
 
-	this.loadModules = function loadModules() {
-		dispatcher.emit('load-modules');
+	this.loadModules = function loadModules(modules, callback) {
+
+		if(callback) callback();
 	};
 
-	this.run = function run() {
-		dispatcher.emit('init');
+	this.run = function run(callback) {
+
+		if(callback) bot.once('init', callback);
+		bot.emit('init');
 	};
 }
 
