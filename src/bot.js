@@ -47,6 +47,23 @@ function Bot() {
 			}
 		}
 
+		//make sure we have important values
+		if(!error) {
+			if(typeof bot.config.bot === 'undefined') {
+				bot.config.bot = {
+					'name': 'IRC-PONY',
+					'modules': 'modules.json'
+				};
+			} else {
+				if(typeof bot.config.bot.name === 'undefined') {
+					bot.config.bot.name = 'IRC-PONY';
+				}
+				if(typeof bot.config.bot.modules === 'undefined') {
+					bot.config.bot.modules = 'modules.json';
+				}
+			}
+		}
+
 		if(callback) callback(error, bot.config);
 	};
 

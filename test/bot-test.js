@@ -1,3 +1,5 @@
+'use strict';
+
 var vows = require('vows'),
 	assert = require('assert');
 
@@ -37,13 +39,13 @@ suite.addBatch({
 				assert.isNull(err);
 				assert.isObject(config);
 			},
-			'with default bot name \'IRC-PONY\'': function(error, config) {
+			'with bot name': function(error, config) {
 				assert.isObject(config.bot);
-				assert.equal(config.bot.name, 'IRC-PONY');
+				assert.isString(config.bot.name);
 			},
-			'and default module file \'modules.json\'': function(error, config) {
+			'and module file': function(error, config) {
 				assert.isObject(config.bot);
-				assert.equal(config.bot.modules, 'modules.json');
+				assert.isString(config.bot.modules);
 			}
 		},
 		'manual custom object': {
@@ -52,12 +54,35 @@ suite.addBatch({
 					'test': 'ok'
 				}, this.callback);
 			},
-			'then il get that object as config': function(err, config) {
+			'then il get custom config': function(err, config) {
 				assert.isObject(config);
-				assert.deepEqual(config, {
-					'test': 'ok'
-				});
 				assert.equal(config.test, 'ok');
+			},
+			'with bot name': function(error, config) {
+				assert.isObject(config.bot);
+				assert.isString(config.bot.name);
+			},
+			'and module file': function(error, config) {
+				assert.isObject(config.bot);
+				assert.isString(config.bot.modules);
+			}
+		},
+		'manual custom object with twist': {
+			topic: function() {
+				new(require('../src/bot'))().loadConfig({
+					'bot': {
+						'name': 'Dash',
+						'modules': 'dashing.json'
+					}
+				}, this.callback);
+			},
+			'with custom bot name \'Dash\'': function(error, config) {
+				assert.isObject(config.bot);
+				assert.equal(config.bot.name, 'Dash');
+			},
+			'and custom module file \'dashing.json\'': function(error, config) {
+				assert.isObject(config.bot);
+				assert.equal(config.bot.modules, 'dashing.json');
 			}
 		}
 	}
