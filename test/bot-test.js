@@ -3,26 +3,28 @@
 var vows = require('vows'),
 	assert = require('assert');
 
-
 var suite = vows.describe('Bot class');
+
+var BOT = require('../libs/bot');
+var FS = require('fs');
 
 suite.addBatch({
 	'When i require bot': {
 		topic: function() {
-			return new(require('../src/bot'))();
+			return new BOT();
 		},
 		'then i get Bot instance': function(bot) {
 			assert.isObject(bot);
-			assert.instanceOf(bot, require('../src/bot'));
+			assert.instanceOf(bot, BOT);
 		},
 		'and \'BOT_PATH\' has app.js': function() {
-			assert.isTrue(require('fs').existsSync(BOT_PATH + '/app.js'));
+			assert.isTrue(FS.existsSync(BOT_PATH + '/app.js'));
 		}
 	},
-	'When i load': {
+	'When i load config with': {
 		'not existing config': {
 			topic: function() {
-				new(require('../src/bot'))().loadConfig('not-exist-config.json', this.callback);
+				new BOT().loadConfig('not-exist-config.json', this.callback);
 			},
 			'then i get error': function(err, config) {
 				assert.isTrue(err);
@@ -33,7 +35,7 @@ suite.addBatch({
 		},
 		'default config': {
 			topic: function() {
-				new(require('../src/bot'))().loadConfig(this.callback);
+				new BOT().loadConfig(this.callback);
 			},
 			'then i get config object': function(err, config) {
 				assert.isNull(err);
@@ -50,7 +52,7 @@ suite.addBatch({
 		},
 		'manual custom object': {
 			topic: function() {
-				new(require('../src/bot'))().loadConfig({
+				new BOT().loadConfig({
 					'test': 'ok'
 				}, this.callback);
 			},
@@ -69,7 +71,7 @@ suite.addBatch({
 		},
 		'manual custom object with twist': {
 			topic: function() {
-				new(require('../src/bot'))().loadConfig({
+				new BOT().loadConfig({
 					'bot': {
 						'name': 'Dash',
 						'modules': 'dashing.json'
@@ -83,6 +85,101 @@ suite.addBatch({
 			'and custom module file \'dashing.json\'': function(error, config) {
 				assert.isObject(config.bot);
 				assert.equal(config.bot.modules, 'dashing.json');
+			}
+		}
+	},
+	'When i load modules with': {
+		'not existing files': {
+			topic: function() {
+				new BOT().loadModules('not-exist-modules-config.json', this.callback);
+			},
+			'then i get error': function(err, modules) {
+				assert.isTrue(err);
+			}
+		},
+		'object': {
+			'one': {
+				topic: function() {
+					new BOT().loadModules({
+						test: true
+					}, this.callback);
+				},
+				'then i get module in list': function(err, modules) {
+					assert.isNull(err);
+
+					assert.isTrue(modules.some(function(module) {
+						return module.name === 'test';
+					}));
+				}
+			},
+			'more': {
+				topic: function() {
+					new BOT().loadModules({
+						test: true,
+						test2: true
+					}, this.callback);
+				},
+				'then i get module in list': function(err, modules) {
+					assert.isNull(err);
+
+					assert.isTrue(modules.some(function(module) {
+						return module.name === 'test';
+					}));
+					assert.isTrue(modules.some(function(module) {
+						return module.name === 'test2';
+					}));
+				}
+			}
+		},
+		'array': {
+			'one': {
+				topic: function() {
+					new BOT().loadModules(['test'], this.callback);
+				},
+				'then i get module in list': function(err, modules) {
+					assert.isNull(err);
+
+					assert.isTrue(modules.some(function(module) {
+						return module.name === 'test';
+					}));
+				}
+			},
+			'more': {
+				topic: function() {
+					new BOT().loadModules(['test', 'test2'], this.callback);
+				},
+				'then i get module in list': function(err, modules) {
+					assert.isNull(err);
+
+					assert.isTrue(modules.some(function(module) {
+						return module.name === 'test';
+					}));
+					assert.isTrue(modules.some(function(module) {
+						return module.name === 'test2';
+					}));
+				}
+			}
+		},
+		'directly': {
+			'with callback': {
+				topic: function() {
+					new BOT().load('test', this.callback);
+				},
+				'then i get true': function(err, module) {
+					assert.isNull(err);
+				}
+			},
+			'with return': {
+				topic: function() {
+					var bot = new BOT();
+					bot.load('test');
+					return bot;
+				},
+				'and i find it in bot.modules': function(bot) {
+					assert.isTrue(bot.modules.some(function(module) {
+						return module.name === 'test';
+					}));
+				}
 			}
 		}
 	}

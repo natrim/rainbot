@@ -6,8 +6,7 @@
 		"request": "*",
 		"cheerio": "*",
 		"time": "*",
-		"async": "*",
-		"underscore": "*"
+		"async": "*"
 	},
 	"devDependencies": {
 		"vows": "*"
