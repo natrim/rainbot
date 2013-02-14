@@ -1,12 +1,24 @@
-module.exports = function Module(name, dispatchBase) {
-	'use strict';
-
+function Module(name) {
 	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 
 	this.name = name;
 	this.fileName = name + ".js";
-	this.fullPath = require.resolve(BOT_PATH + "/modules/" + this.fileName);
+	this.fullPath = require.resolve(MODULES_DIR + '/' + this.fileName);
+}
 
+//called on load
+Module.prototype.init = function init() {};
+
+//called on unload
+Module.prototype.halt = function halt() {
+	//remove from node require cache
+	delete require.cache[this.fullPath];
+
+	//and remove all listeners
+	if(typeof this.dispatcher === 'object') this.dispatcher.clearEvents();
+};
+
+Module.prototype.injectDispatcher = function(dispatchBase) {
 	var events = [];
 	this.dispatcher = {
 		on: function(event, listener) {
@@ -54,22 +66,16 @@ module.exports = function Module(name, dispatchBase) {
 			try {
 				dispatchBase.emit.apply(dispatchBase, arguments);
 			} catch(e) {
-				dispatchBase.emit.call(dispatchBase, "dispatchError", event, e);
+				dispatchBase.emit.call(dispatchBase, "dispatchError", event, e, this);
 			}
+		},
+		clearEvents: function() {
+			events.forEach(function(event) {
+				dispatchBase.removeListener(event.event, event.listener);
+			});
+			events = [];
 		}
 	};
-
-	//called on load
-	this.init = function init() {};
-
-	//called on unload
-	this.halt = function halt() {
-		//remove from node require cache
-		delete require.cache[this.fullPath];
-
-		//and remove all listeners
-		events.forEach(function(event) {
-			dispatchBase.removeListener(event.event, event.listener);
-		});
-	};
 };
+
+module.exports = Module;

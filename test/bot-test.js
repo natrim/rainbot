@@ -8,6 +8,9 @@ var suite = vows.describe('Bot class');
 var BOT = require('../libs/bot');
 var FS = require('fs');
 
+//disable logger
+require(LIBS_DIR + '/logger').enabled = false;
+
 suite.addBatch({
 	'When i require bot': {
 		topic: function() {
@@ -18,7 +21,7 @@ suite.addBatch({
 			assert.instanceOf(bot, BOT);
 		},
 		'and \'BOT_PATH\' has app.js': function() {
-			assert.isTrue(FS.existsSync(BOT_PATH + '/app.js'));
+			assert.isTrue(FS.existsSync(BOT_DIR + '/app.js'));
 		}
 	},
 	'When i load config with': {
@@ -89,6 +92,14 @@ suite.addBatch({
 		}
 	},
 	'When i load modules with': {
+		'defaults': {
+			topic: function() {
+				return new BOT().loadModules();
+			},
+			'then i will have only core modules': function(bot) {
+				assert.lengthOf(bot.modules.getModules(), Object.keys(bot.core_modules).length);
+			}
+		},
 		'not existing files': {
 			topic: function() {
 				new BOT().loadModules('not-exist-modules-config.json', this.callback);
@@ -104,12 +115,10 @@ suite.addBatch({
 						test: true
 					}, this.callback);
 				},
-				'then i get module in list': function(err, modules) {
+				'then i get module in list': function(err, moduleManager) {
 					assert.isNull(err);
 
-					assert.isTrue(modules.some(function(module) {
-						return module.name === 'test';
-					}));
+					assert.isTrue(moduleManager.has('test'));
 				}
 			},
 			'more': {
@@ -119,15 +128,11 @@ suite.addBatch({
 						test2: true
 					}, this.callback);
 				},
-				'then i get module in list': function(err, modules) {
+				'then i get module in list': function(err, moduleManager) {
 					assert.isNull(err);
 
-					assert.isTrue(modules.some(function(module) {
-						return module.name === 'test';
-					}));
-					assert.isTrue(modules.some(function(module) {
-						return module.name === 'test2';
-					}));
+					assert.isTrue(moduleManager.has('test'));
+					assert.isTrue(moduleManager.has('test2'));
 				}
 			}
 		},
@@ -136,27 +141,21 @@ suite.addBatch({
 				topic: function() {
 					new BOT().loadModules(['test'], this.callback);
 				},
-				'then i get module in list': function(err, modules) {
+				'then i get module in list': function(err, moduleManager) {
 					assert.isNull(err);
 
-					assert.isTrue(modules.some(function(module) {
-						return module.name === 'test';
-					}));
+					assert.isTrue(moduleManager.has('test'));
 				}
 			},
 			'more': {
 				topic: function() {
 					new BOT().loadModules(['test', 'test2'], this.callback);
 				},
-				'then i get module in list': function(err, modules) {
+				'then i get module in list': function(err, moduleManager) {
 					assert.isNull(err);
 
-					assert.isTrue(modules.some(function(module) {
-						return module.name === 'test';
-					}));
-					assert.isTrue(modules.some(function(module) {
-						return module.name === 'test2';
-					}));
+					assert.isTrue(moduleManager.has('test'));
+					assert.isTrue(moduleManager.has('test2'));
 				}
 			}
 		},
@@ -167,18 +166,19 @@ suite.addBatch({
 				},
 				'then i get true': function(err, module) {
 					assert.isNull(err);
+					assert.isObject(module);
+					assert.equal(module.name, 'test');
 				}
 			},
 			'with return': {
 				topic: function() {
-					var bot = new BOT();
-					bot.load('test');
-					return bot;
+					var b = new BOT();
+					b.load('test');
+					return b;
 				},
 				'and i find it in bot.modules': function(bot) {
-					assert.isTrue(bot.modules.some(function(module) {
-						return module.name === 'test';
-					}));
+					assert.isTrue(bot.modules.has('test'));
+					assert.isObject(bot.modules.get('test'));
 				}
 			}
 		}
