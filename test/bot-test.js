@@ -20,7 +20,7 @@ suite.addBatch({
 			assert.isObject(bot);
 			assert.instanceOf(bot, BOT);
 		},
-		'and \'BOT_PATH\' has app.js': function() {
+		'and \'BOT_DIR\' has app.js': function() {
 			assert.isTrue(FS.existsSync(BOT_DIR + '/app.js'));
 		}
 	},
