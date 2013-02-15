@@ -4,7 +4,7 @@
  * @param {string} format Format with (YYYY-MM-DD HH:MM:SS TZ) placeholders
  * @return {string}   returns date in defined format
  */
-module.exports = function dateFormat(d, format) {
+module.exports.dateFormat = module.exports.formatDate = module.exports.formattedDate = function(d, format) {
 	if(typeof d == "undefined" || !d) {
 		d = new Date();
 	}
@@ -33,4 +33,18 @@ module.exports = function dateFormat(d, format) {
 	else if(tz > 0) tz = "UTC+" + tz;
 	else tz = "UTC" + tz;
 	return format.replace("YYYY", year).replace("YY", year.toString().substr(-2)).replace("MM", month).replace("DD", day).replace("HH", hour).replace("MM", minute).replace("SS", second).replace("TZ", tz);
+};
+
+/**
+ * Wraps function in another function
+ * @param  {function} func
+ * @param  {function} wrapper
+ * @return {function}
+ */
+module.exports.wrap = function(func, wrapper) {
+	return function() {
+		var args = [func];
+		Array.prototype.push.apply(args, arguments);
+		return wrapper.apply(this, args);
+	};
 };
