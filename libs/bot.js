@@ -107,8 +107,11 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 			modules[tmp[i]] = true;
 		}
 
+	} else if(typeof modules !== 'object' && typeof bot.config.bot.modules === 'string') {
+		modules = {};
 	} else if(typeof modules !== 'object') {
-		logger.error('Modules was nor Object nor Array nor String!');
+		logger.error('Modules was nor Object nor Array nor String! Trying to load default \'modules.json\'.');
+		bot.config.bot.modules = 'modules.json';
 		modules = {};
 		error = true;
 	}
