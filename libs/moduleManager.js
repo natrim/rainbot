@@ -38,7 +38,9 @@ ModuleManager.prototype.get = ModuleManager.prototype.find = function(name) {
 ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, callback) {
 	var error = false;
 	var module;
-	if(!this.exists(name)) {
+	if(this.exists(name)) {
+		module = this.get(name);
+	} else {
 		module = new MODULE(name);
 		if(module.loaded) {
 			if(typeof this.dispatcher === 'object' && typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
