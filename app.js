@@ -1,7 +1,7 @@
 //set some shortcuts
 //global._ = require("underscore");
 //global.a = require("async");
-//global.dateFormat = require("./libs/dateFormat");
+//global.dateFormat = require("./libs/helpers").dateFormat;
 var bot = new(require('./libs/bot').Bot)(); //create bot
 // OR var bot = require('./libs/bot').create();
 bot.loadConfig(); //load the config from file - default is config.json

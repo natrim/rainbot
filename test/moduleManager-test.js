@@ -11,9 +11,10 @@ require('../libs/logger').enabled = false;
 var MM = require('../libs/moduleManager').ModuleManager;
 var M = require('../libs/module').Module;
 
+var h = require('../libs/helpers');
+
 //disable file resolving of test modules
-var _ = require("underscore");
-M.prototype._resolvePath = _.wrap(M.prototype._resolvePath, function(resol) {
+M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
 	if(this.name === 'test' || this.name === 'test2') {
 		return '../libs/modules/' + this.fileName;
 	} else {
