@@ -42,16 +42,15 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 		module = this.get(name);
 	} else {
 		module = new MODULE(name);
-		if(module.loaded) {
+		if(typeof module === 'object' && module.loaded) {
 			if(typeof this.dispatcher === 'object' && typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
-		} else {
-			error = true;
-			logger.error('Cannot load \'' + name + '\' module!');
-		}
 
-		if(!error) {
 			this.modules.push(module);
 			if(typeof module.init === 'function') module.init();
+		} else {
+			error = true;
+			module = null;
+			logger.error('Cannot load \'' + name + '\' module!');
 		}
 	}
 
