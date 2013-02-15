@@ -10,7 +10,7 @@ function Bot() {
 	var dispatcher = new(require('events').EventEmitter)();
 	dispatcher.setMaxListeners(0); //remove listener limit
 	//add MM
-	var moduleManager = new(require(LIBS_DIR + '/moduleManager'))(dispatcher);
+	var moduleManager = new(require(LIBS_DIR + '/moduleManager').ModuleManager)(dispatcher);
 
 	dispatcher.on('newListener', function(event, listener) {
 		var i, name;
@@ -190,4 +190,7 @@ Bot.prototype.run = function run(callback) {
 	return this;
 };
 
-module.exports = Bot;
+module.exports.Bot = Bot;
+module.exports.create = function() {
+	return new Bot();
+};

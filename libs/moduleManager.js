@@ -1,6 +1,6 @@
 var logger = require(LIBS_DIR + '/logger');
 
-var MODULE = require(LIBS_DIR + '/module');
+var MODULE = require(LIBS_DIR + '/module').Module;
 
 function ModuleManager(dispatcher) {
 	this.modules = [];
@@ -75,4 +75,7 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 	return this;
 };
 
-module.exports = ModuleManager;
+module.exports.ModuleManager = ModuleManager;
+module.exports.create = function(dispatcher) {
+	return new ModuleManager(dispatcher);
+};

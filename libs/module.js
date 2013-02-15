@@ -78,4 +78,7 @@ Module.prototype.injectDispatcher = function(dispatchBase) {
 	};
 };
 
-module.exports = Module;
+module.exports.Module = Module;
+module.exports.create = function(name) {
+	return new Module(name);
+};

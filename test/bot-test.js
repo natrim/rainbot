@@ -5,7 +5,7 @@ var vows = require('vows'),
 
 var suite = vows.describe('Bot class');
 
-var BOT = require('../libs/bot');
+var BOT = require('../libs/bot').Bot;
 var FS = require('fs');
 
 //disable logger

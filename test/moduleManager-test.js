@@ -8,8 +8,8 @@ var suite = vows.describe('ModuleManager class');
 //disable logger
 require('../libs/logger').enabled = false;
 
-var MM = require('../libs/moduleManager');
-var M = require('../libs/module');
+var MM = require('../libs/moduleManager').ModuleManager;
+var M = require('../libs/module').Module;
 
 suite.addBatch({
 	'When i construct class': {
