@@ -14,6 +14,8 @@ ModuleManager.prototype.getModules = function() {
 ModuleManager.prototype.exists = ModuleManager.prototype.has = ModuleManager.prototype.contains = function(name) {
 	if(name instanceof MODULE) {
 		name = name.name;
+	} else if(typeof name !== 'string') {
+		return false;
 	}
 	return this.modules.some(function(module) {
 		return module.name === name;
@@ -23,6 +25,8 @@ ModuleManager.prototype.exists = ModuleManager.prototype.has = ModuleManager.pro
 ModuleManager.prototype.get = ModuleManager.prototype.find = function(name) {
 	if(name instanceof MODULE) {
 		return name;
+	} else if(typeof name !== 'string') {
+		return null;
 	}
 	var module = null;
 	this.modules.some(function(m) {
@@ -37,8 +41,10 @@ ModuleManager.prototype.get = ModuleManager.prototype.find = function(name) {
 
 ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, callback) {
 	var error = false;
-	var module;
-	if(this.exists(name)) {
+	var module = null;
+	if(typeof name !== 'string') {
+		error = true;
+	} else if(this.exists(name)) {
 		module = this.get(name);
 	} else {
 		module = new MODULE(name);
@@ -60,17 +66,22 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 
 //pokud je callback tak bude asynchrone jinak synchrone
 ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name, callback) {
-	var mm = this;
-	var error = !this.modules.some(function(module, i) {
-		if(module.name === name) {
-			if(typeof module.halt === 'function') module.halt();
-			mm.modules.splice(i, 1);
+	var error = false;
+	if(typeof name !== 'string') {
+		error = true;
+	} else {
+		var mm = this;
+		error = !this.modules.some(function(module, i) {
+			if(module.name === name) {
+				if(typeof module.halt === 'function') module.halt();
+				mm.modules.splice(i, 1);
 
-			return true;
-		}
+				return true;
+			}
 
-		return false;
-	});
+			return false;
+		});
+	}
 
 	if(callback) callback(error, this);
 	return this;
