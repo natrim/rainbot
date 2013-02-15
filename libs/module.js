@@ -5,7 +5,12 @@ function Module(name) {
 
 	this.name = name;
 	this.fileName = name + ".js";
-	this.fullPath = require.resolve(MODULES_DIR + '/' + this.fileName);
+	this.loaded = true;
+	try {
+		this.fullPath = require.resolve(MODULES_DIR + '/' + this.fileName);
+	} catch(e) {
+		this.loaded = false;
+	}
 }
 
 //called on load
@@ -14,7 +19,7 @@ Module.prototype.init = function init() {};
 //called on unload
 Module.prototype.halt = function halt() {
 	//remove from node require cache
-	delete require.cache[this.fullPath];
+	if(this.loaded) delete require.cache[this.fullPath];
 
 	//and remove all listeners
 	if(typeof this.dispatcher === 'object') this.dispatcher.clearEvents();

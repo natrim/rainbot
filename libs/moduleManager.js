@@ -39,12 +39,12 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 	var error = false;
 	var module;
 	if(!this.exists(name)) {
-		try {
-			module = new MODULE(name);
+		module = new MODULE(name);
+		if(module.loaded) {
 			if(typeof this.dispatcher === 'object' && typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
-		} catch(e) {
+		} else {
 			error = true;
-			logger.error('Cannot load ' + name + ' module!' + e);
+			logger.error('Cannot load \'' + name + '\' module!');
 		}
 
 		if(!error) {

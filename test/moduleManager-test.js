@@ -23,7 +23,7 @@ suite.addBatch({
 			assert.isArray(mm.modules);
 			assert.isArray(mm.getModules());
 		},
-		'with': {
+		'with module, then i have': {
 			topic: function(mm) {
 				mm.modules = [new M('test')];
 				return mm;
@@ -108,25 +108,36 @@ suite.addBatch({
 		},
 		'test module': {
 			topic: function() {
-				var mm = (new MM()).load('test');
-				assert.isObject(mm.find('test'));
-				mm.unload('test', this.callback);
+				var mm = (new MM());
+				mm.modules = [new M('test')]; //if we put it directly then we skip the file check part
+				assert.isTrue(mm.has('test'));
+				return mm;
 			},
-			'then i get it unloaded': function(err, mm) {
-				assert.isNull(err);
-				assert.isFalse(mm.has('test'));
+			'then i get it unloaded': {
+				topic: function(mm) {
+					mm.unload('test', this.callback);
+				},
+				'and itz gone': function(err, mm) {
+					assert.isNull(err);
+					assert.isFalse(mm.has('test'));
+				}
 			}
 		},
 		'test2 module': {
 			topic: function() {
-				var mm = (new MM()).load('test2');
-				assert.isObject(mm.find('test2'));
-				mm.unload('test2');
+				var mm = (new MM());
+				mm.modules = [new M('test2')]; //if we put it directly then we skip the file check part
+				assert.isTrue(mm.has('test2'));
 				return mm;
 			},
-			'then i get it unloaded': function(mm) {
-				assert.isObject(mm);
-				assert.isFalse(mm.has('test2'));
+			'then i get it unloaded': {
+				topic: function(mm) {
+					return mm.unload('test2');
+				},
+				'and itz gone': function(mm) {
+					assert.isObject(mm);
+					assert.isFalse(mm.has('test2'));
+				}
 			}
 		}
 	}
