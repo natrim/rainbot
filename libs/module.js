@@ -1,3 +1,5 @@
+var logger = require(LIBS_DIR + '/logger');
+
 function Module(name) {
 	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 
@@ -19,6 +21,10 @@ Module.prototype.halt = function halt() {
 };
 
 Module.prototype.injectDispatcher = function(dispatchBase) {
+	if(typeof dispatchBase !== 'object') {
+		logger.error('Wrong dispatcher type injected!');
+		return;
+	}
 	var events = [];
 	this.dispatcher = {
 		on: function(event, listener) {
