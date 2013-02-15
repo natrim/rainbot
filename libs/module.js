@@ -7,11 +7,16 @@ function Module(name) {
 	this.fileName = name + ".js";
 	this.loaded = true;
 	try {
-		this.fullPath = require.resolve(MODULES_DIR + '/' + this.fileName);
+		this.fullPath = this._resolvePath();
 	} catch(e) {
 		this.loaded = false;
 	}
 }
+
+//internal file path resolving
+Module.prototype._resolvePath = function() {
+	return require.resolve(MODULES_DIR + '/' + this.fileName);
+};
 
 //called on load
 Module.prototype.init = function init() {};
