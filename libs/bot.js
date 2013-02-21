@@ -193,6 +193,17 @@ Bot.prototype.run = function run(callback) {
 	return this;
 };
 
+Bot.prototype.end = function end(callback) {
+	if(callback) callback(this);
+
+	this.emit('halt');
+
+	//exit the proccess on next tick
+	process.nextTick(function() {
+		process.exit(0);
+	});
+};
+
 module.exports.Bot = Bot;
 module.exports.create = function() {
 	return new Bot();
