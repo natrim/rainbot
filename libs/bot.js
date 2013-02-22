@@ -12,6 +12,7 @@ function Bot() {
 	//add MM
 	var moduleManager = new(require(LIBS_DIR + '/moduleManager').ModuleManager)(dispatcher);
 
+	//load module on new listener
 	dispatcher.on('newListener', function(event, listener) {
 		var i, name;
 		if(((i = event.indexOf('/')) + 1) && (name = event.substr(0, i))) {
@@ -21,12 +22,6 @@ function Bot() {
 		}
 	});
 
-	//bind event commands
-	this.on = this.addListener = dispatcher.on.bind(dispatcher);
-	this.off = this.removeListener = dispatcher.removeListener.bind(dispatcher);
-	this.once = dispatcher.once.bind(dispatcher);
-	this.emit = dispatcher.emit.bind(dispatcher);
-
 	//bot config
 	this.config = {
 		'bot': {}
@@ -34,12 +29,39 @@ function Bot() {
 
 	//bot MM
 	this.modules = moduleManager;
+	//dispatcher
+	this.dispatcher = dispatcher;
 
 	//list of core modules
 	this.core_modules = {
 		'irc': true
 	};
 }
+
+Bot.prototype.addListener = function() {
+	this.dispatcher.addListener.apply(this.dispatcher, arguments);
+	return this;
+};
+
+Bot.prototype.on = function() {
+	this.dispatcher.on.apply(this.dispatcher, arguments);
+	return this;
+};
+
+Bot.prototype.off = Bot.prototype.removeListener = function() {
+	this.dispatcher.removeListener.apply(this.dispatcher, arguments);
+	return this;
+};
+
+Bot.prototype.once = function() {
+	this.dispatcher.once.apply(this.dispatcher, arguments);
+	return this;
+};
+
+Bot.prototype.emit = function() {
+	this.dispatcher.emit.apply(this.dispatcher, arguments);
+	return this;
+};
 
 Bot.prototype.loadConfig = function loadConfig(config, callback) {
 	var bot = this;
