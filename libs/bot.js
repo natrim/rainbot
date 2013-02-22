@@ -207,18 +207,14 @@ Bot.prototype.unload = function unload(names, callback) {
 	return bot;
 };
 
-Bot.prototype.run = function run(callback) {
-	if(callback) callback(this);
-
-	this.emit('init');
+Bot.prototype.run = function run() {
+	this.emit('init', this);
 
 	return this;
 };
 
-Bot.prototype.end = function end(callback) {
-	if(callback) callback(this);
-
-	this.emit('halt');
+Bot.prototype.end = function end() {
+	this.emit('halt', this);
 
 	//exit the proccess on next tick
 	process.nextTick(function() {
