@@ -9,6 +9,7 @@ function Module(name) {
 	this.fileName = name + ".js";
 	this.loadable = true;
 	this.loaded = false;
+	this.context = null;
 	try {
 		this.fullPath = this._resolvePath();
 	} catch(e) {
