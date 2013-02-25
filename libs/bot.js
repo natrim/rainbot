@@ -36,6 +36,13 @@ function Bot() {
 	this.core_modules = {
 		'irc': true
 	};
+
+	//bind to exit event of main process
+	var bot = this;
+	process.on('exit', function() {
+		bot.unloadModules();
+		bot.emit('halt');
+	});
 }
 
 Bot.prototype.addListener = function() {
@@ -167,6 +174,14 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 
 	if(callback) callback(error, bot.modules);
 	return bot;
+};
+
+Bot.prototype.unloadModules = function() {
+	var bot = this;
+	bot.modules.modules.forEach(function(m) {
+		m.dispatcher.last = true; //HAXX: set the last run to dispatcher - to enable halt event from modules
+		bot.modules.unload(m.name);
+	});
 };
 
 Bot.prototype.load = function load(names, callback) {

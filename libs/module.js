@@ -117,8 +117,13 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 				}
 			},
 			clearEvents: function() {
+				var last = this.last;
 				events.forEach(function(event) {
-					dispatchBase.removeListener(event.event, event.listener);
+					if(last && event.event === 'halt') {
+						//we let the halt event on bot last run
+					} else {
+						dispatchBase.removeListener(event.event, event.listener);
+					}
 				});
 				events = [];
 			}
