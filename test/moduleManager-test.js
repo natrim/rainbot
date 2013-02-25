@@ -162,7 +162,18 @@ suite.addBatch({
 				}
 			}
 		}
+	},
+	'When i require': {
+		topic: function() {
+			return(new MM()).require('test');
+		},
+		'then i get the module': function(m) {
+			assert.isObject(m);
+			assert.instanceOf(m, M);
+			assert.equal(m.name, 'test');
+		}
 	}
+
 });
 
 suite.export(module);

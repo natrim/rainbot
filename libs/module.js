@@ -57,6 +57,7 @@ Module.prototype.halt = function halt(callback) {
 
 Module.prototype.injectModuleManager = function(mm, callback) {
 	this.mm = this.moduleManager = mm;
+	this.require = mm.require;
 	if(callback) callback(null, this);
 };
 

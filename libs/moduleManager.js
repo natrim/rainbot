@@ -67,7 +67,6 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 	return this;
 };
 
-//pokud je callback tak bude asynchrone jinak synchrone
 ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name, callback) {
 	var error = null;
 	if(typeof name !== 'string') {
@@ -90,6 +89,16 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 
 	if(callback) callback(error, this);
 	return this;
+};
+
+ModuleManager.prototype.require = function(name) {
+	if(typeof name !== 'string') {
+		return new Error('Please enter a name!');
+	} else if(!this.exists(name)) {
+		this.load(name);
+	}
+
+	return this.get(name);
 };
 
 module.exports.ModuleManager = ModuleManager;
