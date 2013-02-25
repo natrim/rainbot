@@ -50,7 +50,12 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 			if(typeof this.dispatcher === 'object' && typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
 
 			this.modules.push(module);
-			if(typeof module.init === 'function') module.init();
+
+			try {
+				if(typeof module.init === 'function') module.init();
+			} catch(e) {
+				error = e;
+			}
 		} else {
 			error = new Error('Cannot load \'' + name + '\' module!');
 			module = null;
