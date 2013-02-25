@@ -41,7 +41,7 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 	var error = null;
 	var module = null;
 	if(typeof name !== 'string') {
-		error = true;
+		error = new Error('Please enter a name!');
 	} else if(this.exists(name)) {
 		module = this.get(name);
 	} else {
@@ -65,7 +65,7 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name, callback) {
 	var error = null;
 	if(typeof name !== 'string') {
-		error = true;
+		error = new Error('Please enter a name!');
 	} else {
 		var mm = this;
 		if(!this.modules.some(function(module, i) {
