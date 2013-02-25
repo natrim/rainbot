@@ -23,7 +23,16 @@ Module.prototype._resolvePath = function() {
 };
 
 //called on load
-Module.prototype.init = function init() {};
+Module.prototype.init = function init() {
+	if(this.loadable) {
+		try {
+			this.context = require(this.fullPath);
+			this.loaded = true;
+		} catch(e) {
+			throw new Error('Failed loading context of module \'' + this.name + '\'!');
+		}
+	}
+};
 
 //called on unload
 Module.prototype.halt = function halt() {
