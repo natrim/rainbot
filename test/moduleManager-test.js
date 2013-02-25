@@ -22,15 +22,23 @@ M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
 	}
 });
 
+//isError assert
+assert.isError = function(val) {
+	assert.isObject(val);
+	assert.instanceOf(val, Error);
+};
+
 suite.addBatch({
 	'When i construct class': {
 		topic: function() {
 			return new MM();
 		},
 		'then i get ModuleManager class': function(context) {
+			assert.isObject(context);
 			assert.instanceOf(context, MM);
 		},
 		'and get modules': function(mm) {
+			assert.isObject(mm);
 			assert.isArray(mm.modules);
 			assert.isArray(mm.getModules());
 		},
@@ -63,7 +71,7 @@ suite.addBatch({
 				(new MM()).load(undefined, this.callback);
 			},
 			'then i get error': function(err, module) {
-				assert.isTrue(err);
+				assert.isError(err);
 			}
 		},
 		'nonexistent module': {
@@ -71,32 +79,35 @@ suite.addBatch({
 				(new MM()).load('someunknownpony', this.callback);
 			},
 			'then i get error': function(err, module) {
-				assert.isTrue(err);
+				assert.isError(err);
 			}
 		},
 		'test module': {
 			topic: function() {
 				(new MM()).load('test', this.callback);
 			},
-			'then i get it loaded': function(err, module, mm) {
-				assert.isNull(err);
+			'then i get it loaded without context': function(err, module, mm) {
+				assert.equal(err.message, "Failed loading context of 'test' module!");
+				//assert.isNull(err);
 				assert.isObject(module);
 				assert.instanceOf(module, M);
 				assert.equal(module.name, 'test');
 				assert.isTrue(mm.has('test'));
 				assert.isObject(mm.get('test'));
+				assert.isNull(module.context);
 			}
 		},
 		'test2 module': {
 			topic: function() {
 				return(new MM()).load('test2');
 			},
-			'then i get it loaded': function(mm) {
+			'then i get it loaded without context': function(mm) {
 				assert.isObject(mm);
 				assert.isTrue(mm.has('test2'));
 				assert.isObject(mm.find('test2'));
 				assert.instanceOf(mm.find('test2'), M);
 				assert.equal(mm.find('test2').name, 'test2');
+				assert.isNull(mm.find('test2').context);
 			}
 		}
 	},
@@ -106,7 +117,7 @@ suite.addBatch({
 				(new MM()).unload(undefined, this.callback);
 			},
 			'then i get error': function(err, module) {
-				assert.isTrue(err);
+				assert.isError(err);
 			}
 		},
 		'nonexistent module': {
@@ -114,7 +125,7 @@ suite.addBatch({
 				(new MM()).unload('someunknownpony', this.callback);
 			},
 			'then i get error': function(err, module) {
-				assert.isTrue(err);
+				assert.isError(err);
 			}
 		},
 		'test module': {

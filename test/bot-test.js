@@ -166,8 +166,9 @@ suite.addBatch({
 				topic: function() {
 					new BOT().load('test', this.callback);
 				},
-				'then i get true': function(err, module) {
-					assert.isNull(err);
+				'then i get err and module without context': function(err, module) {
+					assert.equal(err.message, "Failed loading context of 'test' module!");
+					//assert.isNull(err);
 					assert.isObject(module);
 					assert.equal(module.name, 'test');
 				}
