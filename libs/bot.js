@@ -224,14 +224,11 @@ Bot.prototype.unload = function unload(names, callback) {
 
 Bot.prototype.run = function run() {
 	this.emit('init', this);
-
 	return this;
 };
 
 Bot.prototype.end = function end() {
-	this.emit('halt', this);
-
-	//exit the proccess on next tick
+	//halt event is emitted on process 'exit'
 	process.nextTick(function() {
 		process.exit(0);
 	});
