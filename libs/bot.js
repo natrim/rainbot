@@ -40,7 +40,7 @@ function Bot() {
 	//bind to exit event of main process
 	var bot = this;
 	process.on('exit', function() {
-		bot.emit('halt');
+		bot.emit('halt', bot);
 		bot.unloadModules();
 	});
 }
