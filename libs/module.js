@@ -104,6 +104,31 @@ Module.prototype.injectDispatcher = function(dispatchBase) {
 			events = [];
 		}
 	};
+
+	this.addListener = function() {
+		this.dispatcher.addListener.apply(this.dispatcher, arguments);
+		return this;
+	};
+
+	this.on = function() {
+		this.dispatcher.on.apply(this.dispatcher, arguments);
+		return this;
+	};
+
+	this.off = Bot.prototype.removeListener = function() {
+		this.dispatcher.removeListener.apply(this.dispatcher, arguments);
+		return this;
+	};
+
+	this.once = function() {
+		this.dispatcher.once.apply(this.dispatcher, arguments);
+		return this;
+	};
+
+	this.emit = function() {
+		this.dispatcher.emit.apply(this.dispatcher, arguments);
+		return this;
+	};
 };
 
 module.exports.Module = Module;
