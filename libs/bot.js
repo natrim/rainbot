@@ -66,7 +66,7 @@ Bot.prototype.emit = function() {
 Bot.prototype.loadConfig = function loadConfig(config, callback) {
 	var bot = this;
 
-	var error = false;
+	var error = null;
 	if(typeof config === 'function' && typeof callback === 'undefined') {
 		callback = config;
 		config = undefined;
@@ -118,7 +118,7 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 		callback = modules;
 		modules = {};
 	}
-	var error = false;
+	var error = null;
 	if(typeof modules === 'string') {
 		bot.config.bot.modules = modules;
 		modules = {};

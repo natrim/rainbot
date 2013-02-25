@@ -40,7 +40,7 @@ ModuleManager.prototype.get = ModuleManager.prototype.find = function(name) {
 };
 
 ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, callback) {
-	var error = false;
+	var error = null;
 	var module = null;
 	if(typeof name !== 'string') {
 		error = true;
@@ -66,12 +66,12 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 
 //pokud je callback tak bude asynchrone jinak synchrone
 ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name, callback) {
-	var error = false;
+	var error = null;
 	if(typeof name !== 'string') {
 		error = true;
 	} else {
 		var mm = this;
-		error = !this.modules.some(function(module, i) {
+		if(!this.modules.some(function(module, i) {
 			if(module.name === name) {
 				if(typeof module.halt === 'function') module.halt();
 				mm.modules.splice(i, 1);
@@ -80,7 +80,9 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 			}
 
 			return false;
-		});
+		})) {
+			error = true;
+		}
 	}
 
 	if(callback) callback(error, this);
