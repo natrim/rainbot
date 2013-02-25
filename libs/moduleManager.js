@@ -75,6 +75,13 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 		var mm = this;
 		if(!this.modules.some(function(module, i) {
 			if(module.name === name) {
+				//disable event binding on halt with uncatched exception so users gets kicked in face
+				if(typeof module.dispatcher === 'object') {
+					module.dispatcher.on = module.dispatcher.once = module.dispatcher.addListener = function() {
+						throw new Error('You cannot bind events on module halt!');
+					};
+				}
+
 				if(typeof module.halt === 'function') module.halt();
 				mm.modules.splice(i, 1);
 

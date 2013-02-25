@@ -40,8 +40,8 @@ function Bot() {
 	//bind to exit event of main process
 	var bot = this;
 	process.on('exit', function() {
-		bot.unloadModules();
 		bot.emit('halt');
+		bot.unloadModules();
 	});
 }
 
@@ -179,7 +179,6 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 Bot.prototype.unloadModules = function() {
 	var bot = this;
 	bot.modules.modules.forEach(function(m) {
-		m.dispatcher.last = true; //HAXX: set the last run to dispatcher - to enable halt event from modules
 		bot.modules.unload(m.name);
 	});
 };
