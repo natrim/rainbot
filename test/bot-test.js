@@ -186,50 +186,6 @@ suite.addBatch({
 			}
 		}
 	}
-}).addBatch({
-	'When i run bot': {
-		topic: function() {
-
-			var bot = (new BOT());
-
-			bot.on("init", function(ret) {
-				bot.dispatcher.emit("success", ret);
-			}).run();
-
-			return bot.dispatcher;
-		},
-		'i get called': function(bot) {
-			assert.isObject(bot);
-			assert.instanceOf(bot, BOT);
-		}
-	},
-	'When i stop bot': {
-		topic: function() {
-
-			var bot = (new BOT());
-
-			//disable process.exit
-			var exit = process.exit;
-			module.noexit = true;
-			process.exit = function(code) {
-				if(module.noexit) {
-					return;
-				}
-
-				exit(code);
-			};
-
-			bot.on("halt", function(ret) {
-				bot.dispatcher.emit("success", ret);
-			}).end();
-
-			return bot.dispatcher;
-		},
-		'i get called': function(bot) {
-			assert.isObject(bot);
-			assert.instanceOf(bot, BOT);
-		}
-	}
 });
 
 
