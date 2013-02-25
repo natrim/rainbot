@@ -12,7 +12,7 @@ ModuleManager.prototype.getModules = function() {
 ModuleManager.prototype.exists = ModuleManager.prototype.has = ModuleManager.prototype.contains = function(name) {
 	if(name instanceof MODULE) {
 		name = name.name;
-	} else if(typeof name !== 'string') {
+	} else if(typeof name !== 'string' || name === '') {
 		return false;
 	}
 	return this.modules.some(function(module) {
@@ -40,7 +40,7 @@ ModuleManager.prototype.get = ModuleManager.prototype.find = function(name) {
 ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, callback) {
 	var error = null;
 	var module = null;
-	if(typeof name !== 'string') {
+	if(typeof name !== 'string' || name === '') {
 		error = new Error('Please enter a name!');
 	} else if(this.exists(name)) {
 		module = this.get(name);
@@ -69,7 +69,7 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 
 ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name, callback) {
 	var error = null;
-	if(typeof name !== 'string') {
+	if(typeof name !== 'string' || name === '') {
 		error = new Error('Please enter a name!');
 	} else {
 		var mm = this;
@@ -92,7 +92,7 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 };
 
 ModuleManager.prototype.require = function(name) {
-	if(typeof name !== 'string') {
+	if(typeof name !== 'string' || name === '') {
 		return new Error('Please enter a name!');
 	} else if(!this.exists(name)) {
 		this.load(name);
