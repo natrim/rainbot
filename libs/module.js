@@ -1,15 +1,19 @@
-var logger = require(LIBS_DIR + '/logger');
-
 function Module(name) {
+	if(typeof name !== 'string' || name === '') {
+		throw new Error('You need to specifify module name!');
+	}
+
 	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 
 	this.name = name;
 	this.fileName = name + ".js";
-	this.loaded = true;
+	this.loadable = true;
+	this.loaded = false;
+	this.context = {};
 	try {
 		this.fullPath = this._resolvePath();
 	} catch(e) {
-		this.loaded = false;
+		this.loadable = false;
 	}
 }
 
@@ -32,8 +36,7 @@ Module.prototype.halt = function halt() {
 
 Module.prototype.injectDispatcher = function(dispatchBase) {
 	if(typeof dispatchBase !== 'object') {
-		logger.error('Wrong dispatcher type injected!');
-		return;
+		throw new Error('Wrong dispatcher type for \'' + this.name + '\' module injected!');
 	}
 	var events = [];
 	this.dispatcher = {
@@ -82,7 +85,7 @@ Module.prototype.injectDispatcher = function(dispatchBase) {
 			try {
 				dispatchBase.emit.apply(dispatchBase, arguments);
 			} catch(e) {
-				dispatchBase.emit.call(dispatchBase, "dispatchError", event, e, this);
+				dispatchBase.emit.call(dispatchBase, 'dispatchError', event, e, this);
 			}
 		},
 		clearEvents: function() {

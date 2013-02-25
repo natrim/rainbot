@@ -1,5 +1,3 @@
-var logger = require(LIBS_DIR + '/logger');
-
 var MODULE = require(LIBS_DIR + '/module').Module;
 
 function ModuleManager(dispatcher) {
@@ -48,15 +46,14 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 		module = this.get(name);
 	} else {
 		module = new MODULE(name);
-		if(typeof module === 'object' && module.loaded) {
+		if(typeof module === 'object' && module.loadable) {
 			if(typeof this.dispatcher === 'object' && typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
 
 			this.modules.push(module);
 			if(typeof module.init === 'function') module.init();
 		} else {
-			error = true;
+			error = new Error('Cannot load \'' + name + '\' module!');
 			module = null;
-			logger.error('Cannot load \'' + name + '\' module!');
 		}
 	}
 
@@ -81,7 +78,7 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 
 			return false;
 		})) {
-			error = true;
+			error = new Error('Cannot unload \'' + name + '\' module!');
 		}
 	}
 
