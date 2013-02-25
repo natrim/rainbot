@@ -36,12 +36,15 @@ Module.prototype.init = function init(callback) {
 		error = new Error('Cannot load context of unloadable \'' + this.name + '\' module!');
 	}
 
+	if(this.loaded && typeof this.context.init === 'function') this.context.init.apply(this);
+
 	if(callback) callback(error, this);
 	else if(error) throw error;
 };
 
 //called on unload
 Module.prototype.halt = function halt(callback) {
+	if(this.loaded && typeof this.context.halt === 'function') this.context.halt.apply(this);
 	//remove from node require cache
 	if(this.loaded) delete require.cache[this.fullPath];
 
@@ -49,6 +52,11 @@ Module.prototype.halt = function halt(callback) {
 	if(this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
 
 	//callback
+	if(callback) callback(null, this);
+};
+
+Module.prototype.injectModuleManager = function(mm, callback) {
+	this.mm = this.moduleManager = mm;
 	if(callback) callback(null, this);
 };
 

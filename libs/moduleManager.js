@@ -47,6 +47,7 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 	} else {
 		module = new MODULE(name);
 		if(typeof module === 'object' && module.loadable) {
+			if(typeof module.injectModuleManager === 'function') module.injectModuleManager(this);
 			if(typeof this.dispatcher === 'object' && typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
 
 			this.modules.push(module);
