@@ -5,18 +5,21 @@ var vows = require('vows'),
 
 var suite = vows.describe('ModuleManager class');
 
+if(!global.LIBS_DIR) global.LIBS_DIR = '../libs';
+if(!global.MODULES_DIR) global.MODULES_DIR = '../modules';
+
 //disable logger
 require('../libs/logger').enabled = false;
 
-var MM = require('../libs/moduleManager').ModuleManager;
-var M = require('../libs/module').Module;
+var MM = require(LIBS_DIR + '/moduleManager').ModuleManager;
+var M = require(LIBS_DIR + '/module').Module;
 
-var h = require('../libs/helpers');
+var h = require(LIBS_DIR + '/helpers');
 
 //disable file resolving of test modules
 M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
 	if(this.name === 'test' || this.name === 'test2') {
-		return '../libs/modules/' + this.fileName;
+		return MODULES_DIR + '/' + this.fileName;
 	} else {
 		return resol.apply(this);
 	}

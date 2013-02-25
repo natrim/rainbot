@@ -5,14 +5,14 @@ var vows = require('vows'),
 
 var suite = vows.describe('Module class');
 
+if(!global.MODULES_DIR) global.MODULES_DIR = '../modules';
+
 //disable logger
 require('../libs/logger').enabled = false;
 
 var M = require('../libs/module').Module;
 
 var h = require('../libs/helpers');
-
-if(!global.MODULES_DIR) global.MODULES_DIR = '../modules';
 
 //disable file resolving of test modules
 M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
@@ -95,7 +95,7 @@ suite.addBatch({
 	},
 	'When i inject EventEmitter': {
 		topic: function() {
-			(new M('test')).injectDispatcher(new (require('events').EventEmitter)(), this.callback);
+			(new M('test')).injectDispatcher(new(require('events').EventEmitter)(), this.callback);
 		},
 		'then i get bound events on module': function(err, dispatcher, m) {
 			assert.isNull(err);
