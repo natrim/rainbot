@@ -2,5 +2,10 @@
 	"bot": {
 		"name": "IRC-PONY",
 		"modules": "modules.json"
+	},
+	"irc": {
+		"hostname": "irc.ponychat.net",
+		"port": 6667,
+		"ssl": false
 	}
 }
