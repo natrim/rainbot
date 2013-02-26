@@ -67,9 +67,10 @@ Module.prototype.injectModuleManager = function(mm, callback) {
 };
 
 Module.prototype.injectDispatcher = function(dispatchBase, callback) {
+	var name = this.name;
 	var error = null;
 	if(typeof dispatchBase !== 'object' || dispatchBase === null) {
-		error = new Error('Wrong dispatcher type for \'' + this.name + '\' module injected!');
+		error = new Error('Wrong dispatcher type for \'' + name + '\' module injected!');
 	} else {
 		var events = [];
 		this.dispatcher = {
@@ -115,6 +116,11 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 				dispatchBase.removeListener(event, listener);
 			},
 			emit: function(event) {
+				//all emited events needs to be prefixed by module name
+				if(event.search(name + '/') === -1) {
+					event = name + '/' + event;
+					arguments[0] = event;
+				}
 				try {
 					dispatchBase.emit.apply(dispatchBase, arguments);
 				} catch(e) {
