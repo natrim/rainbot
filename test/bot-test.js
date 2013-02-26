@@ -24,6 +24,12 @@ M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
 	}
 });
 
+//isError assert
+assert.isError = function(val) {
+	assert.isObject(val);
+	assert.instanceOf(val, Error);
+};
+
 suite.addBatch({
 	'When i require bot': {
 		topic: function() {
@@ -43,10 +49,10 @@ suite.addBatch({
 				new BOT().loadConfig('not-exist-config.json', this.callback);
 			},
 			'then i get error': function(err, config) {
-				assert.isTrue(err);
+				assert.isError(err);
 			},
 			'and empty config': function(err, config) {
-				assert.lengthOf(config, 0);
+				assert.lengthOf(config, 1); //the bot part is default so 1
 			}
 		},
 		'default config': {

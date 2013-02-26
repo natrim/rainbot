@@ -9,8 +9,10 @@ function Bot() {
 	//events
 	var dispatcher = new(require('events').EventEmitter)();
 	dispatcher.setMaxListeners(0); //remove listener limit
+	//add empty config
+	var config = new(require(LIBS_DIR + '/config').Config)();
 	//add MM
-	var moduleManager = new(require(LIBS_DIR + '/moduleManager').ModuleManager)(dispatcher);
+	var moduleManager = new(require(LIBS_DIR + '/moduleManager').ModuleManager)(dispatcher, config);
 
 	//load module on new listener
 	dispatcher.on('newListener', function(event, listener) {
@@ -23,10 +25,7 @@ function Bot() {
 	});
 
 	//bot config
-	this.config = {
-		'bot': {}
-	};
-
+	this.config = config;
 	//bot MM
 	this.modules = moduleManager;
 	//dispatcher
@@ -81,36 +80,37 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 
 	if(typeof config === 'string') {
 		try {
-			bot.config = require(BOT_DIR + '/' + config);
+			bot.config.extend(require(BOT_DIR + '/' + config));
+			logger.info('Config loaded!');
 		} catch(e) {
-			error = true;
-			bot.config = {};
+			logger.error('Cannot load config!');
+			error = new Error('Cannot load config!');
 		}
 	} else if(config instanceof Object) {
-		bot.config = config;
+		bot.config.extend(config);
+		logger.info('Config loaded!');
 	} else {
 		try {
-			bot.config = require(BOT_DIR + '/config.json');
+			bot.config.extend(require(BOT_DIR + '/config.json'));
+			logger.info('Config loaded!');
 		} catch(e) {
-			error = true;
-			bot.config = {};
+			logger.error('Cannot load config!');
+			error = new Error('Cannot load config!');
 		}
 	}
 
 	//make sure we have important values
-	if(!error) {
-		if(typeof bot.config.bot === 'undefined') {
-			bot.config.bot = {
-				'name': 'IRC-PONY',
-				'modules': 'modules.json'
-			};
-		} else {
-			if(typeof bot.config.bot.name === 'undefined') {
-				bot.config.bot.name = 'IRC-PONY';
-			}
-			if(typeof bot.config.bot.modules === 'undefined') {
-				bot.config.bot.modules = 'modules.json';
-			}
+	if(typeof bot.config.bot === 'undefined') {
+		bot.config.bot = {
+			'name': 'IRC-PONY',
+			'modules': 'modules.json'
+		};
+	} else {
+		if(typeof bot.config.bot.name === 'undefined') {
+			bot.config.bot.name = 'IRC-PONY';
+		}
+		if(typeof bot.config.bot.modules === 'undefined') {
+			bot.config.bot.modules = 'modules.json';
 		}
 	}
 
@@ -142,7 +142,7 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 		logger.error('Modules was nor Object nor Array nor String! Trying to load default \'modules.json\'.');
 		bot.config.bot.modules = 'modules.json';
 		modules = {};
-		error = true;
+		error = new Error('Modules was nor Object nor Array nor String! Trying to load default \'modules.json\'.');
 	}
 
 	//first load core modules
@@ -159,7 +159,7 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 		} catch(e) {
 			modules = {};
 			logger.error('Cannot load modules file \'' + bot.config.bot.modules + '\'!');
-			error = true;
+			error = new Error('Cannot load modules file \'' + bot.config.bot.modules + '\'!');
 		}
 	}
 
@@ -172,6 +172,10 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 		});
 	}
 
+	if(!error) {
+		logger.info('Modules loaded!');
+	}
+
 	if(callback) callback(error, bot.modules);
 	return bot;
 };
@@ -181,6 +185,7 @@ Bot.prototype.unloadModules = function() {
 	bot.modules.modules.forEach(function(m) {
 		bot.modules.unload(m.name);
 	});
+	logger.info('Modules unloaded!');
 };
 
 Bot.prototype.load = function load(names, callback) {
