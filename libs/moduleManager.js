@@ -1,12 +1,13 @@
 var MODULE = require(LIBS_DIR + '/module').Module;
 
-function ModuleManager(dispatcher) {
-	this.modules = [];
+function ModuleManager(dispatcher, config) {
+	this._modules = [];
 	this.dispatcher = dispatcher;
+	this.config = config;
 }
 
 ModuleManager.prototype.getModules = function() {
-	return this.modules;
+	return this._modules.slice(0); //return cloned array
 };
 
 ModuleManager.prototype.exists = ModuleManager.prototype.has = ModuleManager.prototype.contains = function(name) {
@@ -15,7 +16,7 @@ ModuleManager.prototype.exists = ModuleManager.prototype.has = ModuleManager.pro
 	} else if(typeof name !== 'string' || name === '') {
 		return false;
 	}
-	return this.modules.some(function(module) {
+	return this._modules.some(function(module) {
 		return module.name === name;
 	});
 };
@@ -27,7 +28,7 @@ ModuleManager.prototype.get = ModuleManager.prototype.find = function(name) {
 		return null;
 	}
 	var module = null;
-	this.modules.some(function(m) {
+	this._modules.some(function(m) {
 		if(m.name === name) {
 			module = m;
 			return true;
@@ -50,7 +51,7 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 			if(typeof module.injectModuleManager === 'function') module.injectModuleManager(this);
 			if(typeof this.dispatcher === 'object' && typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
 
-			this.modules.push(module);
+			this._modules.push(module);
 
 			try {
 				if(typeof module.init === 'function') module.init();
@@ -73,7 +74,7 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 		error = new Error('Please enter a name!');
 	} else {
 		var mm = this;
-		if(!this.modules.some(function(module, i) {
+		if(!this._modules.some(function(module, i) {
 			if(module.name === name) {
 				//disable event binding on halt with uncatched exception so users gets kicked in face
 				if(typeof module.dispatcher === 'object') {
@@ -83,7 +84,7 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 				}
 
 				if(typeof module.halt === 'function') module.halt();
-				mm.modules.splice(i, 1);
+				mm._modules.splice(i, 1);
 
 				return true;
 			}

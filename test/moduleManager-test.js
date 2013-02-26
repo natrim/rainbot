@@ -42,16 +42,14 @@ suite.addBatch({
 		},
 		'and get modules': function(mm) {
 			assert.isObject(mm);
-			assert.isArray(mm.modules);
 			assert.isArray(mm.getModules());
 		},
 		'with module, then i have': {
 			topic: function(mm) {
-				mm.modules = [new M('test')];
+				mm.load('test');
 				return mm;
 			},
 			'working has,exists,contains': function(mm) {
-				assert.isArray(mm.modules);
 				assert.isTrue(mm.has('test'));
 				assert.isTrue(mm.exists('test'));
 				assert.isTrue(mm.contains('test'));
@@ -134,8 +132,7 @@ suite.addBatch({
 		'test module': {
 			topic: function() {
 				var mm = (new MM());
-				mm.modules = [new M('test')]; //if we put it directly then we skip the file check part
-				assert.isTrue(mm.has('test'));
+				mm.load('test');
 				return mm;
 			},
 			'then i get it unloaded': {
@@ -151,8 +148,7 @@ suite.addBatch({
 		'test2 module': {
 			topic: function() {
 				var mm = (new MM());
-				mm.modules = [new M('test2')]; //if we put it directly then we skip the file check part
-				assert.isTrue(mm.has('test2'));
+				mm.load('test2');
 				return mm;
 			},
 			'then i get it unloaded': {
