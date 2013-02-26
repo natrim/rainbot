@@ -55,6 +55,11 @@ Module.prototype.halt = function halt(callback) {
 	if(callback) callback(null, this);
 };
 
+Module.prototype.injectConfig = function(config, callback) {
+	this.config = config;
+	if(callback) callback(null, this);
+};
+
 Module.prototype.injectModuleManager = function(mm, callback) {
 	this.mm = this.moduleManager = mm;
 	this.require = mm.require;
