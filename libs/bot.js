@@ -42,6 +42,14 @@ function Bot() {
 		bot.emit('halt', bot);
 		bot.unloadModules();
 	});
+
+	//shutdown on ctrl+c gracefully
+	process.on('SIGINT', function() {
+		process.exit(0);
+	});
+
+	// This will override SIGTSTP and prevent the program from going to the background.
+	process.on('SIGTSTP', function() {});
 }
 
 Bot.prototype.addListener = function() {
