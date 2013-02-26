@@ -11,6 +11,19 @@ var FS = require('fs');
 //disable logger
 require(LIBS_DIR + '/logger').enabled = false;
 
+var MM = require(LIBS_DIR + '/moduleManager').ModuleManager;
+var M = require(LIBS_DIR + '/module').Module;
+
+var h = require(LIBS_DIR + '/helpers');
+//disable file resolving of test modules
+M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
+	if(this.name === 'test' || this.name === 'test2') {
+		return MODULES_DIR + '/' + this.fileName;
+	} else {
+		return resol.apply(this);
+	}
+});
+
 suite.addBatch({
 	'When i require bot': {
 		topic: function() {
