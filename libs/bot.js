@@ -88,11 +88,9 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 		}
 	} else if(config instanceof Object) {
 		bot.config.extend(config);
-		logger.info('Config loaded!');
 	} else {
 		try {
 			bot.config.extend(require(BOT_DIR + '/config.json'));
-			logger.info('Config loaded!');
 		} catch(e) {
 			logger.error('Cannot load config!');
 			error = new Error('Cannot load config!');
@@ -115,6 +113,9 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 	}
 
 	if(callback) callback(error, bot.config);
+	else if(error) throw error;
+
+	logger.info('Config loaded!');
 	return bot;
 };
 
@@ -125,6 +126,13 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 		callback = modules;
 		modules = {};
 	}
+
+	if(typeof bot.config.bot === 'undefined') { //we need atleast empty bot config
+		bot.config.bot = {
+			'modules': 'modules.json'
+		};
+	}
+
 	var error = null;
 	if(typeof modules === 'string') {
 		bot.config.bot.modules = modules;
@@ -140,9 +148,9 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 		modules = {};
 	} else if(typeof modules !== 'object') {
 		logger.error('Modules was nor Object nor Array nor String! Trying to load default \'modules.json\'.');
-		bot.config.bot.modules = 'modules.json';
-		modules = {};
 		error = new Error('Modules was nor Object nor Array nor String! Trying to load default \'modules.json\'.');
+
+		modules = {};
 	}
 
 	//first load core modules
@@ -172,11 +180,10 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 		});
 	}
 
-	if(!error) {
-		logger.info('Modules loaded!');
-	}
-
 	if(callback) callback(error, bot.modules);
+	else if(error) throw error;
+
+	logger.info('Modules loaded!');
 	return bot;
 };
 

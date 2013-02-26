@@ -126,7 +126,7 @@ suite.addBatch({
 				new BOT().loadModules('not-exist-modules-config.json', this.callback);
 			},
 			'then i get error': function(err, modules) {
-				assert.isTrue(err);
+				assert.isError(err);
 			}
 		},
 		'object': {
