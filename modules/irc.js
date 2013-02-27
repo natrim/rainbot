@@ -12,8 +12,8 @@ function Server() {
 	this.lastMsg = '';
 }
 
-Source.prototype.valueOf = Source.prototype.toString = function() {
-	return(this.secured ? 'tls://' : 'tcp://') + this.hostname + ':' + irc.server.port;
+Server.prototype.valueOf = Server.prototype.toString = function() {
+	return(this.secured ? 'tls://' : 'tcp://') + this.hostname + ':' + this.port;
 };
 
 exports.Server = Server;
@@ -216,7 +216,7 @@ function IRC(dispatcher, config) {
 		var source, text;
 
 		if(msg.prefix) {
-			source = Source.fromString(msg.prefix);
+			source = Source.fromString(irc, msg.prefix);
 		}
 
 		if(msg.command) {
@@ -260,7 +260,7 @@ function IRC(dispatcher, config) {
 				}
 				break;
 			default:
-				dispatcher.emit('irc/' + command.toUpperCase(), source, args);
+				dispatcher.emit('irc/' + msg.command.toUpperCase(), source, args);
 			}
 		}
 	};
@@ -270,7 +270,7 @@ function IRC(dispatcher, config) {
 		return match ? {
 			'prefix': match[2],
 			'command': match[3],
-			'params': match[5] ? math[5].split(' ') : [],
+			'params': match[5] ? match[5].split(' ') : [],
 			'trail': match[7]
 		} : null;
 	};
@@ -278,8 +278,8 @@ function IRC(dispatcher, config) {
 
 
 	this.send = function(msg, nolog) {
-		if(!/\r\n$/.test(text)) {
-			text += "\r\n";
+		if(!/\r\n$/.test(msg)) {
+			msg += "\r\n";
 		}
 
 		if(!nolog) {
@@ -393,6 +393,7 @@ exports.init = function() {
 	this.irc = new IRC(this.dispatcher, this.config);
 
 	var module = this;
+
 	this.on('init', function() {
 		module.irc.connect(module.config.hostname || module.config.host || module.config.server, module.config.port, module.config.ssl || module.config.secured);
 	});
