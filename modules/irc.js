@@ -289,6 +289,10 @@ function IRC(dispatcher, config) {
 
 
 	this.send = function(msg, nolog) {
+		if(!irc.connected) { //dont write if no connection
+			return irc;
+		}
+
 		if(!/\r\n$/.test(msg)) {
 			msg += "\r\n";
 		}
