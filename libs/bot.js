@@ -49,7 +49,7 @@ function Bot() {
 	process.on('SIGINT', function() {
 		bot.halting = true;
 		bot.emit('halt', bot);
-		process.exit(0);
+		setTimeout(process.exit, 1000);
 	});
 
 	// This will override SIGTSTP and prevent the program from going to the background.
