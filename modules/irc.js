@@ -181,7 +181,7 @@ function IRC(dispatcher, config) {
 
 		socket.on('close', function(had_error) {
 			dispatcher.emit.call(dispatcher, 'irc/disconnect', had_error, irc);
-			logger.info('DISCONNECTED' + had_error ? ' WITH ERROR' : '');
+			logger.info('DISCONNECTED' + (had_error ? ' WITH ERROR' : ''));
 		});
 
 		socket.on('data', function(data) {
@@ -299,7 +299,12 @@ function IRC(dispatcher, config) {
 
 		logger.debug('[SEND]> ' + msg.replace(/\r\n$/, ''));
 
-		irc.server.write(msg);
+		if(msg.search(/^QUIT /) !== -1) {
+			irc.server.end(msg);
+		} else {
+			irc.server.write(msg);
+		}
+
 		return irc;
 	};
 
