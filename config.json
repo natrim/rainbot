@@ -6,6 +6,7 @@
 	"irc": {
 		"hostname": "irc.ponychat.net",
 		"port": 6667,
-		"ssl": false
+		"ssl": false,
+		"channel": "#pony"
 	}
 }

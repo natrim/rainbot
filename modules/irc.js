@@ -162,6 +162,9 @@ function IRC(dispatcher, config) {
 
 			//make 1sec delay before connect
 			setTimeout(function() {
+				//autojoin
+				irc.tryAutoJoin();
+
 				//event for other modules
 				dispatcher.emit('irc/connect', irc);
 			}, 1000);
@@ -414,6 +417,22 @@ function IRC(dispatcher, config) {
 			}
 		}
 		return true;
+	};
+
+	this.tryAutoJoin = function() {
+		var channels;
+		if(typeof config.channel === 'string') {
+			channels = config.channel.split(',');
+		} else if(config.channel instanceof Array) {
+			channels = config.channel;
+		} else {
+			return;
+		}
+
+		irc.join.apply(irc, channels.map(function(c) {
+			if(c.search(/^#/) === -1) c = '#' + c;
+			return c.trim();
+		}));
 	};
 }
 
