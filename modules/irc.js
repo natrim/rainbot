@@ -160,7 +160,11 @@ function IRC(dispatcher, config) {
 			//set the user
 			irc.user(config.username, config.realname ? config.realname : config.username, mode);
 
-			dispatcher.emit('irc/connect', irc);
+			//make 1sec delay before connect
+			setTimeout(function() {
+				//event for other modules
+				dispatcher.emit('irc/connect', irc);
+			}, 1000);
 		});
 
 		socket.setEncoding('ascii');
