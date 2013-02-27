@@ -36,7 +36,16 @@ Module.prototype.init = function init(callback) {
 		error = new Error('Cannot load context of unloadable \'' + this.name + '\' module!');
 	}
 
-	if(this.loaded && typeof this.context.init === 'function') this.context.init.apply(this);
+	if(this.loaded) {
+		//self inject new dispatcher if none
+		if(typeof this.dispatcher !== 'object') this.injectDispatcher(new(require('events').EventEmitter)());
+
+		//self inject empty config if none
+		if(typeof config !== 'object') this.injectConfig(new(require(LIBS_DIR + '/config').Config)());
+
+		//init the context
+		if(typeof this.context.init === 'function') this.context.init.apply(this);
+	}
 
 	if(callback) callback(error, this);
 	else if(error) throw error;
