@@ -141,7 +141,7 @@ function IRC(dispatcher, config) {
 			if(config.nick instanceof Array && config.nick.length > 0) {
 				irc.tryNick = config.nick.slice(0); //use clone
 			} else {
-				irc.tryNick = ['pony', 'ponybot', 'a_weird_pony', 'another_ponbot']; //defaults
+				irc.tryNick = ['ponbot', 'ponybot', 'a_weird_pony', 'another_ponbot']; //defaults
 				if(typeof config.nick === 'string') {
 					irc.tryNick.unshift(config.nick);
 				}
