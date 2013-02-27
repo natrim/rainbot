@@ -80,7 +80,7 @@ if(!String.prototype.trim) {
 	};
 }
 
-function IRC(dispatcher) {
+function IRC(dispatcher, config) {
 	var irc = this;
 
 	this.connected = 0;
@@ -89,15 +89,15 @@ function IRC(dispatcher) {
 
 	//irc client heartbeat ping - because the socket sometimes hangs
 	irc._heartbeat = 0;
-	if(typeof this.config.heartbeat === 'undefined') {
-		this.config.heartbeat = 120000; //default heartbeat interval
+	if(typeof config.heartbeat === 'undefined') {
+		config.heartbeat = 120000; //default heartbeat interval
 	}
-	if(this.config.heartbeat > 0) {
+	if(config.heartbeat > 0) {
 		this._heartbeat = setInterval(function() {
 			if(irc.connected) {
 				irc.send('PING :' + irc.server.hostname, true);
 			}
-		}, this.config.heartbeat);
+		}, config.heartbeat);
 	}
 
 	this.connect = function(host, port, ssl) {
@@ -134,31 +134,31 @@ function IRC(dispatcher) {
 
 			logger.info('CONNECTED');
 
-			if(typeof irc.config.pass === 'string' && irc.config.pass.trim() !== '') {
-				irc.pass(irc.config.pass);
+			if(typeof config.pass === 'string' && config.pass.trim() !== '') {
+				irc.pass(config.pass);
 			}
 
-			if(irc.config.nick instanceof Array && irc.config.nick.length > 0) {
-				irc.tryNick = irc.config.nick.slice(0); //use clone
+			if(config.nick instanceof Array && config.nick.length > 0) {
+				irc.tryNick = config.nick.slice(0); //use clone
 			} else {
 				irc.tryNick = ['pony', 'ponybot', 'a_weird_pony', 'another_ponbot']; //defaults
-				if(typeof irc.config.nick === 'string') {
-					irc.tryNick.unshift(irc.config.nick);
+				if(typeof config.nick === 'string') {
+					irc.tryNick.unshift(config.nick);
 				}
 			}
 
 			//set first nick
 			irc.nick(irc.tryNick.shift()); //will take care of duplicates later
 			//set username to nick if none given
-			if(!irc.config.username) {
-				irc.config.username = irc.server.currentNick;
+			if(!config.username) {
+				config.username = irc.server.currentNick;
 			}
 
 			//mode
-			var mode = (irc.config.wallops ? 4 : 0) + (irc.config.invisible ? 8 : 0);
+			var mode = (config.wallops ? 4 : 0) + (config.invisible ? 8 : 0);
 
 			//set the user
-			irc.user(irc.config.username, irc.config.realname ? irc.config.realname : irc.config.username, mode);
+			irc.user(config.username, config.realname ? config.realname : config.username, mode);
 
 			dispatcher.emit('irc/connect', irc);
 		});
@@ -342,13 +342,13 @@ function IRC(dispatcher) {
 	};
 
 	this.quit = function(message) {
-		return irc.command(null, 'QUIT', message || irc.config.quitMessage || "Terminating...");
+		return irc.command(null, 'QUIT', message || config.quitMessage || "Terminating...");
 	};
 
 	this.privMsg = function(nick, message) {
 		var now = Date.now();
 
-		if(message == lastMsg && now - lastMsgTime < (irc.config.msgDelay || 5000)) {
+		if(message == lastMsg && now - lastMsgTime < (config.msgDelay || 5000)) {
 			return;
 		}
 
@@ -362,7 +362,7 @@ function IRC(dispatcher) {
 	this.notice = function(nick, message) {
 		var now = Date.now();
 
-		if(message == irc.server.lastMsg && now - irc.server.lastMsgTime < (irc.config.msgDelay || 5000)) {
+		if(message == irc.server.lastMsg && now - irc.server.lastMsgTime < (config.msgDelay || 5000)) {
 			return;
 		}
 
@@ -390,7 +390,7 @@ function IRC(dispatcher) {
 exports.IRC = IRC;
 
 exports.init = function() {
-	this.irc = new IRC(this.dispatcher);
+	this.irc = new IRC(this.dispatcher, this.config);
 
 	var module = this;
 	this.on('init', function() {
