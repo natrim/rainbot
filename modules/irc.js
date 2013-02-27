@@ -237,7 +237,7 @@ function IRC(dispatcher, config) {
 				if(text.charCodeAt(0) === 1 && text.charCodeAt((text.length - 1)) === 1) {
 					text = text.slice(1);
 					text = text.slice(0, (text.length - 1));
-					dispatcher.emit('irc/CTCP', source, text, 'notice');
+					if(irc.processCTCP(source, text, 'notice')) dispatcher.emit('irc/CTCP', source, text, 'notice', irc);
 				} else {
 					dispatcher.emit('irc/NOTICE', source, text, irc);
 				}
@@ -248,7 +248,7 @@ function IRC(dispatcher, config) {
 				if(text.charCodeAt(0) === 1 && text.charCodeAt((text.length - 1)) === 1) {
 					text = text.slice(1);
 					text = text.slice(0, (text.length - 1));
-					dispatcher.emit('irc/CTCP', source, text, 'PRIVMSG', irc);
+					if(irc.processCTCP(source, text, 'privmsg')) dispatcher.emit('irc/CTCP', source, text, 'privmsg', irc);
 				} else {
 					dispatcher.emit('irc/PRIVMSG', source, text, irc);
 				}
@@ -390,6 +390,26 @@ function IRC(dispatcher, config) {
 
 	this.action = function(channel, action) {
 		return irc.ctcp(channel, 'ACTION ' + action, 'privmsg');
+	};
+
+	//returning false means no CTCP event
+	this.processCTCP = function(source, msg, type) {
+		type = typeof type === 'string' ? type.toLowerCase() : 'privmsg';
+		if(type === 'privmsg') {
+			var parts = msg.split(' ');
+			switch(parts[0]) {
+			case 'VERSION':
+				irc.ctcp(source.nick, 'VERSION Friendship Powered PonyBot', 'notice');
+				return false;
+			case 'TIME':
+				irc.ctcp(source.nick, 'TIME ' + (new Date()).toUTCString(), 'notice');
+				return false;
+			case 'PING':
+				irc.ctcp(source.nick, msg, 'notice');
+				return false;
+			}
+		}
+		return true;
 	};
 }
 
