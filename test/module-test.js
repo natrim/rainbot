@@ -92,6 +92,23 @@ suite.addBatch({
 			assert.isObject(m);
 			assert.isTrue(m.loaded);
 			assert.isObject(m.context);
+		},
+		'and dispatcher': function(err, m) {
+			assert.isObject(m.dispatcher);
+			//assert.instanceOf(m.dispatcher, require('events').EventEmitter);
+			assert.include(m, 'emit');
+			assert.include(m, 'on');
+			assert.include(m, 'once');
+			assert.include(m, 'off');
+
+			assert.include(m.dispatcher, 'emit');
+			assert.include(m.dispatcher, 'on');
+			assert.include(m.dispatcher, 'once');
+			assert.include(m.dispatcher, 'off');
+		},
+		'and config': function(err, m) {
+			assert.isObject(m.config);
+			assert.instanceOf(m.config, require(LIBS_DIR + '/config').Config);
 		}
 	},
 	'When i inject EventEmitter': {
@@ -104,6 +121,7 @@ suite.addBatch({
 			assert.include(dispatcher, 'emit');
 			assert.include(m, 'emit');
 			assert.include(m, 'on');
+			assert.include(m, 'once');
 			assert.include(m, 'off');
 		}
 	}
