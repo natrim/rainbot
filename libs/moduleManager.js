@@ -1,17 +1,16 @@
 var MODULE = require(LIBS_DIR + '/module').Module;
-var config = require(LIBS_DIR + '/config');
 
 function ModuleManager(dispatcher, config) {
 	this._modules = [];
 	if(typeof dispatcher === 'object') {
 		this.dispatcher = dispatcher;
 	} else {
-		this.dispatcher = new require('events').EventEmitter();
+		this.dispatcher = new(require('events').EventEmitter)();
 	}
 	if(typeof config === 'object') {
 		this.config = config;
 	} else {
-		this.config = new config.Config();
+		this.config = require(LIBS_DIR + '/config').create();
 	}
 }
 
@@ -58,7 +57,7 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 		module = new MODULE(name);
 		if(typeof module === 'object' && module.loadable) {
 			if(typeof module.injectModuleManager === 'function') module.injectModuleManager(this);
-			if(typeof module.injectConfig === 'function') module.injectConfig(config.create(this.config[name]));
+			if(typeof module.injectConfig === 'function') module.injectConfig(require(LIBS_DIR + '/config').create(this.config[name]));
 			if(typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
 
 			this._modules.push(module);
