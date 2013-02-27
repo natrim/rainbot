@@ -41,7 +41,7 @@ Module.prototype.init = function init(callback) {
 		if(typeof this.dispatcher !== 'object') this.injectDispatcher(new(require('events').EventEmitter)());
 
 		//self inject empty config if none
-		if(typeof config !== 'object') this.injectConfig(new(require(LIBS_DIR + '/config').Config)());
+		if(typeof this.config !== 'object') this.injectConfig(new(require(LIBS_DIR + '/config').Config)());
 
 		//init the context
 		if(typeof this.context.init === 'function') this.context.init.apply(this);
