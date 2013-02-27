@@ -193,6 +193,8 @@ function IRC(dispatcher, config) {
 		irc.server.write = socket.write.bind(socket);
 		irc.server.end = socket.end.bind(socket);
 
+		irc.server.socket = socket;
+
 		return irc;
 	};
 
@@ -304,6 +306,7 @@ function IRC(dispatcher, config) {
 		logger.debug('[SEND]> ' + msg.replace(/\r\n$/, ''));
 
 		if(msg.search(/^QUIT /) !== -1) {
+			irc.connected = false;
 			irc.server.end(msg);
 		} else {
 			irc.server.write(msg);
@@ -457,6 +460,12 @@ exports.init = function() {
 	});
 
 	this.on('halt', function() {
+		if(module.irc.server.secured) {
+			module.irc.server.socket.removeAllListeners('secureConnect');
+		} else {
+			module.irc.server.socket.removeAllListeners('connect');
+		}
+
 		if(module.irc.connected) {
 			module.irc.quit('Pony kill!');
 		}
