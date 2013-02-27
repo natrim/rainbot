@@ -1,5 +1,6 @@
 function Logger() {
   this.enabled = true;
+  this.debugging = false;
 }
 
 Logger.prototype.onBeforeLog = function() {};
@@ -25,6 +26,9 @@ Logger.prototype.log = function(msg, level) {
     case 'log':
       console.log(msg);
       break;
+    case 'debug':
+      if(this.debugging) console.log(msg);
+      break;
     default:
       console.log(msg);
     }
@@ -44,6 +48,9 @@ Logger.prototype.info = function(msg) {
   this.log(msg, 'info');
 };
 
+Logger.prototype.debug = function(msg) {
+  this.log(msg, 'debug');
+};
 
 module.exports = new Logger();
 module.exports.Logger = Logger;
