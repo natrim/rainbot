@@ -221,11 +221,12 @@ function IRC(dispatcher, config) {
 		}
 
 		if(msg.command) {
-			if(msg.command !== 'PING' && msg.command !== 'PONG') { //if not pin/pong then emit it
+			if(msg.command !== 'PING' && msg.command !== 'PONG') { //if not ping/pong then emit it
 				dispatcher.emit('irc/RECV', line);
 			}
 
-			var args = msg.params + msg.trail;
+			var args = msg.params.slice(0);
+			args.push(msg.trail);
 
 			switch(msg.command) {
 			case 'NOTICE':
@@ -236,7 +237,7 @@ function IRC(dispatcher, config) {
 					text = text.slice(0, (text.length - 1));
 					dispatcher.emit('irc/CTCP', source, text, 'notice');
 				} else {
-					dispatcher.emit('irc/NOTICE', source, text);
+					dispatcher.emit('irc/NOTICE', source, text, irc);
 				}
 				break;
 			case 'PRIVMSG':
@@ -261,7 +262,7 @@ function IRC(dispatcher, config) {
 				}
 				break;
 			default:
-				dispatcher.emit('irc/' + msg.command.toUpperCase(), source, args);
+				dispatcher.emit('irc/' + msg.command.toUpperCase(), source, args, irc);
 			}
 		}
 	};
@@ -349,7 +350,7 @@ function IRC(dispatcher, config) {
 	this.privMsg = function(nick, message) {
 		var now = Date.now();
 
-		if(message == lastMsg && now - lastMsgTime < (config.msgDelay || 5000)) {
+		if(message === lastMsg && now - lastMsgTime < (config.msgDelay || 5000)) {
 			return;
 		}
 
@@ -363,7 +364,7 @@ function IRC(dispatcher, config) {
 	this.notice = function(nick, message) {
 		var now = Date.now();
 
-		if(message == irc.server.lastMsg && now - irc.server.lastMsgTime < (config.msgDelay || 5000)) {
+		if(message === irc.server.lastMsg && now - irc.server.lastMsgTime < (config.msgDelay || 5000)) {
 			return;
 		}
 
@@ -375,7 +376,7 @@ function IRC(dispatcher, config) {
 	};
 
 	this.ctcp = function(nick, message, type) {
-		type = typeof type == 'string' ? type.toLowerCase() : 'privmsg';
+		type = typeof type === 'string' ? type.toLowerCase() : 'privmsg';
 		if(type === 'notice') {
 			return irc.notice(nick, String.fromCharCode(0x01) + message + String.fromCharCode(0x01));
 		} else {
