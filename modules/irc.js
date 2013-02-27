@@ -221,6 +221,8 @@ function IRC(dispatcher, config) {
 		}
 
 		if(msg.command) {
+			logger.debug('[RECV]> ' + line);
+
 			if(msg.command !== 'PING' && msg.command !== 'PONG') { //if not ping/pong then emit it
 				dispatcher.emit('irc/RECV', line);
 			}
@@ -287,6 +289,8 @@ function IRC(dispatcher, config) {
 		if(!nolog) {
 			dispatcher.emit('irc/SEND', msg.replace(/\r\n$/, ''));
 		}
+
+		logger.debug('[SEND]> ' + msg.replace(/\r\n$/, ''));
 
 		irc.server.write(msg);
 		return irc;
