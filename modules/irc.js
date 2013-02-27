@@ -10,6 +10,10 @@ function Server() {
 	this.lastMsgTo = '';
 	this.lastMsgTime = 0;
 	this.lastMsg = '';
+
+	this.socket = null;
+	this.write = function() {};
+	this.end = function() {};
 }
 
 Server.prototype.valueOf = Server.prototype.toString = function() {
@@ -86,9 +90,10 @@ function IRC(dispatcher, config) {
 	this.connected = 0;
 	this.recvBuffer = '';
 	this.tryNick = [];
+	this.server = new Server();
 
 	//irc client heartbeat ping - because the socket sometimes hangs
-	irc._heartbeat = 0;
+	this._heartbeat = 0;
 	if(typeof config.heartbeat === 'undefined') {
 		config.heartbeat = 120000; //default heartbeat interval
 	}
@@ -101,8 +106,6 @@ function IRC(dispatcher, config) {
 	}
 
 	this.connect = function(host, port, ssl) {
-		irc.server = new Server();
-
 		if(typeof host === 'string') {
 			irc.server.hostname = host;
 		}
@@ -460,10 +463,12 @@ exports.init = function() {
 	});
 
 	this.on('halt', function() {
-		if(module.irc.server.secured) {
-			module.irc.server.socket.removeAllListeners('secureConnect');
-		} else {
-			module.irc.server.socket.removeAllListeners('connect');
+		if(module.irc.server.socket) {
+			if(module.irc.server.secured) {
+				module.irc.server.socket.removeAllListeners('secureConnect');
+			} else {
+				module.irc.server.socket.removeAllListeners('connect');
+			}
 		}
 
 		if(module.irc.connected) {
