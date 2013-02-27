@@ -39,18 +39,23 @@ function Bot() {
 	//bind to exit event of main process
 	var bot = this;
 	process.on('exit', function() {
-		bot.emit('halt', bot);
-		bot.unloadModules();
+		bot.exit();
 	});
 
 	//shutdown on ctrl+c gracefully
 	process.on('SIGINT', function() {
-		process.exit(0);
+		bot.exit(0);
 	});
 
 	// This will override SIGTSTP and prevent the program from going to the background.
 	process.on('SIGTSTP', function() {});
 }
+
+Bot.prototype.exit = function(code) {
+	this.emit('halt', this);
+	this.unloadModules();
+	if(code) process.exit(code);
+};
 
 Bot.prototype.addListener = function() {
 	this.dispatcher.addListener.apply(this.dispatcher, arguments);
