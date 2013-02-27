@@ -173,7 +173,8 @@ function IRC(dispatcher, config) {
 		});
 
 		socket.on('close', function(had_error) {
-			dispatcher.emit.call(dispatcher, 'irc/close', had_error, irc);
+			dispatcher.emit.call(dispatcher, 'irc/disconnect', had_error, irc);
+			logger.info('DISCONNECTED' + had_error ? ' WITH ERROR' : '');
 		});
 
 		socket.on('data', function(data) {
