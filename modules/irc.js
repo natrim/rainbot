@@ -458,10 +458,12 @@ exports.init = function() {
 
 	var module = this;
 
+	//connect to server on bot init
 	this.on('init', function() {
 		module.irc.connect(module.config.hostname || module.config.host || module.config.server, module.config.port, module.config.ssl || module.config.secured);
 	});
 
+	//quit irc on bot halt
 	this.on('halt', function() {
 		if(module.irc.server.socket) {
 			if(module.irc.server.secured) {
