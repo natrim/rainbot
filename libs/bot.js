@@ -48,6 +48,7 @@ function Bot() {
 	//shutdown on ctrl+c gracefully
 	process.on('SIGINT', function() {
 		bot.halting = true;
+		logger.info(':SIGINT Received, Exiting ...');
 		bot.emit('halt', bot);
 		setTimeout(process.exit, 1000);
 	});
