@@ -82,6 +82,7 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 		error = new Error('Wrong dispatcher type for \'' + name + '\' module injected!');
 	} else {
 		var events = [];
+		var module = this;
 		this.dispatcher = {
 			on: function(event, listener) {
 				events.push({
@@ -133,7 +134,7 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 				try {
 					dispatchBase.emit.apply(dispatchBase, arguments);
 				} catch (e) {
-					dispatchBase.emit.call(dispatchBase, 'dispatchError', event, e, this);
+					dispatchBase.emit.call(dispatchBase, 'dispatchError', event, e, module);
 				}
 			},
 			clearEvents: function() {
