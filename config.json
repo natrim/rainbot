@@ -8,5 +8,8 @@
 		"port": 6667,
 		"ssl": false,
 		"channel": "#pony"
+	},
+	"nickserv": {
+		"password": ""
 	}
 }
