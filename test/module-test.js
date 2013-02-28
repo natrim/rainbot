@@ -5,8 +5,8 @@ var vows = require('vows'),
 
 var suite = vows.describe('Module class');
 
-if(!global.LIBS_DIR) global.LIBS_DIR = '../libs';
-if(!global.MODULES_DIR) global.MODULES_DIR = '../modules';
+if (!global.LIBS_DIR) global.LIBS_DIR = '../libs';
+if (!global.MODULES_DIR) global.MODULES_DIR = '../modules';
 
 //disable logger
 require('../libs/logger').enabled = false;
@@ -17,7 +17,7 @@ var h = require('../libs/helpers');
 
 //disable file resolving of test modules
 M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
-	if(this.name === 'test' || this.name === 'test2') {
+	if (this.name === 'test' || this.name === 'test2') {
 		return '../modules/' + this.fileName;
 	} else {
 		return resol.apply(this);

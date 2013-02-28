@@ -2,12 +2,12 @@ var MODULE = require(LIBS_DIR + '/module').Module;
 
 function ModuleManager(dispatcher, config) {
 	this._modules = [];
-	if(typeof dispatcher === 'object') {
+	if (typeof dispatcher === 'object') {
 		this.dispatcher = dispatcher;
 	} else {
 		this.dispatcher = new(require('events').EventEmitter)();
 	}
-	if(typeof config === 'object') {
+	if (typeof config === 'object') {
 		this.config = config;
 	} else {
 		this.config = require(LIBS_DIR + '/config').create();
@@ -19,9 +19,9 @@ ModuleManager.prototype.getModules = function() {
 };
 
 ModuleManager.prototype.exists = ModuleManager.prototype.has = ModuleManager.prototype.contains = function(name) {
-	if(name instanceof MODULE) {
+	if (name instanceof MODULE) {
 		name = name.name;
-	} else if(typeof name !== 'string' || name === '') {
+	} else if (typeof name !== 'string' || name === '') {
 		return false;
 	}
 	return this._modules.some(function(module) {
@@ -30,14 +30,14 @@ ModuleManager.prototype.exists = ModuleManager.prototype.has = ModuleManager.pro
 };
 
 ModuleManager.prototype.get = ModuleManager.prototype.find = function(name) {
-	if(name instanceof MODULE) {
+	if (name instanceof MODULE) {
 		return name;
-	} else if(typeof name !== 'string') {
+	} else if (typeof name !== 'string') {
 		return null;
 	}
 	var module = null;
 	this._modules.some(function(m) {
-		if(m.name === name) {
+		if (m.name === name) {
 			module = m;
 			return true;
 		}
@@ -49,22 +49,22 @@ ModuleManager.prototype.get = ModuleManager.prototype.find = function(name) {
 ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, callback) {
 	var error = null;
 	var module = null;
-	if(typeof name !== 'string' || name === '') {
+	if (typeof name !== 'string' || name === '') {
 		error = new Error('Please enter a name!');
-	} else if(this.exists(name)) {
+	} else if (this.exists(name)) {
 		module = this.get(name);
 	} else {
 		module = new MODULE(name);
-		if(typeof module === 'object' && module.loadable) {
-			if(typeof module.injectModuleManager === 'function') module.injectModuleManager(this);
-			if(typeof module.injectConfig === 'function') module.injectConfig(require(LIBS_DIR + '/config').create(this.config[name]));
-			if(typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
+		if (typeof module === 'object' && module.loadable) {
+			if (typeof module.injectModuleManager === 'function') module.injectModuleManager(this);
+			if (typeof module.injectConfig === 'function') module.injectConfig(require(LIBS_DIR + '/config').create(this.config[name]));
+			if (typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
 
 			this._modules.push(module);
 
 			try {
-				if(typeof module.init === 'function') module.init();
-			} catch(e) {
+				if (typeof module.init === 'function') module.init();
+			} catch (e) {
 				error = e;
 			}
 		} else {
@@ -73,26 +73,26 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 		}
 	}
 
-	if(callback) callback(error, module, this);
+	if (callback) callback(error, module, this);
 	return this;
 };
 
 ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name, callback) {
 	var error = null;
-	if(typeof name !== 'string' || name === '') {
+	if (typeof name !== 'string' || name === '') {
 		error = new Error('Please enter a name!');
 	} else {
 		var mm = this;
-		if(!this._modules.some(function(module, i) {
-			if(module.name === name) {
+		if (!this._modules.some(function(module, i) {
+			if (module.name === name) {
 				//disable event binding on halt with uncatched exception so users gets kicked in face
-				if(typeof module.dispatcher === 'object') {
+				if (typeof module.dispatcher === 'object') {
 					module.dispatcher.on = module.dispatcher.once = module.dispatcher.addListener = function() {
 						throw new Error('You cannot bind events on module halt!');
 					};
 				}
 
-				if(typeof module.halt === 'function') module.halt();
+				if (typeof module.halt === 'function') module.halt();
 				mm._modules.splice(i, 1);
 
 				return true;
@@ -104,14 +104,14 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 		}
 	}
 
-	if(callback) callback(error, this);
+	if (callback) callback(error, this);
 	return this;
 };
 
 ModuleManager.prototype.require = function(name) {
-	if(typeof name !== 'string' || name === '') {
+	if (typeof name !== 'string' || name === '') {
 		return new Error('Please enter a name!');
-	} else if(!this.exists(name)) {
+	} else if (!this.exists(name)) {
 		this.load(name);
 	}
 

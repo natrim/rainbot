@@ -17,8 +17,8 @@ function Bot() {
 	//load module on new listener
 	dispatcher.on('newListener', function(event, listener) {
 		var i, name;
-		if(((i = event.indexOf('/')) + 1) && (name = event.substr(0, i))) {
-			if(moduleManager.exists(name)) {
+		if (((i = event.indexOf('/')) + 1) && (name = event.substr(0, i))) {
+			if (moduleManager.exists(name)) {
 				moduleManager.load(name);
 			}
 		}
@@ -41,7 +41,7 @@ function Bot() {
 	//bind to exit event of main process
 	var bot = this;
 	process.on('exit', function() {
-		if(!bot.halting) bot.emit('halt', bot);
+		if (!bot.halting) bot.emit('halt', bot);
 		bot.unloadModules();
 	});
 
@@ -85,47 +85,47 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 	var bot = this;
 
 	var error = null;
-	if(typeof config === 'function' && typeof callback === 'undefined') {
+	if (typeof config === 'function' && typeof callback === 'undefined') {
 		callback = config;
 		config = undefined;
 	}
 
-	if(typeof config === 'string') {
+	if (typeof config === 'string') {
 		try {
 			bot.config.extend(require(BOT_DIR + '/' + config));
 			logger.info('Config loaded!');
-		} catch(e) {
+		} catch (e) {
 			logger.error('Cannot load config!');
 			error = new Error('Cannot load config!');
 		}
-	} else if(config instanceof Object) {
+	} else if (config instanceof Object) {
 		bot.config.extend(config);
 	} else {
 		try {
 			bot.config.extend(require(BOT_DIR + '/config.json'));
-		} catch(e) {
+		} catch (e) {
 			logger.error('Cannot load config!');
 			error = new Error('Cannot load config!');
 		}
 	}
 
 	//make sure we have important values
-	if(typeof bot.config.bot === 'undefined') {
+	if (typeof bot.config.bot === 'undefined') {
 		bot.config.bot = {
 			'name': 'IRC-PONY',
 			'modules': 'modules.json'
 		};
 	} else {
-		if(typeof bot.config.bot.name === 'undefined') {
+		if (typeof bot.config.bot.name === 'undefined') {
 			bot.config.bot.name = 'IRC-PONY';
 		}
-		if(typeof bot.config.bot.modules === 'undefined') {
+		if (typeof bot.config.bot.modules === 'undefined') {
 			bot.config.bot.modules = 'modules.json';
 		}
 	}
 
-	if(callback) callback(error, bot.config);
-	else if(error) throw error;
+	if (callback) callback(error, bot.config);
+	else if (error) throw error;
 
 	logger.info('Config loaded!');
 	return bot;
@@ -134,31 +134,31 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 Bot.prototype.loadModules = function loadModules(modules, callback) {
 	var bot = this;
 
-	if(typeof modules === 'function' && typeof callback === 'undefined') {
+	if (typeof modules === 'function' && typeof callback === 'undefined') {
 		callback = modules;
 		modules = {};
 	}
 
-	if(typeof bot.config.bot === 'undefined') { //we need atleast empty bot config
+	if (typeof bot.config.bot === 'undefined') { //we need atleast empty bot config
 		bot.config.bot = {
 			'modules': 'modules.json'
 		};
 	}
 
 	var error = null;
-	if(typeof modules === 'string') {
+	if (typeof modules === 'string') {
 		bot.config.bot.modules = modules;
 		modules = {};
-	} else if(typeof modules === 'object' && modules instanceof Array) {
+	} else if (typeof modules === 'object' && modules instanceof Array) {
 		var tmp = modules.slice(0);
 		modules = {};
-		for(var i = 0; i < tmp.length; i++) {
+		for (var i = 0; i < tmp.length; i++) {
 			modules[tmp[i]] = true;
 		}
 
-	} else if(typeof modules !== 'object' && typeof bot.config.bot.modules === 'string') {
+	} else if (typeof modules !== 'object' && typeof bot.config.bot.modules === 'string') {
 		modules = {};
-	} else if(typeof modules !== 'object') {
+	} else if (typeof modules !== 'object') {
 		logger.error('Modules was nor Object nor Array nor String! Trying to load default \'modules.json\'.');
 		error = new Error('Modules was nor Object nor Array nor String! Trying to load default \'modules.json\'.');
 
@@ -167,16 +167,16 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 
 	//first load core modules
 	Object.keys(bot.core_modules).forEach(function(name) {
-		if(bot.core_modules[name] === true) {
+		if (bot.core_modules[name] === true) {
 			bot.modules.load(name);
 		}
 	});
 
 	//then custom modules
-	if(Object.keys(modules).length <= 0) {
+	if (Object.keys(modules).length <= 0) {
 		try {
 			modules = require(BOT_DIR + '/' + bot.config.bot.modules);
-		} catch(e) {
+		} catch (e) {
 			modules = {};
 			logger.error('Cannot load modules file \'' + bot.config.bot.modules + '\'!');
 			error = new Error('Cannot load modules file \'' + bot.config.bot.modules + '\'!');
@@ -184,16 +184,16 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 	}
 
 	var keys = Object.keys(modules);
-	if(keys.length > 0) {
+	if (keys.length > 0) {
 		keys.forEach(function(name) {
-			if(modules[name] === true) {
+			if (modules[name] === true) {
 				bot.modules.load(name);
 			}
 		});
 	}
 
-	if(callback) callback(error, bot.modules);
-	else if(error) throw error;
+	if (callback) callback(error, bot.modules);
+	else if (error) throw error;
 
 	logger.info('Modules loaded!');
 	return bot;
@@ -210,14 +210,13 @@ Bot.prototype.unloadModules = function() {
 Bot.prototype.load = function load(names, callback) {
 	var bot = this;
 
-	if(!(names instanceof Array)) {
+	if (!(names instanceof Array)) {
 		names = [names];
 	}
 
-	var recallback = callback ?
-	function(err, module, mm) {
-		callback(err, module, mm, bot);
-	} : undefined;
+	var recallback = callback ? function(err, module, mm) {
+			callback(err, module, mm, bot);
+		} : undefined;
 
 	names.forEach(function(name) {
 		bot.modules.load(name, recallback);
@@ -229,14 +228,13 @@ Bot.prototype.load = function load(names, callback) {
 Bot.prototype.unload = function unload(names, callback) {
 	var bot = this;
 
-	if(!(names instanceof Array)) {
+	if (!(names instanceof Array)) {
 		names = [names];
 	}
 
-	var recallback = callback ?
-	function(err, mm) {
-		callback(err, mm, bot);
-	} : undefined;
+	var recallback = callback ? function(err, mm) {
+			callback(err, mm, bot);
+		} : undefined;
 
 	names.forEach(function(name) {
 		bot.modules.unload(name, recallback);

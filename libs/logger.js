@@ -7,30 +7,30 @@ Logger.prototype.onBeforeLog = function() {};
 Logger.prototype.onAfterLog = function() {};
 
 Logger.prototype.log = function(msg, level) {
-  if(!this.enabled) {
+  if (!this.enabled) {
     return;
   }
 
   var dontlog = this.onBeforeLog(arguments) || false;
-  if(!dontlog) {
-    switch(level) {
-    case 'error':
-      console.error(msg);
-      break;
-    case 'warn':
-      console.warn(msg);
-      break;
-    case 'info':
-      console.info(msg);
-      break;
-    case 'log':
-      console.log(msg);
-      break;
-    case 'debug':
-      if(this.debugging) console.log(msg);
-      break;
-    default:
-      console.log(msg);
+  if (!dontlog) {
+    switch (level) {
+      case 'error':
+        console.error(msg);
+        break;
+      case 'warn':
+        console.warn(msg);
+        break;
+      case 'info':
+        console.info(msg);
+        break;
+      case 'log':
+        console.log(msg);
+        break;
+      case 'debug':
+        if (this.debugging) console.log(msg);
+        break;
+      default:
+        console.log(msg);
     }
   }
   this.onAfterLog(dontlog || false, arguments);

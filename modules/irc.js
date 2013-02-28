@@ -1,84 +1,10 @@
 var logger = require(LIBS_DIR + '/logger');
 
-function Server() {
-	this.hostname = '';
-	this.port = 6667;
-	this.secured = false;
+var Server = require('./irc/server').Server;
+var Source = require('./irc/source').Source;
 
-	this.currentNick = '';
-
-	this.lastMsgTo = '';
-	this.lastMsgTime = 0;
-	this.lastMsg = '';
-
-	this.socket = null;
-	this.write = function() {};
-	this.end = function() {};
-}
-
-Server.prototype.valueOf = Server.prototype.toString = function() {
-	return(this.secured ? 'tls://' : 'tcp://') + this.hostname + ':' + this.port;
-};
-
-exports.Server = Server;
-
-function Source(irc, nick, user, host) {
-	this.irc = irc;
-	this.nick = nick;
-	this.user = user;
-	this.host = host;
-	this.from = '';
-}
-
-Source.prototype.valueOf = Source.prototype.toString = function() {
-	return this.nick + (this.host ? (this.user ? '!' + this.user : '') + '@' + this.host : '');
-};
-
-Source.fromString = function(irc, string) {
-	var m = string.match(/^([^ !@]+)(?:(?:!([^ @]+))?@([^ ]+))?$/);
-	if(m) {
-		return new Source(irc, m[1], m[2], m[3]);
-	} else {
-		return null;
-	}
-};
-
-Source.prototype.reply = Source.prototype.respond = function(msg) {
-	if(this.from === this.irc.server.currentNick) { //if direct message
-		this.irc.privMsg(this.nick, msg);
-	} else {
-		this.irc.privMsg(this.from || this.nick, msg);
-	}
-};
-
-Source.prototype.mention = function(msg) {
-	if(this.from === this.irc.server.currentNick) { //if direct message
-		this.irc.privMsg(this.nick, msg);
-	} else {
-		this.irc.privMsg(this.from || this.nick, this.nick + ", " + msg);
-	}
-};
-
-Source.prototype.action = function(msg) {
-	if(this.from === this.irc.server.currentNick) { //if direct message
-		this.irc.action(this.nick, msg);
-	} else {
-		this.irc.action(this.from || this.nick, msg);
-	}
-};
-
-Source.prototype.tell = Source.prototype.message = function(msg) {
-	this.irc.privMsg(this.nick, msg);
-};
-
-Source.prototype.note = Source.prototype.notice = function(msg) {
-	this.irc.notice(this.nick, msg);
-};
-
-
-exports.Source = Source;
-
-if(!String.prototype.trim) {
+//trim some strings
+if (!String.prototype.trim) {
 	String.prototype.trim = function() {
 		return this.replace(/^\s+|\s+$/g, '');
 	};
@@ -94,33 +20,33 @@ function IRC(dispatcher, config) {
 
 	//irc client heartbeat ping - because the socket sometimes hangs
 	this._heartbeat = 0;
-	if(typeof config.heartbeat === 'undefined') {
+	if (typeof config.heartbeat === 'undefined') {
 		config.heartbeat = 120000; //default heartbeat interval
 	}
-	if(config.heartbeat > 0) {
+	if (config.heartbeat > 0) {
 		this._heartbeat = setInterval(function() {
-			if(irc.connected) {
+			if (irc.connected) {
 				irc.send('PING :' + irc.server.hostname, true);
 			}
 		}, config.heartbeat);
 	}
 
 	this.connect = function(host, port, ssl) {
-		if(typeof host === 'string') {
+		if (typeof host === 'string') {
 			irc.server.hostname = host;
 		}
-		if(typeof port === 'number') {
+		if (typeof port === 'number') {
 			irc.server.port = port;
 		}
-		if(typeof ssl === 'boolean') {
+		if (typeof ssl === 'boolean') {
 			irc.server.secured = ssl;
 		}
-		if(typeof irc.server.port !== 'number') {
+		if (typeof irc.server.port !== 'number') {
 			irc.server.port = 6667;
 		}
 
 		//throw error when hostname not set
-		if(typeof irc.server.hostname !== 'string' || irc.server.hostname.trim() === '') {
+		if (typeof irc.server.hostname !== 'string' || irc.server.hostname.trim() === '') {
 			throw new Error('Specify server hostname!');
 		}
 
@@ -137,15 +63,15 @@ function IRC(dispatcher, config) {
 
 			logger.info('CONNECTED');
 
-			if(typeof config.pass === 'string' && config.pass.trim() !== '') {
+			if (typeof config.pass === 'string' && config.pass.trim() !== '') {
 				irc.pass(config.pass);
 			}
 
-			if(config.nick instanceof Array && config.nick.length > 0) {
+			if (config.nick instanceof Array && config.nick.length > 0) {
 				irc.tryNick = config.nick.slice(0); //use clone
 			} else {
 				irc.tryNick = ['ponbot', 'ponybot', 'a_weird_pony', 'another_ponbot']; //defaults
-				if(typeof config.nick === 'string') {
+				if (typeof config.nick === 'string') {
 					irc.tryNick.unshift(config.nick);
 				}
 			}
@@ -153,7 +79,7 @@ function IRC(dispatcher, config) {
 			//set first nick
 			irc.nick(irc.tryNick.shift()); //will take care of duplicates later
 			//set username to nick if none given
-			if(!config.username) {
+			if (!config.username) {
 				config.username = irc.server.currentNick;
 			}
 
@@ -202,12 +128,12 @@ function IRC(dispatcher, config) {
 	};
 
 	this.processData = function(data) {
-		if(!irc.connected) {
+		if (!irc.connected) {
 			irc.connected = true;
 		}
 
 		var lines = (irc.recvBuffer + data).split("\r\n");
-		for(var i = 0; i < lines.length - 1; i++) {
+		for (var i = 0; i < lines.length - 1; i++) {
 			irc.processLine(lines[i]);
 		}
 		irc.recvBuffer = lines[lines.length - 1];
@@ -216,67 +142,67 @@ function IRC(dispatcher, config) {
 	this.processLine = function(line) {
 		line = line.trim();
 
-		if(line === '') {
+		if (line === '') {
 			return;
 		}
 
 		var msg = irc.parseLine(line);
 
-		if(!msg) {
+		if (!msg) {
 			return;
 		}
 
 		var source, text;
 
-		if(msg.prefix) {
+		if (msg.prefix) {
 			source = Source.fromString(irc, msg.prefix);
 		}
 
-		if(msg.command) {
+		if (msg.command) {
 			logger.debug('[RECV]> ' + line);
 
-			if(msg.command !== 'PING' && msg.command !== 'PONG') { //if not ping/pong then emit it
+			if (msg.command !== 'PING' && msg.command !== 'PONG') { //if not ping/pong then emit it
 				dispatcher.emit('irc/RECV', line);
 			}
 
 			var args = msg.params.slice(0);
 			args.push(msg.trail);
 
-			switch(msg.command) {
-			case 'NOTICE':
-				source.from = args[0] === irc.server.currentNick ? '' : args[0];
-				text = args[1] ||  '';
-				if(text.charCodeAt(0) === 1 && text.charCodeAt((text.length - 1)) === 1) {
-					text = text.slice(1);
-					text = text.slice(0, (text.length - 1));
-					if(irc.processCTCP(source, text, 'notice')) dispatcher.emit('irc/CTCP', source, text, 'notice', irc);
-				} else {
-					dispatcher.emit('irc/NOTICE', source, text, irc);
-				}
-				break;
-			case 'PRIVMSG':
-				source.from = args[0] === irc.server.currentNick ? '' : args[0];
-				text = args[1] || '';
-				if(text.charCodeAt(0) === 1 && text.charCodeAt((text.length - 1)) === 1) {
-					text = text.slice(1);
-					text = text.slice(0, (text.length - 1));
-					if(irc.processCTCP(source, text, 'privmsg')) dispatcher.emit('irc/CTCP', source, text, 'privmsg', irc);
-				} else {
-					dispatcher.emit('irc/PRIVMSG', source, text, irc);
-				}
-				break;
-			case 'PING':
-				//pingpong heartbeat
-				irc.send('PONG :' + args[0], true);
-				break;
-			case '443':
-				//nick already in use
-				if(irc.tryNick.length > 0) { //if we still have some nicks then try them
-					irc.nick(irc.tryNick.shift());
-				}
-				break;
-			default:
-				dispatcher.emit('irc/' + msg.command.toUpperCase(), source, args, irc);
+			switch (msg.command) {
+				case 'NOTICE':
+					source.channel = args[0] === irc.server.currentNick ? '' : args[0];
+					text = args[1] || '';
+					if (text.charCodeAt(0) === 1 && text.charCodeAt((text.length - 1)) === 1) {
+						text = text.slice(1);
+						text = text.slice(0, (text.length - 1));
+						if (irc.processCTCP(source, text, 'notice')) dispatcher.emit('irc/CTCP', source, text, 'notice', irc);
+					} else {
+						dispatcher.emit('irc/NOTICE', source, text, irc);
+					}
+					break;
+				case 'PRIVMSG':
+					source.channel = args[0] === irc.server.currentNick ? '' : args[0];
+					text = args[1] || '';
+					if (text.charCodeAt(0) === 1 && text.charCodeAt((text.length - 1)) === 1) {
+						text = text.slice(1);
+						text = text.slice(0, (text.length - 1));
+						if (irc.processCTCP(source, text, 'privmsg')) dispatcher.emit('irc/CTCP', source, text, 'privmsg', irc);
+					} else {
+						dispatcher.emit('irc/PRIVMSG', source, text, irc);
+					}
+					break;
+				case 'PING':
+					//pingpong heartbeat
+					irc.send('PONG :' + args[0], true);
+					break;
+				case '443':
+					//nick already in use
+					if (irc.tryNick.length > 0) { //if we still have some nicks then try them
+						irc.nick(irc.tryNick.shift());
+					}
+					break;
+				default:
+					dispatcher.emit('irc/' + msg.command.toUpperCase(), source, args, irc);
 			}
 		}
 	};
@@ -294,21 +220,21 @@ function IRC(dispatcher, config) {
 
 
 	this.send = function(msg, nolog) {
-		if(!irc.connected) { //dont write if no connection
+		if (!irc.connected) { //dont write if no connection
 			return irc;
 		}
 
-		if(!/\r\n$/.test(msg)) {
+		if (!/\r\n$/.test(msg)) {
 			msg += "\r\n";
 		}
 
-		if(!nolog) {
+		if (!nolog) {
 			dispatcher.emit('irc/SEND', msg.replace(/\r\n$/, ''));
 		}
 
 		logger.debug('[SEND]> ' + msg.replace(/\r\n$/, ''));
 
-		if(msg.search(/^QUIT /) !== -1) {
+		if (msg.search(/^QUIT /) !== -1) {
 			irc.connected = false;
 			irc.server.end(msg);
 		} else {
@@ -320,7 +246,7 @@ function IRC(dispatcher, config) {
 
 	this.command = function(source, command) {
 		var args = '';
-		for(var i = 2; i < arguments.length - 1; i++) {
+		for (var i = 2; i < arguments.length - 1; i++) {
 			args += ' ' + arguments[i];
 		}
 
@@ -376,7 +302,7 @@ function IRC(dispatcher, config) {
 	this.privMsg = function(nick, message) {
 		var now = Date.now();
 
-		if(message === lastMsg && now - lastMsgTime < (config.msgDelay || 5000)) {
+		if (message === lastMsg && now - lastMsgTime < (config.msgDelay || 5000)) {
 			return;
 		}
 
@@ -390,7 +316,7 @@ function IRC(dispatcher, config) {
 	this.notice = function(nick, message) {
 		var now = Date.now();
 
-		if(message === irc.server.lastMsg && now - irc.server.lastMsgTime < (config.msgDelay || 5000)) {
+		if (message === irc.server.lastMsg && now - irc.server.lastMsgTime < (config.msgDelay || 5000)) {
 			return;
 		}
 
@@ -403,7 +329,7 @@ function IRC(dispatcher, config) {
 
 	this.ctcp = function(nick, message, type) {
 		type = typeof type === 'string' ? type.toLowerCase() : 'privmsg';
-		if(type === 'notice') {
+		if (type === 'notice') {
 			return irc.notice(nick, String.fromCharCode(0x01) + message + String.fromCharCode(0x01));
 		} else {
 			return irc.privMsg(nick, String.fromCharCode(0x01) + message + String.fromCharCode(0x01));
@@ -417,18 +343,18 @@ function IRC(dispatcher, config) {
 	//returning false means no CTCP event
 	this.processCTCP = function(source, msg, type) {
 		type = typeof type === 'string' ? type.toLowerCase() : 'privmsg';
-		if(type === 'privmsg') {
+		if (type === 'privmsg') {
 			var parts = msg.split(' ');
-			switch(parts[0]) {
-			case 'VERSION':
-				irc.ctcp(source.nick, 'VERSION Friendship Powered PonyBot', 'notice');
-				return false;
-			case 'TIME':
-				irc.ctcp(source.nick, 'TIME ' + (new Date()).toUTCString(), 'notice');
-				return false;
-			case 'PING':
-				irc.ctcp(source.nick, msg, 'notice');
-				return false;
+			switch (parts[0]) {
+				case 'VERSION':
+					irc.ctcp(source.nick, 'VERSION Friendship Powered PonyBot', 'notice');
+					return false;
+				case 'TIME':
+					irc.ctcp(source.nick, 'TIME ' + (new Date()).toUTCString(), 'notice');
+					return false;
+				case 'PING':
+					irc.ctcp(source.nick, msg, 'notice');
+					return false;
 			}
 		}
 		return true;
@@ -436,16 +362,16 @@ function IRC(dispatcher, config) {
 
 	this.tryAutoJoin = function() {
 		var channels;
-		if(typeof config.channel === 'string') {
+		if (typeof config.channel === 'string') {
 			channels = config.channel.split(',');
-		} else if(config.channel instanceof Array) {
+		} else if (config.channel instanceof Array) {
 			channels = config.channel;
 		} else {
 			return;
 		}
 
 		irc.join.apply(irc, channels.map(function(c) {
-			if(c.search(/^#/) === -1) c = '#' + c;
+			if (c.search(/^#/) === -1) c = '#' + c;
 			return c.trim();
 		}));
 	};
@@ -465,15 +391,15 @@ exports.init = function() {
 
 	//quit irc on bot halt
 	this.on('halt', function() {
-		if(module.irc.server.socket) {
-			if(module.irc.server.secured) {
+		if (module.irc.server.socket) {
+			if (module.irc.server.secured) {
 				module.irc.server.socket.removeAllListeners('secureConnect');
 			} else {
 				module.irc.server.socket.removeAllListeners('connect');
 			}
 		}
 
-		if(module.irc.connected) {
+		if (module.irc.connected) {
 			module.irc.quit('Pony kill!');
 		}
 	});
@@ -481,7 +407,7 @@ exports.init = function() {
 
 exports.halt = function() {
 	//stop heartbeat
-	if(this.irc._heartbeat) {
+	if (this.irc._heartbeat) {
 		clearInterval(this.irc._heartbeat);
 	}
 };

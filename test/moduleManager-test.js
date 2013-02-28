@@ -5,8 +5,8 @@ var vows = require('vows'),
 
 var suite = vows.describe('ModuleManager class');
 
-if(!global.LIBS_DIR) global.LIBS_DIR = '../libs';
-if(!global.MODULES_DIR) global.MODULES_DIR = '../modules';
+if (!global.LIBS_DIR) global.LIBS_DIR = '../libs';
+if (!global.MODULES_DIR) global.MODULES_DIR = '../modules';
 
 //disable logger
 require('../libs/logger').enabled = false;
@@ -18,7 +18,7 @@ var h = require(LIBS_DIR + '/helpers');
 
 //disable file resolving of test modules
 M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
-	if(this.name === 'test' || this.name === 'test2') {
+	if (this.name === 'test' || this.name === 'test2') {
 		return MODULES_DIR + '/' + this.fileName;
 	} else {
 		return resol.apply(this);
@@ -100,7 +100,7 @@ suite.addBatch({
 		},
 		'test2 module': {
 			topic: function() {
-				return(new MM()).load('test2');
+				return (new MM()).load('test2');
 			},
 			'then i get it loaded without context': function(mm) {
 				assert.isObject(mm);
@@ -164,7 +164,7 @@ suite.addBatch({
 	},
 	'When i require': {
 		topic: function() {
-			return(new MM()).require('test');
+			return (new MM()).require('test');
 		},
 		'then i get the module': function(m) {
 			assert.isObject(m);

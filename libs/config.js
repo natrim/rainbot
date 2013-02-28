@@ -3,7 +3,7 @@ function Config() {
 }
 
 Config.prototype.extend = function(config) {
-	for(var p in config) {
+	for (var p in config) {
 		this[p] = config[p];
 	}
 
@@ -13,7 +13,7 @@ Config.prototype.extend = function(config) {
 module.exports.Config = Config;
 module.exports.create = function(config) {
 	var c = new Config();
-	if(typeof config !== 'undefined') {
+	if (typeof config !== 'undefined') {
 		c.extend(config);
 	}
 	return c;

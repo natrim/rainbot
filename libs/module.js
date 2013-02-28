@@ -1,5 +1,5 @@
 function Module(name) {
-	if(typeof name !== 'string' || name === '') {
+	if (typeof name !== 'string' || name === '') {
 		throw new Error('You need to specifify module name!');
 	}
 
@@ -12,7 +12,7 @@ function Module(name) {
 	this.context = null;
 	try {
 		this.fullPath = this._resolvePath();
-	} catch(e) {
+	} catch (e) {
 		this.loadable = false;
 	}
 }
@@ -25,60 +25,60 @@ Module.prototype._resolvePath = function() {
 //called on load
 Module.prototype.init = function init(callback) {
 	var error = null;
-	if(this.loadable) {
+	if (this.loadable) {
 		try {
 			this.context = require(this.fullPath);
 			this.loaded = true;
-		} catch(e) {
+		} catch (e) {
 			error = new Error('Failed loading context of \'' + this.name + '\' module!');
 		}
 	} else {
 		error = new Error('Cannot load context of unloadable \'' + this.name + '\' module!');
 	}
 
-	if(this.loaded) {
+	if (this.loaded) {
 		//self inject new dispatcher if none
-		if(typeof this.dispatcher !== 'object') this.injectDispatcher(new(require('events').EventEmitter)());
+		if (typeof this.dispatcher !== 'object') this.injectDispatcher(new(require('events').EventEmitter)());
 
 		//self inject empty config if none
-		if(typeof this.config !== 'object') this.injectConfig(new(require(LIBS_DIR + '/config').Config)());
+		if (typeof this.config !== 'object') this.injectConfig(new(require(LIBS_DIR + '/config').Config)());
 
 		//init the context
-		if(typeof this.context.init === 'function') this.context.init.apply(this);
+		if (typeof this.context.init === 'function') this.context.init.apply(this);
 	}
 
-	if(callback) callback(error, this);
-	else if(error) throw error;
+	if (callback) callback(error, this);
+	else if (error) throw error;
 };
 
 //called on unload
 Module.prototype.halt = function halt(callback) {
-	if(this.loaded && typeof this.context.halt === 'function') this.context.halt.apply(this);
+	if (this.loaded && typeof this.context.halt === 'function') this.context.halt.apply(this);
 	//remove from node require cache
-	if(this.loaded) delete require.cache[this.fullPath];
+	if (this.loaded) delete require.cache[this.fullPath];
 
 	//and remove all listeners
-	if(this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
+	if (this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
 
 	//callback
-	if(callback) callback(null, this);
+	if (callback) callback(null, this);
 };
 
 Module.prototype.injectConfig = function(config, callback) {
 	this.config = config;
-	if(callback) callback(null, this);
+	if (callback) callback(null, this);
 };
 
 Module.prototype.injectModuleManager = function(mm, callback) {
 	this.mm = this.moduleManager = mm;
 	this.require = mm.require;
-	if(callback) callback(null, this);
+	if (callback) callback(null, this);
 };
 
 Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 	var name = this.name;
 	var error = null;
-	if(typeof dispatchBase !== 'object' || dispatchBase === null) {
+	if (typeof dispatchBase !== 'object' || dispatchBase === null) {
 		error = new Error('Wrong dispatcher type for \'' + name + '\' module injected!');
 	} else {
 		var events = [];
@@ -106,7 +106,7 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 			},
 			off: function(event, listener) {
 				events.some(function(obj, i) {
-					if(obj.event == event && obj.listener == listener) {
+					if (obj.event == event && obj.listener == listener) {
 						events.splice(i, 1);
 						return true;
 					}
@@ -116,7 +116,7 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 			},
 			removeListener: function(event, listener) {
 				events.some(function(obj, i) {
-					if(obj.event == event && obj.listener == listener) {
+					if (obj.event == event && obj.listener == listener) {
 						events.splice(i, 1);
 						return true;
 					}
@@ -126,13 +126,13 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 			},
 			emit: function(event) {
 				//all emited events needs to be prefixed by module name
-				if(event.search(name + '/') === -1) {
+				if (event.search(name + '/') === -1) {
 					event = name + '/' + event;
 					arguments[0] = event;
 				}
 				try {
 					dispatchBase.emit.apply(dispatchBase, arguments);
-				} catch(e) {
+				} catch (e) {
 					dispatchBase.emit.call(dispatchBase, 'dispatchError', event, e, this);
 				}
 			},
@@ -170,8 +170,8 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 		};
 	}
 
-	if(callback) callback(error, this.dispatcher, this);
-	else if(error) throw error;
+	if (callback) callback(error, this.dispatcher, this);
+	else if (error) throw error;
 };
 
 module.exports.Module = Module;
