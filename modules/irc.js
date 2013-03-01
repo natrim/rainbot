@@ -59,6 +59,15 @@ IRC.prototype.connect = function(host, port, ssl) {
 		throw new Error('Specify server hostname!');
 	}
 
+	if (this.config.nick instanceof Array && this.config.nick.length > 0) {
+		this.tryNick = this.config.nick.slice(0); //use clone
+	} else {
+		this.tryNick = ['ponbot', 'ponybot', 'a_weird_pony', 'another_ponbot']; //defaults
+		if (typeof this.config.nick === 'string') {
+			this.tryNick.unshift(this.config.nick);
+		}
+	}
+
 	logger.info('CONNECTING TO \'' + this.server + '\'');
 
 	var options = {
@@ -80,17 +89,9 @@ IRC.prototype.connect = function(host, port, ssl) {
 			irc.pass(config.pass);
 		}
 
-		if (config.nick instanceof Array && config.nick.length > 0) {
-			irc.tryNick = config.nick.slice(0); //use clone
-		} else {
-			irc.tryNick = ['ponbot', 'ponybot', 'a_weird_pony', 'another_ponbot']; //defaults
-			if (typeof config.nick === 'string') {
-				irc.tryNick.unshift(config.nick);
-			}
-		}
+		//try first nick
+		irc.nick(irc.tryNick.shift());
 
-		//set first nick
-		irc.nick(irc.tryNick.shift()); //will take care of duplicates later
 		//set username to nick if none given
 		if (!config.username) {
 			config.username = irc.server.currentNick;
@@ -225,6 +226,9 @@ IRC.prototype.processLine = function(line) {
 				//nick already in use
 				if (this.tryNick.length > 0) { //if we still have some nicks then try them
 					this.nick(this.tryNick.shift());
+				} else {
+					logger.error('No free nick found!');
+					this.quit('Nooo...');
 				}
 				break;
 		}
