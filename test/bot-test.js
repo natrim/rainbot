@@ -116,9 +116,7 @@ suite.addBatch({
 				return new BOT().loadModules();
 			},
 			'then i will have only core modules': function(bot) {
-				assert.deepEqual(bot.modules.getModules().map(function(m) {
-					return m.name;
-				}), Object.keys(bot.core_modules));
+				assert.deepEqual(bot.modules.getModules(), Object.keys(bot.core_modules));
 			}
 		},
 		'not existing files': {
