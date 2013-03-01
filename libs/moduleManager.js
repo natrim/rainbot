@@ -1,5 +1,7 @@
 var MODULE = require(LIBS_DIR + '/module').Module;
 
+var logger = require(LIBS_DIR + '/logger');
+
 function ModuleManager(dispatcher, config) {
 	this._modules = {};
 	if (typeof dispatcher === 'object') {
@@ -66,6 +68,8 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 		}
 	}
 
+	logger.debug('Load ' + name + (error ? ' failed' : ' success'));
+
 	if (callback) callback(error, module, this);
 	return this;
 };
@@ -97,6 +101,8 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 			error = new Error('Cannot unload \'' + name + '\' module!');
 		}
 	}
+
+	logger.debug('Unload ' + name + (error ? ' failed' : ' success'));
 
 	if (callback) callback(error, this);
 	return this;
