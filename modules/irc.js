@@ -113,7 +113,13 @@ function IRC(dispatcher, config) {
 			logger.error(err);
 		});
 
+		socket.on('timeout', function() {
+			irc.connected = false;
+			dispatcher.emit.call(dispatcher, 'irc/timeout', irc);
+		});
+
 		socket.on('close', function(had_error) {
+			irc.connected = false;
 			dispatcher.emit.call(dispatcher, 'irc/disconnect', had_error, irc);
 			logger.info('DISCONNECTED' + (had_error ? ' WITH ERROR' : ''));
 		});
