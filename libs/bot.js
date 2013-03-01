@@ -33,7 +33,8 @@ function Bot() {
 
 	//list of core modules
 	this.core_modules = {
-		'irc': true
+		'irc': true,
+		'nickserv': true
 	};
 
 
