@@ -32,6 +32,11 @@ function IRC(dispatcher, config) {
 	}
 
 	this.connect = function(host, port, ssl) {
+		if (irc.connected) {
+			logger.warn('Already connected.');
+			return irc;
+		}
+
 		if (typeof host === 'string') {
 			irc.server.hostname = host;
 		}
@@ -89,7 +94,7 @@ function IRC(dispatcher, config) {
 			//set the user
 			irc.user(config.username, config.realname ? config.realname : config.username, mode);
 
-			//make 1sec delay before connect
+			//make 1sec delay before connect event - just for fun
 			setTimeout(function() {
 				//autojoin
 				irc.tryAutoJoin();
