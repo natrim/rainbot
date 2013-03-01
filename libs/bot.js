@@ -18,7 +18,7 @@ function Bot() {
 	dispatcher.on('newListener', function(event, listener) {
 		var i, name;
 		if (((i = event.indexOf('/')) + 1) && (name = event.substr(0, i))) {
-			if (moduleManager.exists(name)) {
+			if (!moduleManager.exists(name)) {
 				moduleManager.load(name);
 			}
 		}
