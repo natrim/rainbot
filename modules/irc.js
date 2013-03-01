@@ -195,7 +195,7 @@ function IRC(dispatcher, config) {
 					//pingpong heartbeat
 					irc.send('PONG :' + args[0], true);
 					break;
-				case '443':
+				case '433':
 					//nick already in use
 					if (irc.tryNick.length > 0) { //if we still have some nicks then try them
 						irc.nick(irc.tryNick.shift());
