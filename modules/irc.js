@@ -94,14 +94,10 @@ function IRC(dispatcher, config) {
 			//set the user
 			irc.user(config.username, config.realname ? config.realname : config.username, mode);
 
-			//make 1sec delay before connect event - just for fun
-			setTimeout(function() {
-				//autojoin
-				irc.tryAutoJoin();
-
-				//event for other modules
+			//emit the connect event on next tick - just for fun
+			process.nextTick(function() {
 				dispatcher.emit('irc/connect', irc);
-			}, 1000);
+			});
 		});
 
 		socket.setEncoding('ascii');
@@ -179,6 +175,8 @@ function IRC(dispatcher, config) {
 			var args = msg.params.slice(0);
 			args.push(msg.trail);
 
+			var handled = false;
+
 			switch (msg.command) {
 				case 'NOTICE':
 					source.channel = args[0] === irc.server.currentNick ? '' : args[0];
@@ -190,6 +188,8 @@ function IRC(dispatcher, config) {
 					} else {
 						dispatcher.emit('irc/NOTICE', source, text, irc);
 					}
+
+					handled = true;
 					break;
 				case 'PRIVMSG':
 					source.channel = args[0] === irc.server.currentNick ? '' : args[0];
@@ -201,10 +201,17 @@ function IRC(dispatcher, config) {
 					} else {
 						dispatcher.emit('irc/PRIVMSG', source, text, irc);
 					}
+
+					handled = true;
 					break;
 				case 'PING':
 					//pingpong heartbeat
 					irc.send('PONG :' + args[0], true);
+					handled = true;
+					break;
+				case '001':
+					//autojoin
+					irc.tryAutoJoin();
 					break;
 				case '433':
 					//nick already in use
@@ -212,9 +219,9 @@ function IRC(dispatcher, config) {
 						irc.nick(irc.tryNick.shift());
 					}
 					break;
-				default:
-					dispatcher.emit('irc/' + msg.command.toUpperCase(), source, args, irc);
 			}
+
+			if (!handled) dispatcher.emit('irc/' + msg.command.toUpperCase(), source, args, irc);
 		}
 	};
 
