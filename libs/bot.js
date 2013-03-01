@@ -250,16 +250,17 @@ Bot.prototype.unload = function unload(names, callback) {
 	return bot;
 };
 
-Bot.prototype.run = function run() {
+Bot.prototype.run = Bot.prototype.start = function run() {
+	logger.info('Bot initialization starting...');
 	this.emit('init', this);
 	return this;
 };
 
-Bot.prototype.end = function end() {
-	//halt event is emitted on process 'exit'
-	process.nextTick(function() {
-		process.exit(0);
-	});
+Bot.prototype.end = Bot.prototype.stop = function end() {
+	this.halting = true;
+	this.emit('halt', this);
+	logger.info('Exiting ...');
+	setTimeout(process.exit, 1000);
 };
 
 module.exports.Bot = Bot;
