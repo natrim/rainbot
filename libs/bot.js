@@ -130,6 +130,11 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 	else if (error) throw error;
 
 	logger.info('Config loaded!');
+
+	if (logger && typeof bot.config.bot.debug === 'boolean') {
+		logger.debugging = bot.config.bot.debug;
+	}
+
 	return bot;
 };
 

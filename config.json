@@ -1,7 +1,8 @@
 {
 	"bot": {
 		"name": "IRC-PONY",
-		"modules": "modules.json"
+		"modules": "modules.json",
+		"debug": false
 	},
 	"irc": {
 		"hostname": "irc.ponychat.net",
