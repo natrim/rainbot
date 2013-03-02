@@ -1,3 +1,5 @@
+var logger = require(LIBS_DIR + '/logger');
+
 function Module(name) {
 	if (typeof name !== 'string' || name === '') {
 		throw new Error('You need to specifify module name!');
@@ -47,6 +49,8 @@ Module.prototype.init = function init(callback) {
 		if (typeof this.context.init === 'function') this.context.init.apply(this);
 	}
 
+	logger.debug('Init of ' + this.name + (error ? ' failed' : ' success'));
+
 	if (callback) callback(error, this);
 	else if (error) throw error;
 };
@@ -62,17 +66,23 @@ Module.prototype.halt = function halt(callback) {
 
 	//callback
 	if (callback) callback(null, this);
+
+	logger.debug('Halt of ' + this.name);
 };
 
 Module.prototype.injectConfig = function(config, callback) {
 	this.config = config;
 	if (callback) callback(null, this);
+
+	logger.debug('' + this.name + ' Config inject');
 };
 
 Module.prototype.injectModuleManager = function(mm, callback) {
 	this.mm = this.moduleManager = mm;
 	this.require = mm.require;
 	if (callback) callback(null, this);
+
+	logger.debug('' + this.name + ' MM inject');
 };
 
 Module.prototype.injectDispatcher = function(dispatchBase, callback) {
@@ -170,6 +180,8 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 			return this;
 		};
 	}
+
+	logger.debug('' + this.name + ' dispatcher inject');
 
 	if (callback) callback(error, this.dispatcher, this);
 	else if (error) throw error;
