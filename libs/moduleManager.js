@@ -76,6 +76,9 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 
 ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name, callback) {
 	var error = null;
+	if (name instanceof MODULE) {
+		name = name.name;
+	}
 	if (typeof name !== 'string' || name === '') {
 		error = new Error('Please enter a name!');
 	} else {
