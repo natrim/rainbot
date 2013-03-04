@@ -19,7 +19,9 @@ function Bot() {
 		var i, name;
 		if (((i = event.indexOf('/')) + 1) && (name = event.substr(0, i))) {
 			if (!moduleManager.exists(name)) {
-				moduleManager.load(name);
+				//better to not load modules automagically
+				//moduleManager.load(name);
+				logger.warn('Added new listener (' + event + ') for not loaded module!');
 			}
 		}
 	});
