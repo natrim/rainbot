@@ -438,4 +438,8 @@ exports.halt = function() {
 	if (this.irc._heartbeat) {
 		clearInterval(this.irc._heartbeat);
 	}
+	//quit on module halt
+	if (this.irc.connected) {
+		this.irc.quit('Pony going to sleep...');
+	}
 };
