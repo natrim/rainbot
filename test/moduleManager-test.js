@@ -16,9 +16,9 @@ var M = require(LIBS_DIR + '/module').Module;
 
 var h = require(LIBS_DIR + '/helpers');
 
-//disable file resolving of test modules
+//disable file resolving of test2 module
 M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
-	if (this.name === 'test' || this.name === 'test2') {
+	if (this.name === 'test2') {
 		return MODULES_DIR + '/' + this.fileName;
 	} else {
 		return resol.apply(this);
@@ -83,22 +83,22 @@ suite.addBatch({
 				assert.isError(err);
 			}
 		},
-		'test module': {
+		'test2 module callback': {
 			topic: function() {
-				(new MM()).load('test', this.callback);
+				(new MM()).load('test2', this.callback);
 			},
 			'then i get it loaded without context': function(err, module, mm) {
-				assert.equal(err.message, "Failed loading context of 'test' module!");
+				assert.equal(err.message, "Failed loading context of 'test2' module!");
 				//assert.isNull(err);
 				assert.isObject(module);
 				assert.instanceOf(module, M);
-				assert.equal(module.name, 'test');
-				assert.isTrue(mm.has('test'));
-				assert.isObject(mm.get('test'));
+				assert.equal(module.name, 'test2');
+				assert.isTrue(mm.has('test2'));
+				assert.isObject(mm.get('test2'));
 				assert.isNull(module.context);
 			}
 		},
-		'test2 module': {
+		'test2 module return': {
 			topic: function() {
 				return (new MM()).load('test2');
 			},
@@ -170,6 +170,25 @@ suite.addBatch({
 			assert.isObject(m);
 			assert.instanceOf(m, M);
 			assert.equal(m.name, 'test');
+		}
+	},
+	'When i reload': {
+		'not loaded module': {
+			topic: function() {
+				(new MM()).reload('test', this.callback);
+			},
+			'then i get error': function(err, mm) {
+				assert.isObject(err);
+				assert.instanceOf(err, Error);
+			}
+		},
+		'loaded module': {
+			topic: function() {
+				(new MM()).load('test').reload('test', this.callback);
+			},
+			'then i get ok': function(err, mm) {
+				assert.isNull(err);
+			}
 		}
 	}
 

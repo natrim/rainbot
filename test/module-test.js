@@ -15,9 +15,9 @@ var M = require('../libs/module').Module;
 
 var h = require('../libs/helpers');
 
-//disable file resolving of test modules
+//disable file resolving of test2 module
 M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
-	if (this.name === 'test' || this.name === 'test2') {
+	if (this.name === 'test2') {
 		return '../modules/' + this.fileName;
 	} else {
 		return resol.apply(this);
@@ -65,27 +65,27 @@ suite.addBatch({
 	},
 	'When i init unloadable module': {
 		topic: function() {
-			(new M('test')).init();
+			(new M('test2')).init(this.callback);
 		},
-		'then i should get thrown error and not module': function(m) {
-			assert.isObject(m);
-			assert.instanceOf(m, Error);
-			assert.equal(m.message, 'Failed loading context of \'test\' module!');
+		'then i should get thrown error and not module': function(err, m) {
+			assert.isObject(err);
+			assert.instanceOf(err, Error);
+			assert.equal(err.message, 'Failed loading context of \'test2\' module!');
 		}
 	},
 	'When i init loadable module with no file': {
 		topic: function() {
-			(new M('idontexists')).init();
+			(new M('idontexists')).init(this.callback);
 		},
-		'then i should get thrown error and not module': function(m) {
-			assert.isObject(m);
-			assert.instanceOf(m, Error);
-			assert.equal(m.message, 'Cannot load context of unloadable \'idontexists\' module!');
+		'then i should get thrown error and not module': function(err, m) {
+			assert.isObject(err);
+			assert.instanceOf(err, Error);
+			assert.equal(err.message, 'Cannot load context of unloadable \'idontexists\' module!');
 		}
 	},
 	'When i init loadable module': {
 		topic: function() {
-			(new M('irc')).init(this.callback); //irc is built in module
+			(new M('test')).init(this.callback); //irc is built in module
 		},
 		'then i should get module context': function(err, m) {
 			assert.isNull(err);

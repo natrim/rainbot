@@ -15,9 +15,9 @@ var MM = require(LIBS_DIR + '/moduleManager').ModuleManager;
 var M = require(LIBS_DIR + '/module').Module;
 
 var h = require(LIBS_DIR + '/helpers');
-//disable file resolving of test modules
+//disable file resolving of test2 module
 M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
-	if (this.name === 'test' || this.name === 'test2') {
+	if (this.name === 'test2') {
 		return MODULES_DIR + '/' + this.fileName;
 	} else {
 		return resol.apply(this);
@@ -175,30 +175,6 @@ suite.addBatch({
 
 					assert.isTrue(moduleManager.has('test'));
 					assert.isTrue(moduleManager.has('test2'));
-				}
-			}
-		},
-		'directly': {
-			'with callback': {
-				topic: function() {
-					new BOT().load('test', this.callback);
-				},
-				'then i get err and module without context': function(err, module) {
-					assert.equal(err.message, "Failed loading context of 'test' module!");
-					//assert.isNull(err);
-					assert.isObject(module);
-					assert.equal(module.name, 'test');
-				}
-			},
-			'with return': {
-				topic: function() {
-					var b = new BOT();
-					b.load('test');
-					return b;
-				},
-				'and i find it in bot.modules': function(bot) {
-					assert.isTrue(bot.modules.has('test'));
-					assert.isObject(bot.modules.get('test'));
 				}
 			}
 		}
