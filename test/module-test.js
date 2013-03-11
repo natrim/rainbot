@@ -85,7 +85,7 @@ suite.addBatch({
 	},
 	'When i init loadable module': {
 		topic: function() {
-			(new M('test')).init(this.callback); //irc is built in module
+			(new M('test')).init(this.callback);
 		},
 		'then i should get module context': function(err, m) {
 			assert.isNull(err);
@@ -123,6 +123,17 @@ suite.addBatch({
 			assert.include(m, 'on');
 			assert.include(m, 'once');
 			assert.include(m, 'off');
+		}
+	},
+	'When i reload context': {
+		topic: function() {
+			(new M('test')).init().reload(this.callback);
+		},
+		'then i get ok': function(err, m) {
+			assert.isNull(err);
+			assert.isObject(m);
+			assert.equal(m.test_init, "Reload Many ponies!");
+			assert.equal(m.test_halt, "Reloading No ponies!");
 		}
 	}
 });

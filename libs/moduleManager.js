@@ -112,6 +112,30 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 	return this;
 };
 
+//reload module context
+ModuleManager.prototype.reload = function(name, callback) {
+	var mm = this;
+	var error = null;
+
+	var module = this.find(name);
+
+	if (module) {
+		try {
+			module.reload();
+		} catch (e) {
+			error = e;
+		}
+	} else {
+		error = new Error('Module \'' + name + '\' is not loaded!');
+	}
+
+	logger.debug('Reload ' + name + (error ? ' failed' : ' success'));
+
+	if (callback) callback(error, this);
+
+	return this;
+};
+
 ModuleManager.prototype.require = function(name) {
 	if (typeof name !== 'string' || name === '') {
 		return new Error('Please enter a name!');

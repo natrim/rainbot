@@ -11,6 +11,7 @@ function Module(name) {
 	this.fileName = name + ".js";
 	this.loadable = true;
 	this.loaded = false;
+	this.reloading = false;
 	this.context = null;
 	try {
 		this.fullPath = this._resolvePath();
@@ -53,6 +54,8 @@ Module.prototype.init = function init(callback) {
 
 	if (callback) callback(error, this);
 	else if (error) throw error;
+
+	return this;
 };
 
 //called on unload
@@ -61,6 +64,9 @@ Module.prototype.halt = function halt(callback) {
 	//remove from node require cache
 	if (this.loaded) delete require.cache[this.fullPath];
 
+	//reset
+	this.loaded = false;
+
 	//and remove all listeners
 	if (this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
 
@@ -68,6 +74,33 @@ Module.prototype.halt = function halt(callback) {
 	if (callback) callback(null, this);
 
 	logger.debug('Halt of ' + this.name);
+
+	return this;
+};
+
+Module.prototype.reload = function reload(callback) {
+	var error = null;
+	if (this.loaded) {
+		this.reloading = true;
+		if (typeof this.context.halt === 'function') this.context.halt.apply(this);
+		delete require.cache[this.fullPath];
+		this.loaded = false;
+		try {
+			this.context = require(this.fullPath);
+			this.loaded = true;
+		} catch (e) {
+			error = new Error('Failed loading context of \'' + this.name + '\' module!');
+		}
+		if (typeof this.context.init === 'function') this.context.init.apply(this);
+		this.reloading = false;
+	} else {
+		error = new Error('Module \'' + this.name + '\' is not loaded!');
+	}
+
+	if (callback) callback(error, this);
+	else if (error) throw error;
+
+	return this;
 };
 
 Module.prototype.injectConfig = function(config, callback) {
@@ -75,6 +108,8 @@ Module.prototype.injectConfig = function(config, callback) {
 	if (callback) callback(null, this);
 
 	logger.debug('' + this.name + ' Config inject');
+
+	return this;
 };
 
 Module.prototype.injectModuleManager = function(mm, callback) {
@@ -83,6 +118,8 @@ Module.prototype.injectModuleManager = function(mm, callback) {
 	if (callback) callback(null, this);
 
 	logger.debug('' + this.name + ' MM inject');
+
+	return this;
 };
 
 Module.prototype.injectDispatcher = function(dispatchBase, callback) {
@@ -185,6 +222,8 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 
 	if (callback) callback(error, this.dispatcher, this);
 	else if (error) throw error;
+
+	return this;
 };
 
 module.exports.Module = Module;

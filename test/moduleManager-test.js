@@ -83,6 +83,22 @@ suite.addBatch({
 				assert.isError(err);
 			}
 		},
+		'test module': {
+			topic: function() {
+				(new MM()).load('test', this.callback);
+			},
+			'then i get it loaded': function(err, module, mm) {
+				assert.isNull(err);
+				assert.isObject(module);
+				assert.instanceOf(module, M);
+				assert.equal(module.name, 'test');
+				assert.isTrue(module.loaded);
+				assert.isTrue(mm.has('test'));
+				assert.isObject(mm.get('test'));
+				assert.isObject(module.context);
+				assert.equal(module.test_init, "Many ponies!");
+			}
+		},
 		'test2 module callback': {
 			topic: function() {
 				(new MM()).load('test2', this.callback);
@@ -170,6 +186,7 @@ suite.addBatch({
 			assert.isObject(m);
 			assert.instanceOf(m, M);
 			assert.equal(m.name, 'test');
+			assert.equal(m.test_init, "Many ponies!");
 		}
 	},
 	'When i reload': {
@@ -188,6 +205,9 @@ suite.addBatch({
 			},
 			'then i get ok': function(err, mm) {
 				assert.isNull(err);
+				var m = mm.get('test');
+				assert.equal(m.test_init, "Reload Many ponies!");
+				assert.equal(m.test_halt, "Reloading No ponies!");
 			}
 		}
 	}
