@@ -8,6 +8,7 @@ function ModuleManager(dispatcher, config) {
 		this.dispatcher = dispatcher;
 	} else {
 		this.dispatcher = new(require('events').EventEmitter)();
+		this.dispatcher.setMaxListeners(0);
 	}
 	if (typeof config === 'object') {
 		this.config = config;
@@ -101,7 +102,7 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 			//puff it
 			delete this._modules[name];
 		} else {
-			error = new Error('Cannot unload \'' + name + '\' module!');
+			error = new Error('Module \'' + name + '\' is not loaded!');
 		}
 	}
 
