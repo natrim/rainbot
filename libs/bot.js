@@ -5,6 +5,8 @@ global.MODULES_DIR = require('path').resolve(BOT_DIR, 'modules');
 
 var logger = require(LIBS_DIR + '/logger');
 
+process.setMaxListeners(0); //fix the possible memory leak warning, by unlimiting listeners
+
 function Bot() {
 	//events
 	var dispatcher = new(require('events').EventEmitter)();
@@ -41,6 +43,7 @@ function Bot() {
 
 
 	this.halting = false;
+
 	//bind to exit event of main process
 	var bot = this;
 	process.on('exit', function() {
