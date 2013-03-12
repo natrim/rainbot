@@ -399,7 +399,9 @@ IRC.prototype.tryAutoJoin = function() {
 
 exports.IRC = IRC;
 
-exports.init = function() {
+exports.init = function(reload) {
+	if (reload) return; //do nothing on context reload
+
 	this.irc = new IRC(this.dispatcher, this.config);
 
 	var module = this;
@@ -425,7 +427,9 @@ exports.init = function() {
 	});
 };
 
-exports.halt = function() {
+exports.halt = function(reload) {
+	if (reload) return; //do nothing on context reload
+
 	//stop heartbeat
 	if (this.irc._heartbeat) {
 		clearInterval(this.irc._heartbeat);
