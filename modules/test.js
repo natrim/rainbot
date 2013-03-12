@@ -2,8 +2,8 @@
 
 module.exports.test = "Pony";
 
-module.exports.init = function() {
-	if (this.reloading) {
+module.exports.init = function(reloading) {
+	if (reloading) {
 		this.test_init = "Reload Many ponies!";
 	} else {
 		this.test_init = "Many ponies!";

@@ -47,10 +47,10 @@ Module.prototype.init = function init(callback) {
 		if (typeof this.config !== 'object') this.injectConfig(new(require(LIBS_DIR + '/config').Config)());
 
 		//init the context
-		if (typeof this.context.init === 'function') this.context.init.apply(this);
+		if (typeof this.context.init === 'function') this.context.init.call(this, false);
 	}
 
-	logger.debug('Init of ' + this.name + (error ? ' failed' : ' success'));
+	logger.debug('Init of ' + this.name + ' module' + (error ? ' failed' : ' is success') + '.');
 
 	if (callback) callback(error, this);
 	else if (error) throw error;
@@ -60,7 +60,7 @@ Module.prototype.init = function init(callback) {
 
 //called on unload
 Module.prototype.halt = function halt(callback) {
-	if (this.loaded && typeof this.context.halt === 'function') this.context.halt.apply(this);
+	if (this.loaded && typeof this.context.halt === 'function') this.context.halt.call(this, false);
 	//remove from node require cache
 	if (this.loaded) delete require.cache[this.fullPath];
 
@@ -73,7 +73,7 @@ Module.prototype.halt = function halt(callback) {
 	//callback
 	if (callback) callback(null, this);
 
-	logger.debug('Halt of ' + this.name);
+	logger.debug('Halt of ' + this.name + ' module.');
 
 	return this;
 };
@@ -82,7 +82,7 @@ Module.prototype.reload = function reload(callback) {
 	var error = null;
 	if (this.loaded) {
 		this.reloading = true;
-		if (typeof this.context.halt === 'function') this.context.halt.apply(this);
+		if (typeof this.context.halt === 'function') this.context.halt.call(this, true);
 		delete require.cache[this.fullPath];
 		this.loaded = false;
 		try {
@@ -91,7 +91,7 @@ Module.prototype.reload = function reload(callback) {
 		} catch (e) {
 			error = new Error('Failed loading context of \'' + this.name + '\' module!');
 		}
-		if (typeof this.context.init === 'function') this.context.init.apply(this);
+		if (typeof this.context.init === 'function') this.context.init.call(this, true);
 		this.reloading = false;
 	} else {
 		error = new Error('Module \'' + this.name + '\' is not loaded!');
@@ -107,7 +107,7 @@ Module.prototype.injectConfig = function(config, callback) {
 	this.config = config;
 	if (callback) callback(null, this);
 
-	logger.debug('' + this.name + ' Config inject');
+	logger.debug('Module ' + this.name + ' Config inject.');
 
 	return this;
 };
@@ -117,7 +117,7 @@ Module.prototype.injectModuleManager = function(mm, callback) {
 	this.require = mm.require;
 	if (callback) callback(null, this);
 
-	logger.debug('' + this.name + ' MM inject');
+	logger.debug('Module ' + this.name + ' MM inject.');
 
 	return this;
 };
@@ -218,7 +218,7 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 		};
 	}
 
-	logger.debug('' + this.name + ' dispatcher inject');
+	logger.debug('Module ' + this.name + ' dispatcher inject.');
 
 	if (callback) callback(error, this.dispatcher, this);
 	else if (error) throw error;
