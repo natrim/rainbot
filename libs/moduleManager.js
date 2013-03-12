@@ -69,7 +69,7 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 		}
 	}
 
-	logger.debug('Load ' + name + (error ? ' failed' : ' success'));
+	logger.debug('Load of \'' + name + '\' module' + (error ? ' failed' : ' is success') + '.');
 
 	if (callback) callback(error, module, this);
 	return this;
@@ -106,7 +106,7 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 		}
 	}
 
-	logger.debug('Unload ' + name + (error ? ' failed' : ' success'));
+	logger.debug('Unload of \'' + name + '\' module' + (error ? ' failed' : ' is success') + '.');
 
 	if (callback) callback(error, this);
 	return this;
@@ -129,7 +129,7 @@ ModuleManager.prototype.reload = function(name, callback) {
 		error = new Error('Module \'' + name + '\' is not loaded!');
 	}
 
-	logger.debug('Reload ' + name + (error ? ' failed' : ' success'));
+	logger.debug('Reload of \'' + name + '\' module' + (error ? ' failed' : ' is success') + '.');
 
 	if (callback) callback(error, this);
 

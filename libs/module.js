@@ -50,7 +50,7 @@ Module.prototype.init = function init(callback) {
 		if (typeof this.context.init === 'function') this.context.init.call(this, false);
 	}
 
-	logger.debug('Init of ' + this.name + ' module' + (error ? ' failed' : ' is success') + '.');
+	logger.debug('Init of \'' + this.name + '\' module' + (error ? ' failed' : ' is success') + '.');
 
 	if (callback) callback(error, this);
 	else if (error) throw error;
@@ -73,7 +73,7 @@ Module.prototype.halt = function halt(callback) {
 	//callback
 	if (callback) callback(null, this);
 
-	logger.debug('Halt of ' + this.name + ' module.');
+	logger.debug('Halt of \'' + this.name + '\' module.');
 
 	return this;
 };
@@ -107,7 +107,7 @@ Module.prototype.injectConfig = function(config, callback) {
 	this.config = config;
 	if (callback) callback(null, this);
 
-	logger.debug('Module ' + this.name + ' Config inject.');
+	logger.debug('Module \'' + this.name + '\' Config inject.');
 
 	return this;
 };
@@ -117,7 +117,7 @@ Module.prototype.injectModuleManager = function(mm, callback) {
 	this.require = mm.require;
 	if (callback) callback(null, this);
 
-	logger.debug('Module ' + this.name + ' MM inject.');
+	logger.debug('Module \'' + this.name + '\' MM inject.');
 
 	return this;
 };
@@ -218,7 +218,7 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 		};
 	}
 
-	logger.debug('Module ' + this.name + ' dispatcher inject.');
+	logger.debug('Module \'' + this.name + '\' dispatcher inject.');
 
 	if (callback) callback(error, this.dispatcher, this);
 	else if (error) throw error;
