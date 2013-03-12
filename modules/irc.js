@@ -311,14 +311,6 @@ IRC.prototype.names = function(channel) {
 	return this.command(null, 'NAMES', channel, null);
 };
 
-IRC.prototype.list = function() {
-	return this.command(null, 'LIST');
-};
-
-IRC.prototype.motd = function() {
-	return this.command(null, 'MOTD');
-};
-
 IRC.prototype.topic = function(channel, topic) {
 	topic = topic || null;
 	return this.command(null, 'TOPIC', channel, topic);
