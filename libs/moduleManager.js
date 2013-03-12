@@ -50,22 +50,32 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 	} else if (this.exists(name)) {
 		module = this.get(name);
 	} else {
-		module = new MODULE(name);
-		if (typeof module === 'object' && module.loadable) {
-			if (typeof module.injectModuleManager === 'function') module.injectModuleManager(this);
-			if (typeof module.injectConfig === 'function') module.injectConfig(require(LIBS_DIR + '/config').create(this.config[name]));
-			if (typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
-
-			this._modules[name] = module;
-
-			try {
-				if (typeof module.init === 'function') module.init();
-			} catch (e) {
-				error = e;
-			}
+		if (typeof this[name] !== 'undefined') {
+			error = new Error('Reserved module name! Please rename your module!');
 		} else {
-			error = new Error('Cannot load \'' + name + '\' module!');
-			module = null;
+			module = new MODULE(name);
+			if (typeof module === 'object' && module.loadable) {
+				if (typeof module.injectModuleManager === 'function') module.injectModuleManager(this);
+				if (typeof module.injectConfig === 'function') module.injectConfig(require(LIBS_DIR + '/config').create(this.config[name]));
+				if (typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
+
+				this._modules[name] = module;
+
+				//add as property
+				Object.defineProperty(this, name, {
+					configurable: true,
+					value: module
+				});
+
+				try {
+					if (typeof module.init === 'function') module.init();
+				} catch (e) {
+					error = e;
+				}
+			} else {
+				error = new Error('Cannot load \'' + name + '\' module!');
+				module = null;
+			}
 		}
 	}
 
@@ -101,6 +111,7 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 
 			//puff it
 			delete this._modules[name];
+			if (this[name] === module) delete this[name];
 		} else {
 			error = new Error('Module \'' + name + '\' is not loaded!');
 		}

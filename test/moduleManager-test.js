@@ -95,6 +95,7 @@ suite.addBatch({
 				assert.isTrue(module.loaded);
 				assert.isTrue(mm.has('test'));
 				assert.isObject(mm.get('test'));
+				assert.isObject(mm.test);
 				assert.isObject(module.context);
 				assert.equal(module.test_init, "Many ponies!");
 			}
@@ -158,6 +159,7 @@ suite.addBatch({
 				'and itz gone': function(err, mm) {
 					assert.isNull(err);
 					assert.isFalse(mm.has('test'));
+					assert.isUndefined(mm.test);
 				}
 			}
 		},
