@@ -1,5 +1,4 @@
-function Source(irc, nick, user, host) {
-	this.irc = irc;
+function Source(nick, user, host) {
 	this.nick = nick;
 	this.user = user;
 	this.host = host;
@@ -10,10 +9,10 @@ Source.prototype.valueOf = Source.prototype.toString = function() {
 	return this.nick + (this.host ? (this.user ? '!' + this.user : '') + '@' + this.host : '');
 };
 
-Source.fromString = function(irc, string) {
+Source.fromString = function(string) {
 	var m = string.match(/^([^ !@]+)(?:(?:!([^ @]+))?@([^ ]+))?$/);
 	if (m) {
-		return new Source(irc, m[1], m[2], m[3]);
+		return new Source(m[1], m[2], m[3]);
 	} else {
 		return null;
 	}

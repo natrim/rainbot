@@ -171,7 +171,10 @@ IRC.prototype.processLine = function(line) {
 	var source, text;
 
 	if (msg.prefix) {
-		source = Source.fromString(this, msg.prefix);
+		source = Source.fromString(msg.prefix);
+		Object.defineProperty(source, 'irc', {
+			value: this
+		});
 	}
 
 	if (msg.command) {
