@@ -406,6 +406,14 @@ exports.init = function(reload) {
 
 	var module = this;
 
+	//export functions
+	require(LIBS_DIR + '/helpers').export(module, module.irc, ['command', 'join', 'part', 'connect', 'quit', 'nick', 'ctcp', 'action', 'notice', 'privMsg', 'names', 'topic']);
+	Object.defineProperty(this, 'connected', {
+		get: function() {
+			return module.irc.connected;
+		}
+	});
+
 	//connect to server on bot init
 	this.on('init', function() {
 		module.irc.connect(module.config.hostname || module.config.host || module.config.server, module.config.port, module.config.ssl || module.config.secured);
