@@ -9,7 +9,7 @@ exports.init = function() {
 	var config = this.config;
 
 	function identify(source, msg) {
-		if (source.nick === 'NickServ' && !source.channel) {
+		if (source.nick === 'NickServ' && !source.channel) { //if direct message from NS
 			if (msg.match(/^This nickname is registered/)) {
 				module.emit('nickserv/identify');
 				if (config.password.trim() !== '') source.reply('IDENTIFY ' + config.password);
@@ -19,5 +19,9 @@ exports.init = function() {
 		}
 	}
 
+	//irc is core module so no need to load it
+	//this.require('irc');
+
+	//bind on messages
 	this.on('irc/NOTICE', identify).on('irc/PRIVMSG', identify);
 };
