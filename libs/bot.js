@@ -255,6 +255,24 @@ Bot.prototype.unload = function unload(names, callback) {
 	return bot;
 };
 
+Bot.prototype.reload = function reload(names, callback) {
+	var bot = this;
+
+	if (!(names instanceof Array)) {
+		names = [names];
+	}
+
+	var recallback = callback ? function(err, mm) {
+			callback(err, mm, bot);
+		} : undefined;
+
+	names.forEach(function(name) {
+		bot.modules.reload(name, recallback);
+	});
+
+	return bot;
+};
+
 Bot.prototype.run = Bot.prototype.start = function run() {
 	logger.info('Bot initialization starting...');
 	this.emit('init', this);
