@@ -24,14 +24,25 @@ M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
 	}
 });
 
+//isError assert
+assert.isError = function(val) {
+	assert.isObject(val);
+	assert.instanceOf(val, Error);
+};
+
+//osModule
+assert.isModule = function(m) {
+	assert.isObject(m);
+	assert.instanceOf(m, M);
+};
+
 suite.addBatch({
 	'When i construct class': {
 		topic: function() {
 			return new M('test');
 		},
-		'then i get Module class': function(context) {
-			assert.isObject(context);
-			assert.instanceOf(context, M);
+		'then i get Module class': function(m) {
+			assert.isModule(m);
 		},
 		'with module name': function(m) {
 			assert.isObject(m);
@@ -48,15 +59,14 @@ suite.addBatch({
 			return new M();
 		},
 		'then i should get thrown error and not module': function(m) {
-			assert.isObject(m);
-			assert.instanceOf(m, Error);
+			assert.isError(m);
 		}
 	},
 	'When i construct module with nonexistent file': {
 		topic: function() {
 			return new M('idontexists');
 		},
-		'then i should get non loadable module': function(m) {
+		'then i should get unloadable module': function(m) {
 			assert.isObject(m);
 			assert.equal(m.name, 'idontexists');
 			assert.isFalse(m.loadable);
@@ -64,34 +74,61 @@ suite.addBatch({
 		}
 	},
 	'When i init unloadable module': {
-		topic: function() {
-			(new M('test2')).init(this.callback);
+		'callback': {
+			topic: function() {
+				var m = (new M('idontexists'));
+				m.init(this.callback);
+			},
+			'then i stays unloaded': function(err, m) {
+				assert.isNull(err);
+				assert.isFalse(m.loaded);
+			}
 		},
-		'then i should get thrown error and not module': function(err, m) {
-			assert.isObject(err);
-			assert.instanceOf(err, Error);
-			assert.equal(err.message, 'Failed loading context of \'test2\' module!');
+		'return': {
+			topic: function() {
+				var m = (new M('idontexists'));
+				return m.init();
+			},
+			'then i stays unloaded': function(m) {
+				assert.isModule(m);
+				assert.isFalse(m.loaded);
+			}
 		}
 	},
-	'When i init loadable module with no file': {
-		topic: function() {
-			(new M('idontexists')).init(this.callback);
+	'When i init broken module': {
+		'callback': {
+			topic: function() {
+				var m = (new M('test2'));
+				m.init(this.callback);
+			},
+			'then i get error': function(err, m) {
+				assert.isError(err);
+				assert.equal(err.message, 'Failed loading context of \'test2\' module! Cannot find module \'../modules/test2.js\'');
+			}
 		},
-		'then i should get thrown error and not module': function(err, m) {
-			assert.isObject(err);
-			assert.instanceOf(err, Error);
-			assert.equal(err.message, 'Cannot load context of unloadable \'idontexists\' module!');
+		'return': {
+			topic: function() {
+				var m = (new M('test2'));
+				return m.init();
+			},
+			'then i get error': function(err) {
+				assert.isError(err);
+				assert.equal(err.message, 'Failed loading context of \'test2\' module! Cannot find module \'../modules/test2.js\'');
+			}
 		}
 	},
-	'When i init loadable module': {
+	'When i init loadable module callback': {
 		topic: function() {
 			(new M('test')).init(this.callback);
 		},
 		'then i should get module context': function(err, m) {
 			assert.isNull(err);
-			assert.isObject(m);
+			assert.isModule(m);
+			assert.isTrue(m.loadable);
 			assert.isTrue(m.loaded);
 			assert.isObject(m.context);
+			assert.equal(m.context.test, 'Pony');
+			assert.equal(m.test_init, 'Many ponies!');
 		},
 		'and dispatcher': function(err, m) {
 			assert.isObject(m.dispatcher);
@@ -111,6 +148,21 @@ suite.addBatch({
 			assert.instanceOf(m.config, require(LIBS_DIR + '/config').Config);
 		}
 	},
+	'When i init loadable module return': {
+		topic: function() {
+			return (new M('test')).init();
+		},
+		'then ok': function(m) {
+			assert.isModule(m);
+			assert.equal(m.name, 'test');
+			assert.isTrue(m.loadable);
+			assert.isTrue(m.loaded);
+			assert.isObject(m.context);
+			assert.equal(m.context.test, 'Pony');
+			assert.equal(m.test_init, 'Many ponies!');
+		}
+	},
+
 	'When i inject EventEmitter': {
 		topic: function() {
 			(new M('test')).injectDispatcher(new(require('events').EventEmitter)(), this.callback);
@@ -125,15 +177,83 @@ suite.addBatch({
 			assert.include(m, 'off');
 		}
 	},
-	'When i reload context': {
-		topic: function() {
-			(new M('test')).init().reload(this.callback);
+	'When i halt': {
+		'loaded module return': {
+			topic: function() {
+				return (new M('test')).init().halt();
+			},
+			'then it unloads': function(m) {
+				assert.isObject(m);
+				assert.equal(m.name, 'test');
+				assert.isTrue(m.loadable);
+				assert.isFalse(m.loaded);
+			}
 		},
-		'then i get ok': function(err, m) {
-			assert.isNull(err);
-			assert.isObject(m);
-			assert.equal(m.test_init, "Reload Many ponies!");
-			assert.equal(m.test_halt, "Reloading No ponies!");
+		'unloadable module return': {
+			topic: function() {
+				return (new M('idontexists')).init().halt();
+			},
+			'then nothing happens': function(err, m) {
+				assert.isObject(m);
+				assert.equal(m.name, 'idontexists');
+				assert.isFalse(m.loadable);
+				assert.isFalse(m.loaded);
+			}
+		},
+		'loaded module callback': {
+			topic: function() {
+				(new M('test')).init().halt(this.callback);
+			},
+			'then it unloads': function(err, m) {
+				assert.isNull(err);
+				assert.isObject(m);
+				assert.equal(m.name, 'test');
+				assert.isTrue(m.loadable);
+				assert.isFalse(m.loaded);
+			}
+		},
+		'unloadable module callback': {
+			topic: function() {
+				(new M('idontexists')).init().halt(this.callback);
+			},
+			'then nothing happens': function(err, m) {
+				assert.isNull(err);
+				assert.isObject(m);
+				assert.equal(m.name, 'idontexists');
+				assert.isFalse(m.loadable);
+				assert.isFalse(m.loaded);
+			}
+		}
+	},
+	'When i reload context': {
+		'of loadable module': {
+			topic: function() {
+				(new M('test')).init().reload(this.callback);
+			},
+			'then i get ok': function(err, m) {
+				assert.isNull(err);
+				assert.isModule(m);
+				assert.equal(m.test_init, 'Reload Many ponies!');
+				assert.equal(m.test_halt, 'Reloading No ponies!');
+			}
+		},
+		'of not loaded loadable module': {
+			topic: function() {
+				(new M('test')).reload(this.callback);
+			},
+			'then i get error': function(err, m) {
+				assert.isError(err);
+				assert.equal(err.message, 'Module \'test\' is not loaded!');
+			}
+		},
+		'of unloadable module': {
+			topic: function() {
+				(new M('idontexists')).init().reload(this.callback);
+			},
+			'then i get error': function(err, m) {
+				assert.isError(err);
+				assert.equal(err.message, 'Module \'idontexists\' is not loadable!');
+			}
 		}
 	}
 });
