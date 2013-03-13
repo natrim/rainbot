@@ -33,7 +33,7 @@ Module.prototype.init = function init(callback) {
 			this.context = require(this.fullPath);
 			this.loaded = true;
 		} catch (e) {
-			error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e);
+			error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e.message);
 		}
 	}
 
@@ -102,9 +102,12 @@ Module.prototype.reload = function reload(callback) {
 			this.context = require(this.fullPath);
 			this.loaded = true;
 		} catch (e) {
-			error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e);
+			error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e.message);
 		}
-		if (typeof this.context.init === 'function') this.context.init.call(this, true);
+		if (this.loaded) {
+			if (typeof this.context.init === 'function') this.context.init.call(this, true);
+		}
+
 		this.reloading = false;
 	} else if (this.loadable) {
 		error = new Error('Module \'' + this.name + '\' is not loaded!');
