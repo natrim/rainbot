@@ -173,13 +173,19 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 				dispatchBase.removeListener(event, listener);
 			},
 			emit: function(event) {
+				var args = [];
 				//all emited events needs to be prefixed by module name
 				if (event.search(name + '/') === -1) {
+					for (var val in arguments) {
+						args.push(val);
+					}
 					event = name + '/' + event;
-					arguments[0] = event;
+					args[0] = event;
+				} else {
+					args = arguments;
 				}
 				try {
-					dispatchBase.emit.apply(dispatchBase, arguments);
+					dispatchBase.emit.apply(dispatchBase, args);
 				} catch (e) {
 					dispatchBase.emit.call(dispatchBase, 'dispatchError', event, e, module);
 				}
