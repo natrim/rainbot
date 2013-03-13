@@ -62,6 +62,11 @@ Module.prototype.init = function init(callback) {
 Module.prototype.halt = function halt(callback) {
 	if (this.loaded && typeof this.context.halt === 'function') this.context.halt.call(this, false);
 	//remove from node require cache
+	var module = require.cache[this.fullPath];
+
+	module.children.forEach(function(m) {
+		delete require.cache[m.id];
+	});
 	if (this.loaded) delete require.cache[this.fullPath];
 
 	//reset
@@ -82,9 +87,18 @@ Module.prototype.reload = function reload(callback) {
 	var error = null;
 	if (this.loaded) {
 		this.reloading = true;
+
 		if (typeof this.context.halt === 'function') this.context.halt.call(this, true);
+		var module = require.cache[this.fullPath];
+
+		module.children.forEach(function(m) {
+			delete require.cache[m.id];
+		});
+
 		delete require.cache[this.fullPath];
 		this.loaded = false;
+		if (this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
+
 		try {
 			this.context = require(this.fullPath);
 			this.loaded = true;
