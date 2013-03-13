@@ -82,6 +82,7 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 	logger.debug('Load of \'' + name + '\' module' + (error ? ' failed' : ' is success') + '.');
 
 	if (callback) callback(error, module, this);
+	else if (error) throw error;
 	return this;
 };
 
@@ -120,6 +121,7 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 	logger.debug('Unload of \'' + name + '\' module' + (error ? ' failed' : ' is success') + '.');
 
 	if (callback) callback(error, this);
+	else if (error) throw error;
 	return this;
 };
 
@@ -143,13 +145,14 @@ ModuleManager.prototype.reload = function(name, callback) {
 	logger.debug('Reload of \'' + name + '\' module' + (error ? ' failed' : ' is success') + '.');
 
 	if (callback) callback(error, this);
+	else if (error) throw error;
 
 	return this;
 };
 
 ModuleManager.prototype.require = function(name) {
 	if (typeof name !== 'string' || name === '') {
-		return new Error('Please enter a name!');
+		throw new Error('Please enter a name!');
 	} else if (!this.exists(name)) {
 		this.load(name);
 	}
