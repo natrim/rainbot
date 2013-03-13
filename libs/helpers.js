@@ -48,3 +48,16 @@ module.exports.wrap = function(func, wrapper) {
 		return wrapper.apply(this, args);
 	};
 };
+
+/**
+ * Exports functions passed in array
+ * @param  {object} to   destinations object
+ * @param  {object} from source object
+ * @param  {array} list list of function names to export
+ * @return {void} nothing
+ */
+module.exports.export = function(to, from, list) {
+	list.forEach(function(p) {
+		if (typeof from[p] === "function") to[p] = from[p].bind(from);
+	});
+};
