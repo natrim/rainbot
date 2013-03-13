@@ -35,8 +35,6 @@ Module.prototype.init = function init(callback) {
 		} catch (e) {
 			error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e);
 		}
-	} else {
-		error = new Error('Cannot load context of unloadable \'' + this.name + '\' module!');
 	}
 
 	if (this.loaded) {
@@ -71,14 +69,15 @@ Module.prototype.halt = function halt(callback) {
 
 	//reset
 	this.loaded = false;
+	this.context = null;
 
 	//and remove all listeners
 	if (this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
 
+	logger.debug('Halt of \'' + this.name + '\' module.');
+
 	//callback
 	if (callback) callback(null, this);
-
-	logger.debug('Halt of \'' + this.name + '\' module.');
 
 	return this;
 };
@@ -107,8 +106,10 @@ Module.prototype.reload = function reload(callback) {
 		}
 		if (typeof this.context.init === 'function') this.context.init.call(this, true);
 		this.reloading = false;
-	} else {
+	} else if (this.loadable) {
 		error = new Error('Module \'' + this.name + '\' is not loaded!');
+	} else {
+		error = new Error('Module \'' + this.name + '\' is not loadable!');
 	}
 
 	if (callback) callback(error, this);
