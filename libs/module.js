@@ -114,7 +114,7 @@ Module.prototype.injectConfig = function(config, callback) {
 
 Module.prototype.injectModuleManager = function(mm, callback) {
 	this.mm = this.moduleManager = mm;
-	this.require = mm.require;
+	this.require = mm.require.bind(mm);
 	if (callback) callback(null, this);
 
 	logger.debug('Module \'' + this.name + '\' MM inject.');
