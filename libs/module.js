@@ -9,14 +9,13 @@ function Module(name) {
 
 	this.name = name;
 	this.fileName = name + ".js";
-	this.loadable = true;
 	this.loaded = false;
 	this.reloading = false;
 	this.context = null;
 	try {
 		this.fullPath = this._resolvePath();
 	} catch (e) {
-		this.loadable = false;
+		throw new Error('Module \'' + name + '\' does not exists in MODULE_DIR!');
 	}
 }
 
@@ -28,13 +27,11 @@ Module.prototype._resolvePath = function() {
 //called on load
 Module.prototype.init = function init(callback) {
 	var error = null;
-	if (this.loadable) {
-		try {
-			this.context = require(this.fullPath);
-			this.loaded = true;
-		} catch (e) {
-			error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e.message);
-		}
+	try {
+		this.context = require(this.fullPath);
+		this.loaded = true;
+	} catch (e) {
+		error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e.message);
 	}
 
 	if (this.loaded) {
@@ -113,10 +110,8 @@ Module.prototype.reload = function reload(callback) {
 		}
 
 		this.reloading = false;
-	} else if (this.loadable) {
-		error = new Error('Module \'' + this.name + '\' is not loaded!');
 	} else {
-		error = new Error('Module \'' + this.name + '\' is not loadable!');
+		error = new Error('Module \'' + this.name + '\' is not loaded!');
 	}
 
 	if (callback) callback(error, this);
