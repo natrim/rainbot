@@ -97,7 +97,7 @@ suite.addBatch({
 				assert.isObject(mm.get('test'));
 				assert.isObject(mm.test);
 				assert.isObject(module.context);
-				assert.equal(module.test_init, "Many ponies!");
+				assert.equal(module.test_init, 'Many ponies!');
 			}
 		},
 		'test2 module callback': {
@@ -105,27 +105,33 @@ suite.addBatch({
 				(new MM()).load('test2', this.callback);
 			},
 			'then i get it loaded without context': function(err, module, mm) {
-				assert.equal(err.message, "Failed loading context of 'test2' module!");
 				//assert.isNull(err);
+				assert.isError(err);
+				assert.equal(err.message, 'Failed loading context of \'test2\' module! Cannot find module \'../modules/test2.js\'');
 				assert.isObject(module);
 				assert.instanceOf(module, M);
 				assert.equal(module.name, 'test2');
 				assert.isTrue(mm.has('test2'));
 				assert.isObject(mm.get('test2'));
+				assert.isFalse(module.loaded);
 				assert.isNull(module.context);
 			}
 		},
 		'test2 module return': {
 			topic: function() {
-				return (new MM()).load('test2');
+				this.mm = (new MM());
+				return this.mm.load('test2');
 			},
-			'then i get it loaded without context': function(mm) {
+			'then i get it loaded without context': function(err) {
+				assert.isError(err);
+				var mm = this.mm;
 				assert.isObject(mm);
 				assert.isTrue(mm.has('test2'));
 				assert.isObject(mm.find('test2'));
 				assert.instanceOf(mm.find('test2'), M);
 				assert.equal(mm.find('test2').name, 'test2');
 				assert.isNull(mm.find('test2').context);
+				assert.isFalse(mm.find('test2').loaded);
 			}
 		}
 	},
@@ -165,13 +171,13 @@ suite.addBatch({
 		},
 		'test2 module': {
 			topic: function() {
-				var mm = (new MM());
-				mm.load('test2');
-				return mm;
+				this.mm = (new MM());
+				this.mm.load('test2');
+				return this.mm;
 			},
 			'then i get it unloaded': {
 				topic: function(mm) {
-					return mm.unload('test2');
+					return this.mm.unload('test2');
 				},
 				'and itz gone': function(mm) {
 					assert.isObject(mm);
@@ -188,7 +194,7 @@ suite.addBatch({
 			assert.isObject(m);
 			assert.instanceOf(m, M);
 			assert.equal(m.name, 'test');
-			assert.equal(m.test_init, "Many ponies!");
+			assert.equal(m.test_init, 'Many ponies!');
 		}
 	},
 	'When i reload': {
@@ -208,8 +214,8 @@ suite.addBatch({
 			'then i get ok': function(err, mm) {
 				assert.isNull(err);
 				var m = mm.get('test');
-				assert.equal(m.test_init, "Reload Many ponies!");
-				assert.equal(m.test_halt, "Reloading No ponies!");
+				assert.equal(m.test_init, 'Reload Many ponies!');
+				assert.equal(m.test_halt, 'Reloading No ponies!');
 			}
 		}
 	}

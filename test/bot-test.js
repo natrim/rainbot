@@ -111,9 +111,9 @@ suite.addBatch({
 		}
 	},
 	'When i load modules with': {
-		'defaults': {
+		'empty': {
 			topic: function() {
-				return new BOT().loadModules();
+				return new BOT().loadModules('');
 			},
 			'then i will have only core modules': function(bot) {
 				assert.deepEqual(bot.modules.getModules(), Object.keys(bot.core_modules));
