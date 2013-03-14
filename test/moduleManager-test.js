@@ -100,38 +100,25 @@ suite.addBatch({
 				assert.equal(module.test_init, 'Many ponies!');
 			}
 		},
-		'test2 module callback': {
+		'broken test2 module callback': {
 			topic: function() {
 				(new MM()).load('test2', this.callback);
 			},
-			'then i get it loaded without context': function(err, module, mm) {
-				//assert.isNull(err);
+			'then i get error': function(err, module, mm) {
 				assert.isError(err);
-				assert.equal(err.message, 'Failed loading context of \'test2\' module! Cannot find module \'../modules/test2.js\'');
-				assert.isObject(module);
-				assert.instanceOf(module, M);
-				assert.equal(module.name, 'test2');
-				assert.isTrue(mm.has('test2'));
-				assert.isObject(mm.get('test2'));
-				assert.isFalse(module.loaded);
-				assert.isNull(module.context);
+				assert.equal(err.message, 'Error happened during module initialization: Failed loading context of \'test2\' module! Cannot find module \'../modules/test2.js\'');
+				assert.isNull(module);
+				assert.isFalse(mm.has('test2'));
 			}
 		},
-		'test2 module return': {
+		'broken test2 module return': {
 			topic: function() {
 				this.mm = (new MM());
 				return this.mm.load('test2');
 			},
-			'then i get it loaded without context': function(err) {
+			'then i get err': function(err) {
 				assert.isError(err);
-				var mm = this.mm;
-				assert.isObject(mm);
-				assert.isTrue(mm.has('test2'));
-				assert.isObject(mm.find('test2'));
-				assert.instanceOf(mm.find('test2'), M);
-				assert.equal(mm.find('test2').name, 'test2');
-				assert.isNull(mm.find('test2').context);
-				assert.isFalse(mm.find('test2').loaded);
+				assert.isFalse(this.mm.has('test2'));
 			}
 		}
 	},
@@ -166,22 +153,6 @@ suite.addBatch({
 					assert.isNull(err);
 					assert.isFalse(mm.has('test'));
 					assert.isUndefined(mm.test);
-				}
-			}
-		},
-		'test2 module': {
-			topic: function() {
-				this.mm = (new MM());
-				this.mm.load('test2');
-				return this.mm;
-			},
-			'then i get it unloaded': {
-				topic: function(mm) {
-					return this.mm.unload('test2');
-				},
-				'and itz gone': function(mm) {
-					assert.isObject(mm);
-					assert.isFalse(mm.has('test2'));
 				}
 			}
 		}

@@ -53,24 +53,32 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 		if (typeof this[name] !== 'undefined') {
 			error = new Error('Reserved module name! Please rename your module!');
 		} else {
-			module = new MODULE(name);
-			if (typeof module === 'object' && module.loadable) {
+			try {
+				module = new MODULE(name);
+			} catch (e) {
+				error = new Error('Error happened during module construction: ' + e.message);
+				module = null;
+			}
+			if (module instanceof MODULE) {
 				if (typeof module.injectModuleManager === 'function') module.injectModuleManager(this);
 				if (typeof module.injectConfig === 'function') module.injectConfig(require(LIBS_DIR + '/config').create(this.config[name]));
 				if (typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
 
-				this._modules[name] = module;
-
-				//add as property
-				Object.defineProperty(this, name, {
-					configurable: true,
-					value: module
-				});
-
 				try {
 					if (typeof module.init === 'function') module.init();
 				} catch (e) {
-					error = e;
+					error = new Error('Error happened during module initialization: ' + e.message);
+					module = null;
+				}
+
+				if (!error) {
+					this._modules[name] = module;
+
+					//add as property for quick access
+					Object.defineProperty(this, name, {
+						configurable: true,
+						value: module
+					});
 				}
 			} else {
 				error = new Error('Cannot load \'' + name + '\' module!');
@@ -136,7 +144,7 @@ ModuleManager.prototype.reload = function(name, callback) {
 		try {
 			module.reload();
 		} catch (e) {
-			error = e;
+			error = new Error('Error happened during module reload: ' + e.message);
 		}
 	} else {
 		error = new Error('Module \'' + name + '\' is not loaded!');
