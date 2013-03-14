@@ -128,55 +128,27 @@ suite.addBatch({
 			}
 		},
 		'object': {
-			'one': {
-				topic: function() {
-					new BOT().loadModules({
-						test: true
-					}, this.callback);
-				},
-				'then i get module in list': function(err, moduleManager) {
-					assert.isNull(err);
-
-					assert.isTrue(moduleManager.has('test'));
-				}
+			topic: function() {
+				new BOT().loadModules({
+					test: true
+				}, this.callback);
 			},
-			'more': {
-				topic: function() {
-					new BOT().loadModules({
-						test: true,
-						test2: true
-					}, this.callback);
-				},
-				'then i get module in list': function(err, moduleManager) {
-					assert.isNull(err);
+			'then i get module in list': function(err, moduleManager) {
+				assert.isNull(err);
 
-					assert.isTrue(moduleManager.has('test'));
-					assert.isTrue(moduleManager.has('test2'));
-				}
+				assert.isTrue(moduleManager.has('test'));
 			}
 		},
 		'array': {
-			'one': {
-				topic: function() {
-					new BOT().loadModules(['test'], this.callback);
-				},
-				'then i get module in list': function(err, moduleManager) {
-					assert.isNull(err);
-
-					assert.isTrue(moduleManager.has('test'));
-				}
+			topic: function() {
+				new BOT().loadModules(['test'], this.callback);
 			},
-			'more': {
-				topic: function() {
-					new BOT().loadModules(['test', 'test2'], this.callback);
-				},
-				'then i get module in list': function(err, moduleManager) {
-					assert.isNull(err);
+			'then i get module in list': function(err, moduleManager) {
+				assert.isNull(err);
 
-					assert.isTrue(moduleManager.has('test'));
-					assert.isTrue(moduleManager.has('test2'));
-				}
+				assert.isTrue(moduleManager.has('test'));
 			}
+
 		}
 	}
 });
