@@ -213,7 +213,7 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 
 Bot.prototype.unloadModules = function() {
 	var bot = this;
-	bot.modules.getModules().forEach(function(m) {
+	bot.modules.getModules().reverse().forEach(function(m) {
 		bot.modules.unload(m);
 	});
 	logger.info('Modules unloaded!');
