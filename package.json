@@ -1,6 +1,6 @@
 {
 	"name": "irc-pony",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "Simple js IRC pony bot",
 	"dependencies": {},
 	"devDependencies": {
