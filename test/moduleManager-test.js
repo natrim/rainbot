@@ -173,7 +173,7 @@ suite.addBatch({
 			topic: function() {
 				(new MM()).reload('test', this.callback);
 			},
-			'then i get error': function(err, mm) {
+			'then i get error': function(err, m, mm) {
 				assert.isObject(err);
 				assert.instanceOf(err, Error);
 			}
@@ -182,9 +182,8 @@ suite.addBatch({
 			topic: function() {
 				(new MM()).load('test').reload('test', this.callback);
 			},
-			'then i get ok': function(err, mm) {
+			'then i get ok': function(err, m, mm) {
 				assert.isNull(err);
-				var m = mm.get('test');
 				assert.equal(m.test_init, 'Reload Many ponies!');
 				assert.equal(m.test_halt, 'Reloading No ponies!');
 			}
