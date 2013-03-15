@@ -249,6 +249,10 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 	return this;
 };
 
+Module.prototype.valueOf = Module.prototype.toString = function() {
+	return this.name;
+};
+
 module.exports.Module = Module;
 module.exports.create = function(name) {
 	return new Module(name);
