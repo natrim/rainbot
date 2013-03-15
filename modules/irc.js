@@ -10,11 +10,20 @@ if (!String.prototype.trim) {
 	};
 }
 
-function IRC(dispatcher, config) {
-	this.connected = 0;
+function IRC(server, dispatcher, config) {
+	this.server = server;
+	this.config = config;
+	this.dispatcher = dispatcher;
+
+	Object.defineProperty(this, 'connected', {
+		enumerable: true,
+		get: function() {
+			return server.connected;
+		}
+	});
+
 	this.recvBuffer = '';
 	this.tryNick = [];
-	this.server = new Server();
 
 	//irc client heartbeat ping - because the socket sometimes hangs
 	this._heartbeat = 0;
@@ -24,39 +33,18 @@ function IRC(dispatcher, config) {
 	if (config.heartbeat > 0) {
 		var irc = this;
 		this._heartbeat = setInterval(function() {
-			if (irc.connected) {
+			if (irc.server.connected) {
 				irc.send('PING :' + irc.server.hostname, true);
 			}
 		}, config.heartbeat);
 	}
-
-	this.config = config;
-	this.dispatcher = dispatcher;
 }
 
 
-IRC.prototype.connect = function(host, port, ssl) {
-	if (this.connected) {
+IRC.prototype.connect = function() {
+	if (this.server.connected) {
 		logger.warn('Already connected.');
 		return this;
-	}
-
-	if (typeof host === 'string') {
-		this.server.hostname = host;
-	}
-	if (typeof port === 'number') {
-		this.server.port = port;
-	}
-	if (typeof ssl === 'boolean') {
-		this.server.secured = ssl;
-	}
-	if (typeof this.server.port !== 'number') {
-		this.server.port = 6667;
-	}
-
-	//throw error when hostname not set
-	if (typeof this.server.hostname !== 'string' || this.server.hostname.trim() === '') {
-		throw new Error('Specify server hostname!');
 	}
 
 	if (this.config.nick instanceof Array && this.config.nick.length > 0) {
@@ -81,7 +69,7 @@ IRC.prototype.connect = function(host, port, ssl) {
 	var dispatcher = this.dispatcher;
 
 	var socket = (this.server.secured ? require('tls') : require('net')).connect(options, function() {
-		irc.connected = true;
+		irc.server.connected = true;
 
 		logger.info('CONNECTED');
 
@@ -119,12 +107,12 @@ IRC.prototype.connect = function(host, port, ssl) {
 	});
 
 	socket.on('timeout', function() {
-		irc.connected = false;
+		irc.server.connected = false;
 		dispatcher.emit.call(dispatcher, 'irc/timeout', irc);
 	});
 
 	socket.on('close', function(had_error) {
-		irc.connected = false;
+		irc.server.connected = false;
 		dispatcher.emit.call(dispatcher, 'irc/disconnect', had_error, irc);
 		logger.info('DISCONNECTED' + (had_error ? ' WITH ERROR' : ''));
 	});
@@ -144,8 +132,8 @@ IRC.prototype.connect = function(host, port, ssl) {
 };
 
 IRC.prototype.processData = function(data) {
-	if (!this.connected) {
-		this.connected = true;
+	if (!this.server.connected) {
+		this.server.connected = true;
 	}
 
 	var lines = (this.recvBuffer + data).split("\r\n");
@@ -252,7 +240,7 @@ IRC.prototype.parseLine = function(line) {
 
 
 IRC.prototype.send = function(msg, nolog) {
-	if (!this.connected) { //dont write if no connection
+	if (!this.server.connected) { //dont write if no connection
 		return this;
 	}
 
@@ -267,7 +255,7 @@ IRC.prototype.send = function(msg, nolog) {
 	logger.debug('[SEND]> ' + msg.replace(/\r\n$/, ''));
 
 	if (msg.search(/^QUIT /) !== -1) {
-		this.connected = false;
+		this.server.connected = false;
 		this.server.end(msg);
 	} else {
 		this.server.write(msg);
@@ -403,50 +391,60 @@ IRC.prototype.tryAutoJoin = function() {
 exports.IRC = IRC;
 
 exports.init = function(reload) {
-	if (reload) return; //do nothing on context reload
+	if (!reload) {
+		this.server = new Server(this.config.hostname || this.config.host || this.config.server, this.config.port, this.config.ssl || this.config.secured);
+	}
 
-	this.irc = new IRC(this.dispatcher, this.config);
+	this.irc = new IRC(this.server, this.dispatcher, this.config);
 
 	var module = this;
 
+	if (!reload) {
+		Object.defineProperty(this, 'connected', {
+			enumerable: true,
+			get: function() {
+				return module.server.connected;
+			}
+		});
+		Object.defineProperty(this, 'currentNick', {
+			enumerable: true,
+			get: function() {
+				return module.server.currentNick;
+			}
+		});
+	}
+
 	//export functions
-	require(LIBS_DIR + '/helpers').export(module, module.irc, ['command', 'join', 'part', 'connect', 'quit', 'nick', 'ctcp', 'action', 'notice', 'privMsg', 'names', 'topic']);
-	Object.defineProperty(this, 'connected', {
-		get: function() {
-			return module.irc.connected;
-		}
-	});
+	require(LIBS_DIR + '/helpers').export(this, this.irc, ['command', 'join', 'part', 'connect', 'quit', 'nick', 'ctcp', 'action', 'notice', 'privMsg', 'names', 'topic']);
 
 	//connect to server on bot init
 	this.on('init', function() {
-		module.irc.connect(module.config.hostname || module.config.host || module.config.server, module.config.port, module.config.ssl || module.config.secured);
+		module.irc.connect();
 	});
 
 	//quit irc on bot halt
 	this.on('halt', function() {
-		if (module.irc.server.socket) {
-			if (module.irc.server.secured) {
-				module.irc.server.socket.removeAllListeners('secureConnect');
+		if (module.server.socket) {
+			if (module.server.secured) {
+				module.server.socket.removeAllListeners('secureConnect');
 			} else {
-				module.irc.server.socket.removeAllListeners('connect');
+				module.server.socket.removeAllListeners('connect');
 			}
 		}
 
-		if (module.irc.connected) {
+		if (module.server.connected) {
 			module.irc.quit('Pony kill!');
 		}
 	});
 };
 
 exports.halt = function(reload) {
-	if (reload) return; //do nothing on context reload
-
 	//stop heartbeat
 	if (this.irc._heartbeat) {
 		clearInterval(this.irc._heartbeat);
 	}
 	//quit on module halt
-	if (this.irc.connected) {
+	if (!reload && this.server.connected) {
 		this.irc.quit('Pony going to sleep...');
 	}
 };
