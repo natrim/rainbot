@@ -11,19 +11,6 @@ var FS = require('fs');
 //disable logger
 require(LIBS_DIR + '/logger').enabled = false;
 
-var MM = require(LIBS_DIR + '/moduleManager').ModuleManager;
-var M = require(LIBS_DIR + '/module').Module;
-
-var h = require(LIBS_DIR + '/helpers');
-//disable file resolving of test2 module
-M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
-	if (this.name === 'test2') {
-		return MODULES_DIR + '/' + this.fileName;
-	} else {
-		return resol.apply(this);
-	}
-});
-
 //isError assert
 assert.isError = function(val) {
 	assert.isObject(val);
@@ -108,47 +95,6 @@ suite.addBatch({
 				assert.isObject(config.bot);
 				assert.equal(config.bot.modules, 'dashing.json');
 			}
-		}
-	},
-	'When i load modules with': {
-		'empty': {
-			topic: function() {
-				return new BOT().loadModules('');
-			},
-			'then i will have only core modules': function(bot) {
-				assert.deepEqual(bot.modules.getModules(), Object.keys(bot.core_modules));
-			}
-		},
-		'not existing files': {
-			topic: function() {
-				new BOT().loadModules('not-exist-modules-config.json', this.callback);
-			},
-			'then i get error': function(err, modules) {
-				assert.isError(err);
-			}
-		},
-		'object': {
-			topic: function() {
-				new BOT().loadModules({
-					test: true
-				}, this.callback);
-			},
-			'then i get module in list': function(err, moduleManager) {
-				assert.isNull(err);
-
-				assert.isTrue(moduleManager.has('test'));
-			}
-		},
-		'array': {
-			topic: function() {
-				new BOT().loadModules(['test'], this.callback);
-			},
-			'then i get module in list': function(err, moduleManager) {
-				assert.isNull(err);
-
-				assert.isTrue(moduleManager.has('test'));
-			}
-
 		}
 	}
 });
