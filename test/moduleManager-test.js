@@ -127,7 +127,7 @@ suite.addBatch({
 			topic: function() {
 				(new MM()).unload(undefined, this.callback);
 			},
-			'then i get error': function(err, module) {
+			'then i get error': function(err, name, mm) {
 				assert.isError(err);
 			}
 		},
@@ -135,7 +135,7 @@ suite.addBatch({
 			topic: function() {
 				(new MM()).unload('someunknownpony', this.callback);
 			},
-			'then i get error': function(err, module) {
+			'then i get error': function(err, name, mm) {
 				assert.isError(err);
 			}
 		},
@@ -149,7 +149,7 @@ suite.addBatch({
 				topic: function(mm) {
 					mm.unload('test', this.callback);
 				},
-				'and itz gone': function(err, mm) {
+				'and itz gone': function(err, name, mm) {
 					assert.isNull(err);
 					assert.isFalse(mm.has('test'));
 					assert.isUndefined(mm.test);

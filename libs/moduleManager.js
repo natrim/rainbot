@@ -128,7 +128,7 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 
 	logger.debug('Unload of \'' + name + '\' module' + (error ? ' failed' : ' is success') + '.');
 
-	if (callback) callback(error, this);
+	if (callback) callback(error, name, this);
 	else if (error) throw error;
 	return this;
 };
