@@ -12,6 +12,9 @@ module.exports.init = function() {
 	}, /^quit[ ]?(.*)$/i);
 
 	c.addAction('part', function(source, args) {
+		//m.on('irc/PART', ok);
+		//is not needed as nothing can stop us from parting
+
 		var chans = args[1].match(/#[\w]+/gi);
 		if (chans !== null) {
 			source.respond('ok, ' + source.nick + '!');
@@ -28,6 +31,36 @@ module.exports.init = function() {
 		var chans = args[1].match(/#[\w]+/gi);
 		if (chans !== null) {
 			source.respond('ok, ' + source.nick + '!');
+
+			var fail = function(s, args) {
+				source.mention('joining the channel \'' + args[1] + '\' has failed! ' + args[2]);
+				clean();
+			};
+			var ok = function(s, args) {
+				if (s.nick === irc.currentNick) {
+					source.respond('ok, i joined the channel \'' + args[0] + '\'');
+					clean();
+				}
+			};
+
+			var clean = function() {
+				m.off('irc/405', fail);
+				m.off('irc/471', fail);
+				m.off('irc/473', fail);
+				m.off('irc/474', fail);
+				m.off('irc/475', fail);
+				m.off('irc/JOIN', ok);
+			};
+
+			m.on('irc/405', fail);
+			m.on('irc/471', fail);
+			m.on('irc/473', fail);
+			m.on('irc/474', fail);
+			m.on('irc/475', fail);
+			m.on('irc/JOIN', ok);
+
+			setTimeout(clean, 5000);
+
 			irc.join.apply(irc, chans);
 		} else {
 			source.mention('please specify a channel.');
