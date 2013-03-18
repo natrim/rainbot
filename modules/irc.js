@@ -298,15 +298,6 @@ IRC.prototype.part = function() {
 	return this.command(null, 'PART', Array.prototype.join.call(arguments, ','), null);
 };
 
-IRC.prototype.names = function(channel) {
-	return this.command(null, 'NAMES', channel, null);
-};
-
-IRC.prototype.topic = function(channel, topic) {
-	topic = topic || null;
-	return this.command(null, 'TOPIC', channel, topic);
-};
-
 IRC.prototype.quit = function(message) {
 	return this.command(null, 'QUIT', message || this.config.quitMessage || "Terminating...");
 };
@@ -415,7 +406,7 @@ exports.init = function(reload) {
 	}
 
 	//export functions
-	require(LIBS_DIR + '/helpers').export(this, this.irc, ['command', 'join', 'part', 'connect', 'quit', 'nick', 'ctcp', 'action', 'notice', 'privMsg', 'names', 'topic']);
+	require(LIBS_DIR + '/helpers').export(this, this.irc, ['command', 'join', 'part', 'connect', 'quit', 'nick', 'ctcp', 'action', 'notice', 'privMsg']);
 
 	//connect to server on bot init
 	this.on('init', function() {
