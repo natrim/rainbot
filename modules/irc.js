@@ -24,6 +24,7 @@ function IRC(server, dispatcher, config) {
 
 	this.recvBuffer = '';
 	this.tryNick = [];
+	this.connecting = false;
 
 	//irc client heartbeat ping - because the socket sometimes hangs
 	this._heartbeat = 0;
@@ -55,6 +56,8 @@ IRC.prototype.connect = function() {
 			this.tryNick.unshift(this.config.nick);
 		}
 	}
+
+	this.connecting = true;
 
 	logger.info('CONNECTING TO \'' + this.server + '\'');
 
@@ -209,17 +212,35 @@ IRC.prototype.processLine = function(line) {
 				this.send('PONG :' + args[0], true);
 				handled = true;
 				break;
+			case 'NICK':
+				//nick change
+				if (source.nick === this.server.currentNick) {
+					this.server.currentNick = args[0];
+				}
+				break;
 			case '001':
+				//done connecting
+				this.connecting = false;
 				//autojoin
 				this.tryAutoJoin();
 				break;
+			case '432':
+				//nick change failed
+				if (!this.connecting) {
+					this.privMsg(this.server.lastMsgTo, 'NICK change failed!');
+				}
+				break;
 			case '433':
 				//nick already in use
-				if (this.tryNick.length > 0) { //if we still have some nicks then try them
-					this.nick(this.tryNick.shift());
+				if (this.connecting) {
+					if (this.tryNick.length > 0) { //if we still have some nicks then try them
+						this.nick(this.tryNick.shift());
+					} else {
+						logger.error('No free nick found!');
+						this.quit('Nooo...');
+					}
 				} else {
-					logger.error('No free nick found!');
-					this.quit('Nooo...');
+					this.privMsg(this.server.lastMsgTo, 'NICK change failed! Nick already in use!');
 				}
 				break;
 		}
@@ -277,7 +298,9 @@ IRC.prototype.pass = function(pass) {
 };
 
 IRC.prototype.nick = function(nick) {
-	this.server.currentNick = nick;
+	if (this.connecting) {
+		this.server.currentNick = nick;
+	}
 	return this.command(null, 'NICK', nick, null);
 };
 

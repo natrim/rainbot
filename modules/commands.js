@@ -33,6 +33,16 @@ module.exports.init = function() {
 		}
 	}, /^join([ ]+(.*)|)$/i);
 
+	c.addAction('nick', function(source, args) {
+		var nick = args[2];
+		if (nick) {
+			source.respond('ok, ' + source.nick + ', lemmy try this new name');
+			irc.nick(nick);
+		} else {
+			source.mention('im pretty sure you know my name already, but here it is, only for u: Hello, my name is ' + irc.currentNick);
+		}
+	}, /^nick([ ]+(.*)|)$/i);
+
 	function help(source) {
 		//TODO: display only commands the asking user has persmission to
 		source.mention('available commands are: ' + c.commandDelimiter + Object.keys(c.commands).join(', ' + c.commandDelimiter));
@@ -97,7 +107,7 @@ module.exports.init = function() {
 module.exports.halt = function() {
 	var c = this.require('controls');
 
-	c.removeAction('quit').removeAction('part').removeAction('join');
+	c.removeAction('quit').removeAction('part').removeAction('join').removeAction('nick');
 	c.removeAction('help').removeCommand('help');
 	c.removeAction('lsmod').removeAction('load').removeAction('unload').removeAction('reload');
 };
