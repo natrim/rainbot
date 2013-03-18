@@ -34,8 +34,10 @@ module.exports.init = function() {
 	}, /^join([ ]+(.*)|)$/i);
 
 	function help(source) {
+		//TODO: display only commands the asking user has persmission to
 		source.mention('available commands are: ' + c.commandDelimiter + Object.keys(c.commands).join(', ' + c.commandDelimiter));
-		source.respond('available actions are: ' + Object.keys(c.actions).join(', '));
+		//TODO: display only actions the asking user has persmission to and send them in PRIVMSG
+		//source.respond('available actions are: ' + Object.keys(c.actions).join(', '));
 	}
 
 	c.addCommand('help', help).addAction('help', help, /^help$/);
