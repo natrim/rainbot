@@ -301,7 +301,7 @@ IRC.prototype.nick = function(nick) {
 	if (this.connecting) {
 		this.server.currentNick = nick;
 	}
-	return this.command(null, 'NICK', nick, null);
+	return this.command(null, 'NICK', nick);
 };
 
 IRC.prototype.user = function(username, realname, mode) {
