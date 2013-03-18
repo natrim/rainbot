@@ -254,12 +254,7 @@ IRC.prototype.send = function(msg, nolog) {
 
 	logger.debug('[SEND]> ' + msg.replace(/\r\n$/, ''));
 
-	if (msg.search(/^QUIT /) !== -1) {
-		this.server.connected = false;
-		this.server.end(msg);
-	} else {
-		this.server.write(msg);
-	}
+	this.server.write(msg);
 
 	return this;
 };
@@ -299,7 +294,10 @@ IRC.prototype.part = function() {
 };
 
 IRC.prototype.quit = function(message) {
-	return this.command(null, 'QUIT', message || this.config.quitMessage || "Terminating...");
+	var ret = this.command(null, 'QUIT', message || this.config.quitMessage || 'Terminating...');
+	this.server.connected = false;
+	this.server.end();
+	return ret;
 };
 
 IRC.prototype.privMsg = function(nick, message) {
