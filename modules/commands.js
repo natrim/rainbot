@@ -1,6 +1,7 @@
 module.exports.init = function() {
 	'use strict';
 
+	var m = this;
 	var c = this.require('controls');
 	var irc = this.require('irc');
 
@@ -37,9 +38,40 @@ module.exports.init = function() {
 		var nick = args[2];
 		if (nick) {
 			source.respond('ok, ' + source.nick + ', lemmy try this new name');
+
+			var fail = function() {
+				source.mention('NICK change failed!');
+				clean();
+			};
+			var inuse = function() {
+				source.mention('NICK change failed! Nick already in use!');
+				clean();
+			};
+			var ok = function(s) {
+				if (s.nick === irc.currentNick) {
+					source.mention('NICK change is success!');
+					clean();
+				}
+			};
+			var clean = function() {
+				m.off('irc/430', fail);
+				m.off('irc/431', fail);
+				m.off('irc/432', fail);
+				m.off('irc/433', inuse);
+				m.off('irc/NICK', ok);
+			};
+
+			m.on('irc/430', fail);
+			m.on('irc/431', fail);
+			m.on('irc/432', fail);
+			m.on('irc/433', inuse);
+			m.on('irc/NICK', ok);
+
+			setTimeout(clean, 5000);
+
 			irc.nick(nick);
 		} else {
-			source.mention('im pretty sure you know my name already, but here it is, only for u: Hello, my name is ' + irc.currentNick);
+			source.respond('Hello, my name is ' + irc.currentNick);
 		}
 	}, /^nick([ ]+(.*)|)$/i);
 

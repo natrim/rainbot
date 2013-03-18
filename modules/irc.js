@@ -224,12 +224,6 @@ IRC.prototype.processLine = function(line) {
 				//autojoin
 				this.tryAutoJoin();
 				break;
-			case '432':
-				//nick change failed
-				if (!this.connecting) {
-					this.privMsg(this.server.lastMsgTo, 'NICK change failed!');
-				}
-				break;
 			case '433':
 				//nick already in use
 				if (this.connecting) {
@@ -239,8 +233,7 @@ IRC.prototype.processLine = function(line) {
 						logger.error('No free nick found!');
 						this.quit('Nooo...');
 					}
-				} else {
-					this.privMsg(this.server.lastMsgTo, 'NICK change failed! Nick already in use!');
+					handled = true;
 				}
 				break;
 		}
