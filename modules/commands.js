@@ -1,7 +1,7 @@
 module.exports.init = function() {
 	'use strict';
 
-	var m = this;
+	var dispatcher = this.dispatcher;
 	var c = this.require('controls');
 	var irc = this.require('irc');
 
@@ -12,7 +12,7 @@ module.exports.init = function() {
 	}, /^quit[ ]?(.*)$/i);
 
 	c.addAction('part', function(source, args) {
-		//m.on('irc/PART', ok);
+		//dispatcher.on('irc/PART', ok);
 		//is not needed as nothing can stop us from parting
 
 		var chans = args[1].match(/#[\w]+/gi);
@@ -44,20 +44,20 @@ module.exports.init = function() {
 			};
 
 			var clean = function() {
-				m.off('irc/405', fail);
-				m.off('irc/471', fail);
-				m.off('irc/473', fail);
-				m.off('irc/474', fail);
-				m.off('irc/475', fail);
-				m.off('irc/JOIN', ok);
+				dispatcher.off('irc/405', fail);
+				dispatcher.off('irc/471', fail);
+				dispatcher.off('irc/473', fail);
+				dispatcher.off('irc/474', fail);
+				dispatcher.off('irc/475', fail);
+				dispatcher.off('irc/JOIN', ok);
 			};
 
-			m.on('irc/405', fail);
-			m.on('irc/471', fail);
-			m.on('irc/473', fail);
-			m.on('irc/474', fail);
-			m.on('irc/475', fail);
-			m.on('irc/JOIN', ok);
+			dispatcher.on('irc/405', fail);
+			dispatcher.on('irc/471', fail);
+			dispatcher.on('irc/473', fail);
+			dispatcher.on('irc/474', fail);
+			dispatcher.on('irc/475', fail);
+			dispatcher.on('irc/JOIN', ok);
 
 			setTimeout(clean, 5000);
 
@@ -87,18 +87,18 @@ module.exports.init = function() {
 				}
 			};
 			var clean = function() {
-				m.off('irc/430', fail);
-				m.off('irc/431', fail);
-				m.off('irc/432', fail);
-				m.off('irc/433', inuse);
-				m.off('irc/NICK', ok);
+				dispatcher.off('irc/430', fail);
+				dispatcher.off('irc/431', fail);
+				dispatcher.off('irc/432', fail);
+				dispatcher.off('irc/433', inuse);
+				dispatcher.off('irc/NICK', ok);
 			};
 
-			m.on('irc/430', fail);
-			m.on('irc/431', fail);
-			m.on('irc/432', fail);
-			m.on('irc/433', inuse);
-			m.on('irc/NICK', ok);
+			dispatcher.on('irc/430', fail);
+			dispatcher.on('irc/431', fail);
+			dispatcher.on('irc/432', fail);
+			dispatcher.on('irc/433', inuse);
+			dispatcher.on('irc/NICK', ok);
 
 			setTimeout(clean, 5000);
 
@@ -117,7 +117,11 @@ module.exports.init = function() {
 
 	c.addCommand('help', help).addAction('help', help, /^help$/);
 
-	var mm = this.mm;
+	//get moduleManager and save it for the commands
+	var mm;
+	this.dispatcher.on('init', function(bot) {
+		mm = bot.modules;
+	});
 
 	c.addAction('lsmod', function(source) {
 		source.mention('i have these modules active: ' + mm.getModules().join(', '));

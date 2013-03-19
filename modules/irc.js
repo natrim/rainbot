@@ -432,12 +432,12 @@ exports.init = function(reload) {
 	require(LIBS_DIR + '/helpers').export(this, this.irc, ['command', 'join', 'part', 'connect', 'quit', 'nick', 'ctcp', 'action', 'notice', 'privMsg']);
 
 	//connect to server on bot init
-	this.on('init', function() {
+	this.dispatcher.on('init', function() {
 		module.irc.connect();
 	});
 
 	//quit irc on bot halt
-	this.on('halt', function() {
+	this.dispatcher.on('halt', function() {
 		if (module.server.socket) {
 			if (module.server.secured) {
 				module.server.socket.removeAllListeners('secureConnect');

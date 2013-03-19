@@ -130,7 +130,6 @@ Module.prototype.injectConfig = function(config, callback) {
 };
 
 Module.prototype.injectModuleManager = function(mm, callback) {
-	this.mm = this.moduleManager = mm;
 	this.require = mm.require.bind(mm);
 	if (callback) callback(null, this);
 
@@ -154,6 +153,7 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 					listener: listener
 				});
 				dispatchBase.on(event, listener);
+				return this;
 			},
 			once: function(event, listener) {
 				events.push({
@@ -161,6 +161,7 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 					listener: listener
 				});
 				dispatchBase.once(event, listener);
+				return this;
 			},
 			addListener: function(event, listener) {
 				events.push({
@@ -168,6 +169,7 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 					listener: listener
 				});
 				dispatchBase.addListener(event, listener);
+				return this;
 			},
 			off: function(event, listener) {
 				events.some(function(obj, i) {
@@ -178,6 +180,7 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 					return false;
 				});
 				dispatchBase.removeListener(event, listener);
+				return this;
 			},
 			removeListener: function(event, listener) {
 				events.some(function(obj, i) {
@@ -188,6 +191,7 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 					return false;
 				});
 				dispatchBase.removeListener(event, listener);
+				return this;
 			},
 			emit: function(event) {
 				var args = [];
@@ -206,38 +210,15 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 				} catch (e) {
 					dispatchBase.emit.call(dispatchBase, 'dispatchError', event, e, module);
 				}
+				return this;
 			},
 			clearEvents: function() {
 				events.forEach(function(event) {
 					dispatchBase.removeListener(event.event, event.listener);
 				});
 				events = [];
+				return this;
 			}
-		};
-
-		this.addListener = function() {
-			this.dispatcher.addListener.apply(this.dispatcher, arguments);
-			return this;
-		};
-
-		this.on = function() {
-			this.dispatcher.on.apply(this.dispatcher, arguments);
-			return this;
-		};
-
-		this.off = this.removeListener = function() {
-			this.dispatcher.removeListener.apply(this.dispatcher, arguments);
-			return this;
-		};
-
-		this.once = function() {
-			this.dispatcher.once.apply(this.dispatcher, arguments);
-			return this;
-		};
-
-		this.emit = function() {
-			this.dispatcher.emit.apply(this.dispatcher, arguments);
-			return this;
 		};
 	}
 

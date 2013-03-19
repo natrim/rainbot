@@ -101,12 +101,6 @@ suite.addBatch({
 		},
 		'and dispatcher': function(err, m) {
 			assert.isObject(m.dispatcher);
-			//assert.instanceOf(m.dispatcher, require('events').EventEmitter);
-			assert.include(m, 'emit');
-			assert.include(m, 'on');
-			assert.include(m, 'once');
-			assert.include(m, 'off');
-
 			assert.include(m.dispatcher, 'emit');
 			assert.include(m.dispatcher, 'on');
 			assert.include(m.dispatcher, 'once');
@@ -138,10 +132,9 @@ suite.addBatch({
 			assert.isNull(err);
 			assert.isObject(dispatcher);
 			assert.include(dispatcher, 'emit');
-			assert.include(m, 'emit');
-			assert.include(m, 'on');
-			assert.include(m, 'once');
-			assert.include(m, 'off');
+			assert.include(dispatcher, 'on');
+			assert.include(dispatcher, 'once');
+			assert.include(dispatcher, 'off');
 		}
 	},
 	'When i halt': {

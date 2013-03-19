@@ -7,14 +7,15 @@ exports.init = function() {
 
 	var module = this;
 	var config = this.config;
+	var dispatcher = this.dispatcher;
 
 	function identify(source, msg) {
 		if (source.nick === 'NickServ' && !source.channel) { //if direct message from NS
 			if (msg.match(/^This nickname is registered/)) {
-				module.emit('nickserv/identify');
+				dispatcher.emit('nickserv/identify');
 				if (config.password.trim() !== '') source.reply('IDENTIFY ' + config.password);
 			} else if (msg.match(/^You are now identified for/)) {
-				module.emit('nickserv/identified');
+				dispatcher.emit('nickserv/identified');
 			}
 		}
 	}
@@ -23,5 +24,5 @@ exports.init = function() {
 	//this.require('irc');
 
 	//bind on messages
-	this.on('irc/NOTICE', identify).on('irc/PRIVMSG', identify);
+	dispatcher.on('irc/NOTICE', identify).on('irc/PRIVMSG', identify);
 };
