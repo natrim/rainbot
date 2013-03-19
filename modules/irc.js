@@ -25,6 +25,7 @@ function IRC(server, dispatcher, config) {
 	this.recvBuffer = '';
 	this.tryNick = [];
 	this.connecting = false;
+	this.shouldAutoJoin = true;
 
 	//irc client heartbeat ping - because the socket sometimes hangs
 	this._heartbeat = 0;
@@ -76,6 +77,9 @@ IRC.prototype.connect = function() {
 
 		logger.info('CONNECTED');
 
+		//emit the connect event for other modules
+		dispatcher.emit('irc/connect', irc);
+
 		if (typeof config.pass === 'string' && config.pass.trim() !== '') {
 			irc.pass(config.pass);
 		}
@@ -93,11 +97,6 @@ IRC.prototype.connect = function() {
 
 		//set the user
 		irc.user(config.username, config.realname ? config.realname : config.username, mode);
-
-		//emit the connect event on next tick - just for fun
-		process.nextTick(function() {
-			dispatcher.emit('irc/connect', irc);
-		});
 	});
 
 	socket.setEncoding('ascii');
@@ -222,7 +221,7 @@ IRC.prototype.processLine = function(line) {
 				//done connecting
 				this.connecting = false;
 				//autojoin
-				this.tryAutoJoin();
+				if (this.shouldAutoJoin) this.tryAutoJoin();
 				break;
 			case '433':
 				//nick already in use
