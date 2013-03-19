@@ -104,17 +104,27 @@ IRC.prototype.connect = function() {
 	socket.setTimeout(0);
 
 	socket.on('error', function(err) {
+		irc.connecting = false;
 		dispatcher.emit.call(dispatcher, 'irc/error', err, irc);
 		logger.error(err);
+		if (irc.server.secured) { //ssl does not push the error to next
+			irc._ssl_had_error = true;
+		}
 	});
 
 	socket.on('timeout', function() {
+		irc.connecting = false;
 		irc.server.connected = false;
 		dispatcher.emit.call(dispatcher, 'irc/timeout', irc);
 	});
 
 	socket.on('close', function(had_error) {
+		irc.connecting = false;
 		irc.server.connected = false;
+		if (irc.server.secured && !had_error && irc._ssl_had_error) { //ssl does not push the error to next
+			had_error = true;
+			delete irc._ssl_had_error;
+		}
 		dispatcher.emit.call(dispatcher, 'irc/disconnect', had_error, irc);
 		logger.info('DISCONNECTED' + (had_error ? ' WITH ERROR' : ''));
 	});
