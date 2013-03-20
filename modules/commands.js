@@ -9,7 +9,7 @@ module.exports.init = function() {
 		source.respond('okey, ' + source.nick + '! Goodbye everypony!');
 		args.shift();
 		irc.quit(args.join(' '));
-	}, /^quit[ ]?(.*)$/i);
+	}, /^quit[ ]?(.*)$/i, ['owner']);
 
 	c.addAction('part', function(source, args) {
 		//dispatcher.on('irc/PART', ok);
@@ -25,7 +25,7 @@ module.exports.init = function() {
 		} else {
 			source.mention('please specify a channel.');
 		}
-	}, /^part([ ]+(.*)|)$/i);
+	}, /^part([ ]+(.*)|)$/i, ['owner', 'operators']);
 
 	c.addAction('join', function(source, args) {
 		var chans = args[1].match(/#[\w]+/gi);
@@ -65,7 +65,7 @@ module.exports.init = function() {
 		} else {
 			source.mention('please specify a channel.');
 		}
-	}, /^join([ ]+(.*)|)$/i);
+	}, /^join([ ]+(.*)|)$/i, ['owner', 'operators']);
 
 	c.addAction('nick', function(source, args) {
 		var nick = args[2];
@@ -112,7 +112,7 @@ module.exports.init = function() {
 		} else {
 			source.respond('Hello, my name is ' + irc.currentNick);
 		}
-	}, /^nick([ ]+(.*)|)$/i);
+	}, /^nick([ ]+(.*)|)$/i, ['owner', 'operators']);
 
 	function help(source) {
 		//TODO: display only commands the asking user has persmission to
@@ -131,7 +131,7 @@ module.exports.init = function() {
 
 	c.addAction('lsmod', function(source) {
 		source.mention('i have these modules active: ' + module.mm.getModules().join(', '));
-	}, /^lsmod|modules$/);
+	}, /^lsmod|modules$/, ['owner']);
 
 	c.addAction('reload', function(source, args) {
 		var modules = args[1].match(/\w+/gi);
@@ -146,7 +146,7 @@ module.exports.init = function() {
 		modules.forEach(function(name) {
 			module.mm.reload(name, call);
 		});
-	}, /^reload[ ]+(.*)$/);
+	}, /^reload[ ]+(.*)$/, ['owner']);
 
 	c.addAction('load', function(source, args) {
 		var modules = args[1].match(/\w+/gi);
@@ -161,7 +161,7 @@ module.exports.init = function() {
 		modules.forEach(function(name) {
 			module.mm.load(name, call);
 		});
-	}, /^load[ ]+(.*)$/);
+	}, /^load[ ]+(.*)$/, ['owner']);
 
 	c.addAction('unload', function(source, args) {
 		var modules = args[1].match(/\w+/gi);
@@ -176,7 +176,7 @@ module.exports.init = function() {
 		modules.forEach(function(name) {
 			module.mm.unload(name, call);
 		});
-	}, /^unload[ ]+(.*)$/);
+	}, /^unload[ ]+(.*)$/, ['owner']);
 };
 
 module.exports.halt = function() {

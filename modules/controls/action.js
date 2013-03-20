@@ -1,4 +1,4 @@
-function Action(name, action, rule) {
+function Action(name, action, rule, access) {
 	if (!(rule instanceof RegExp)) {
 		throw new Error('Rule must be RegExp!');
 	}
@@ -6,10 +6,11 @@ function Action(name, action, rule) {
 	this.name = name;
 	this.action = action;
 	this.rule = rule;
+	this.access = access;
 }
 
 module.exports.Action = Action;
 
-module.exports.create = function(name, action, rule) {
-	return new Action(name, action, rule);
+module.exports.create = function(name, action, rule, access) {
+	return new Action(name, action, rule, access);
 };

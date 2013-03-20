@@ -10,11 +10,12 @@ if (!String.prototype.trim) {
 	};
 }
 
-function Controls(irc, actions, commands) {
+function Controls(irc, actions, commands, groups) {
 	this._irc = irc;
 	this.actions = actions;
 	this.commands = commands;
 	this.commandDelimiter = '.';
+	this.groups = groups;
 }
 
 Controls.prototype.addCommand = function(name, action, access) {
@@ -101,11 +102,15 @@ Controls.prototype.processCommand = function(source, text) {
 	//execute the command
 	Object.keys(this.commands).some(function(name) {
 		if (command == this.commands[name].name) { //use == to not check type
-			logger.debug('Processing Command \'' + name + '\'');
-			this.commands[name].action(source, args, text);
-			return true;
+			if (this.checkAccess(source, this.commands[name])) { //run the command only if the user has access
+				logger.debug('Processing Command \'' + name + '\'');
+				this.commands[name].action(source, args, text);
+			} else {
+				logger.debug('Command \'' + name + '\' access for user \'' + source + '\' denied!');
+			}
+			return true; //stop searching
 		}
-		return false;
+		return false; //try next
 	}, this);
 };
 
@@ -114,19 +119,46 @@ Controls.prototype.processAction = function(source, text) {
 	Object.keys(this.actions).forEach(function(name) {
 		var args = text.match(this.actions[name].rule);
 		if (args !== null) {
-			logger.debug('Processing Action \'' + name + '\'');
-			this.actions[name].action(source, args, text);
+			if (this.checkAccess(source, this.actions[name])) { //run the action only if the user has access
+				logger.debug('Processing Action \'' + name + '\'');
+				this.actions[name].action(source, args, text);
+			} else {
+				logger.debug('Action \'' + name + '\' access for user \'' + source + '\' denied!');
+			}
 		}
 	}, this);
+};
+
+Controls.prototype.checkAccess = function(source, CorA) {
+	//allow access if no rule
+	if (!CorA.access) {
+		return true;
+	}
+
+	//array means list of allowed groups
+	if (CorA.access instanceof Array) {
+		return CorA.access.some(function(name) {
+			if (this.groups[name]) {
+				return this.groups[name].some(function(user) {
+					return source.toString().match(user) !== null;
+				});
+			}
+			return false;
+		}, this);
+	}
+
+	//else try matching it directly
+	return source.toString().match(CorA.access) !== null;
 };
 
 module.exports.init = function(reload) {
 	if (!reload) {
 		this.actions = {};
 		this.commands = {};
+		this.groups = this.config.groups || {};
 	}
 
-	this.controls = new Controls(this.require('irc'), this.actions, this.commands);
+	this.controls = new Controls(this.require('irc'), this.actions, this.commands, this.groups);
 
 	if (typeof this.config.commandDelimiter === 'string') {
 		this.controls.commandDelimiter = this.config.commandDelimiter;
