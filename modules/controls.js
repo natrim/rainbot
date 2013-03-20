@@ -17,53 +17,28 @@ function Controls(irc, actions, commands) {
 	this.commandDelimiter = '.';
 }
 
-Controls.prototype.add = function(ca) {
-	if (ca instanceof Command) {
-		if (typeof this.commands[ca.name] !== 'undefined') {
-			throw new Error('Defined command \'' + ca.name + '\' already exists!');
-		}
-		this.commands[ca.name] = ca;
-	} else if (ca instanceof Action) {
-		if (typeof this.actions[ca.name] !== 'undefined') {
-			throw new Error('Defined action \'' + ca.name + '\' already exists!');
-		}
-		this.actions[ca.name] = ca;
-	} else {
-		throw new Error('Unknown control type!');
+Controls.prototype.addCommand = function(name, action, access) {
+	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
+	if (typeof this.commands[name] !== 'undefined') {
+		throw new Error('Defined command \'' + name + '\' already exists!');
 	}
-
+	this.commands[name] = new Command(name, action, access);
 	return this;
 };
 
-Controls.prototype.remove = function(ca) {
-	if (ca instanceof Command) {
-		if (typeof this.commands[ca.name] === 'undefined') {
-			throw new Error('Command \'' + ca.name + '\' does not exists!');
-		}
-		delete this.commands[ca.name];
-	} else if (ca instanceof Action) {
-		if (typeof this.actions[ca.name] === 'undefined') {
-			throw new Error('Action \'' + ca.name + '\' does not exists!');
-		}
-		delete this.actions[ca.name];
-	} else {
-		throw new Error('Unknown control type!');
+Controls.prototype.addAction = function(name, action, regexp, access) {
+	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
+	if (typeof this.actions[name] !== 'undefined') {
+		throw new Error('Defined action \'' + name + '\' already exists!');
 	}
-
+	this.actions[name] = new Action(name, action, regexp, access);
 	return this;
-};
-
-Controls.prototype.addCommand = function(name, action) {
-	return this.add(new Command(name, action));
-};
-
-Controls.prototype.addAction = function(name, action, regexp) {
-	return this.add(new Action(name, action, regexp));
 };
 
 Controls.prototype.removeCommand = function(name) {
+	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 	if (typeof this.commands[name] !== 'undefined') {
-		this.remove(this.commands[name]);
+		delete this.commands[name];
 	} else {
 		throw new Error('Command \'' + name + '\' does not exists!');
 	}
@@ -71,8 +46,9 @@ Controls.prototype.removeCommand = function(name) {
 };
 
 Controls.prototype.removeAction = function(name) {
+	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 	if (typeof this.actions[name] !== 'undefined') {
-		this.remove(this.actions[name]);
+		delete this.actions[name];
 	} else {
 		throw new Error('Action \'' + name + '\' does not exists!');
 	}
