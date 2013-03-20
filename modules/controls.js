@@ -147,6 +147,20 @@ module.exports.init = function(reload) {
 	//export some functions from Controls
 	require(LIBS_DIR + '/helpers').export(this, this.controls, ['addCommand', 'addAction', 'removeCommand', 'removeAction']);
 
+	this.removeActions = function(list) {
+		list.forEach(function(name) {
+			this.removeAction(name);
+		}, this.controls);
+		return this;
+	};
+
+	this.removeCommands = function(list) {
+		list.forEach(function(name) {
+			this.removeCommand(name);
+		}, this.controls);
+		return this;
+	};
+
 	//bind
 	this.dispatcher.on('irc/PRIVMSG', this.controls.parse.bind(this.controls)).on('irc/NOTICE', this.controls.parse.bind(this.controls));
 };

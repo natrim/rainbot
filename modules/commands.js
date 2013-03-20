@@ -176,7 +176,8 @@ module.exports.init = function() {
 module.exports.halt = function() {
 	var c = this.require('controls');
 
-	c.removeAction('quit').removeAction('part').removeAction('join').removeAction('nick');
-	c.removeAction('help').removeCommand('help');
-	c.removeAction('lsmod').removeAction('load').removeAction('unload').removeAction('reload');
+	c.removeActions(['quit', 'part', 'join', 'nick',
+		'help',
+		'lsmod', 'load', 'unload', 'reload']);
+	c.removeCommand('help');
 };
