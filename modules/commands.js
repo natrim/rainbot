@@ -114,7 +114,24 @@ module.exports.init = function() {
 		}
 	}, /^nick([ ]+(.*)|)$/i, ['owner', 'operators']);
 
-	function commandList(source) {
+
+	function actionList(source) {
+		var actions = [];
+		Object.keys(c.actions).forEach(function(n) {
+			if (this.controls.checkAccess(source, this.actions[n])) {
+				actions.push(n);
+			}
+		}, c);
+
+		source.message('actions that can be triggered by you are: ' + actions.join(', '));
+	}
+
+	function commandList(source, args) {
+		if (args[0] === 'actions' ||  args[1] === ' actions') {
+			actionList(source);
+			return;
+		}
+
 		var commands = [];
 		Object.keys(c.commands).forEach(function(n) {
 			if (this.controls.checkAccess(source, this.commands[n])) {
@@ -125,7 +142,7 @@ module.exports.init = function() {
 		source.mention('the available commands are: ' + c.commandDelimiter + commands.join(', ' + c.commandDelimiter));
 	}
 
-	c.addCommand('help', commandList).addAction('help', commandList, /^help$/);
+	c.addCommand('help', commandList).addAction('help', commandList, /^help( actions)?$/);
 
 	//get moduleManager and save it for the commands
 	var module = this;
