@@ -4,6 +4,7 @@ global.LIBS_DIR = require('path').resolve(BOT_DIR, 'libs');
 global.MODULES_DIR = require('path').resolve(BOT_DIR, 'modules');
 
 var logger = require(LIBS_DIR + '/logger');
+var helpers = require(LIBS_DIR + '/helpers');
 
 process.setMaxListeners(0); //fix the possible memory leak warning, by unlimiting listeners
 

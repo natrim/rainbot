@@ -157,12 +157,15 @@ module.exports.init = function(reload) {
 	}
 
 	var module = this;
-	Object.defineProperty(this, 'commandDelimiter', {
-		enumerable: true,
-		get: function() {
-			return module.controls.commandDelimiter;
-		}
-	});
+
+	if (!reload) {
+		Object.defineProperty(this, 'commandDelimiter', {
+			enumerable: true,
+			get: function() {
+				return module.controls.commandDelimiter;
+			}
+		});
+	}
 
 	//export some functions from Controls
 	require(LIBS_DIR + '/helpers').export(this, this.controls, ['addCommand', 'addAction', 'removeCommand', 'removeAction', 'removeCommands', 'removeActions']);

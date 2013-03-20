@@ -62,7 +62,7 @@ Module.prototype.halt = function halt(callback) {
 		var module = require.cache[this.fullPath];
 
 		module.children.forEach(function(m) {
-			delete require.cache[m.id];
+			delete require.cache[m.filename];
 		});
 		delete require.cache[this.fullPath];
 	}
@@ -91,7 +91,7 @@ Module.prototype.reload = function reload(callback) {
 
 		var module = require.cache[this.fullPath];
 		module.children.forEach(function(m) {
-			delete require.cache[m.id];
+			delete require.cache[m.filename];
 		});
 		delete require.cache[this.fullPath];
 
