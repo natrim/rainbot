@@ -224,6 +224,7 @@ IRC.prototype.processLine = function(line) {
 			case 'NICK':
 				//nick change
 				if (source.nick === this.server.currentNick) {
+					this.server.lastNick = this.server.currentNick;
 					this.server.currentNick = args[0];
 				}
 				break;
@@ -418,6 +419,12 @@ exports.init = function(reload) {
 			enumerable: true,
 			get: function() {
 				return module.server.connected;
+			}
+		});
+		Object.defineProperty(this, 'lastNick', {
+			enumerable: true,
+			get: function() {
+				return module.server.lastNick;
 			}
 		});
 		Object.defineProperty(this, 'currentNick', {

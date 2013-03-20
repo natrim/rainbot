@@ -29,6 +29,7 @@ function Server(host, port, ssl) {
 	}
 
 	this.connected = false;
+	this.lastNick = '';
 	this.currentNick = '';
 
 	this.lastMsgTo = '';
