@@ -118,13 +118,13 @@ module.exports.init = function() {
 	c.addCommand('help', help).addAction('help', help, /^help$/);
 
 	//get moduleManager and save it for the commands
-	var mm;
+	var module = this;
 	this.dispatcher.on('init', function(bot) {
-		mm = bot.modules;
+		module.mm = bot.modules;
 	});
 
 	c.addAction('lsmod', function(source) {
-		source.mention('i have these modules active: ' + mm.getModules().join(', '));
+		source.mention('i have these modules active: ' + module.mm.getModules().join(', '));
 	}, /^lsmod|modules$/);
 
 	c.addAction('reload', function(source, args) {
@@ -138,7 +138,7 @@ module.exports.init = function() {
 		};
 		source.mention('ok');
 		modules.forEach(function(name) {
-			mm.reload(name, call);
+			module.mm.reload(name, call);
 		});
 	}, /^reload[ ]+(.*)$/);
 
@@ -153,7 +153,7 @@ module.exports.init = function() {
 		};
 		source.mention('ok');
 		modules.forEach(function(name) {
-			mm.load(name, call);
+			module.mm.load(name, call);
 		});
 	}, /^load[ ]+(.*)$/);
 
@@ -168,7 +168,7 @@ module.exports.init = function() {
 		};
 		source.mention('ok');
 		modules.forEach(function(name) {
-			mm.unload(name, call);
+			module.mm.unload(name, call);
 		});
 	}, /^unload[ ]+(.*)$/);
 };
