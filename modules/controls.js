@@ -79,6 +79,26 @@ Controls.prototype.removeAction = function(name) {
 	return this;
 };
 
+Controls.prototype.removeActions = function(list) {
+	if (!(list instanceof Array)) {
+		throw new Error('You need to pass Array as first argument!');
+	}
+	list.forEach(function(name) {
+		this.removeAction(name);
+	}, this);
+	return this;
+};
+
+Controls.prototype.removeCommands = function(list) {
+	if (!(list instanceof Array)) {
+		throw new Error('You need to pass Array as first argument!');
+	}
+	list.forEach(function(name) {
+		this.removeCommand(name);
+	}, this);
+	return this;
+};
+
 Controls.prototype.parse = function(source, text) {
 	if (typeof text !== 'string' || text.length <= 0) return;
 
@@ -145,21 +165,7 @@ module.exports.init = function(reload) {
 	});
 
 	//export some functions from Controls
-	require(LIBS_DIR + '/helpers').export(this, this.controls, ['addCommand', 'addAction', 'removeCommand', 'removeAction']);
-
-	this.removeActions = function(list) {
-		list.forEach(function(name) {
-			this.removeAction(name);
-		}, this.controls);
-		return this;
-	};
-
-	this.removeCommands = function(list) {
-		list.forEach(function(name) {
-			this.removeCommand(name);
-		}, this.controls);
-		return this;
-	};
+	require(LIBS_DIR + '/helpers').export(this, this.controls, ['addCommand', 'addAction', 'removeCommand', 'removeAction', 'removeCommands', 'removeActions']);
 
 	//bind
 	this.dispatcher.on('irc/PRIVMSG', this.controls.parse.bind(this.controls)).on('irc/NOTICE', this.controls.parse.bind(this.controls));
