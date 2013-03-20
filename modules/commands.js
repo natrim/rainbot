@@ -80,6 +80,10 @@ module.exports.init = function() {
 				source.mention('i failed, somepony uses that name already!');
 				clean();
 			};
+			var toofast = function() {
+				source.mention('i failed, they told me i need to wait!');
+				clean();
+			};
 			var ok = function(s) {
 				if (s.nick === irc.lastNick) {
 					source.mention('success! Do u like my new name?');
@@ -91,6 +95,7 @@ module.exports.init = function() {
 				dispatcher.off('irc/431', fail);
 				dispatcher.off('irc/432', fail);
 				dispatcher.off('irc/433', inuse);
+				dispatcher.off('irc/438', toofast);
 				dispatcher.off('irc/NICK', ok);
 			};
 
@@ -98,6 +103,7 @@ module.exports.init = function() {
 			dispatcher.on('irc/431', fail);
 			dispatcher.on('irc/432', fail);
 			dispatcher.on('irc/433', inuse);
+			dispatcher.on('irc/438', toofast);
 			dispatcher.on('irc/NICK', ok);
 
 			setTimeout(clean, 5000);
