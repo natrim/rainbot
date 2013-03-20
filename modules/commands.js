@@ -114,14 +114,18 @@ module.exports.init = function() {
 		}
 	}, /^nick([ ]+(.*)|)$/i, ['owner', 'operators']);
 
-	function help(source) {
-		//TODO: display only commands the asking user has persmission to
-		source.mention('the available commands are: ' + c.commandDelimiter + Object.keys(c.commands).join(', ' + c.commandDelimiter));
-		//TODO: display only actions the asking user has persmission to and send them in PRIVMSG
-		//source.respond('available actions are: ' + Object.keys(c.actions).join(', '));
+	function commandList(source) {
+		var commands = [];
+		Object.keys(c.commands).forEach(function(n) {
+			if (this.controls.checkAccess(source, this.commands[n])) {
+				commands.push(n);
+			}
+		}, c);
+
+		source.mention('the available commands are: ' + c.commandDelimiter + commands.join(', ' + c.commandDelimiter));
 	}
 
-	c.addCommand('help', help).addAction('help', help, /^help$/);
+	c.addCommand('help', commandList).addAction('help', commandList, /^help$/);
 
 	//get moduleManager and save it for the commands
 	var module = this;
