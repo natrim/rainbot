@@ -107,6 +107,7 @@ Controls.prototype.processCommand = function(source, text) {
 				this.commands[name].action(source, args, text);
 			} else {
 				logger.debug('Command \'' + name + '\' access for user \'' + source + '\' denied!');
+				source.respond('Command Access denied! Do i know you?');
 			}
 			return true; //stop searching
 		}
@@ -124,6 +125,7 @@ Controls.prototype.processAction = function(source, text) {
 				this.actions[name].action(source, args, text);
 			} else {
 				logger.debug('Action \'' + name + '\' access for user \'' + source + '\' denied!');
+				source.respond('Action Access denied! Derpy in action!');
 			}
 		}
 	}, this);
