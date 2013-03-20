@@ -1,11 +1,11 @@
 module.exports.init = function() {
 	var c = this.require('controls');
 	c.addAction('question', function(source) {
-		source.respond('don\'t ask me, i\'m just a talking pony');
+		source.respond('don\'t ask me, i\'m just a talking pony!');
 	}, /\?\s*$/);
 
 	c.addAction('bot', function(source) {
-		source.respond('i\'m not a bot, i\'m a real pony');
+		source.respond('i\'m not a bot, i\'m a real pony!');
 	}, /[\s,\.]bot[\s!,\.\$]/);
 
 	c.addAction('welcome', function(source) {

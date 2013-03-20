@@ -6,7 +6,7 @@ module.exports.init = function() {
 	var irc = this.require('irc');
 
 	c.addAction('quit', function(source, args) {
-		source.respond('ok, ' + source.nick + '! goodbye everypony!');
+		source.respond('okey, ' + source.nick + '! Goodbye everypony!');
 		args.shift();
 		irc.quit(args.join(' '));
 	}, /^quit[ ]?(.*)$/i);
@@ -17,10 +17,10 @@ module.exports.init = function() {
 
 		var chans = args[1].match(/#[\w]+/gi);
 		if (chans !== null) {
-			source.respond('ok, ' + source.nick + '!');
+			source.respond('okey, ' + source.nick + '! I didnt like the \'' + chans.join('\', \'') + '\' either.');
 			irc.part.apply(irc, chans);
 		} else if (source.channel) {
-			source.respond('ok, ' + source.nick + '!');
+			source.respond('okey, ' + source.nick + '! I\'m going to look for ponies elsewhere.');
 			irc.part(source.channel);
 		} else {
 			source.mention('please specify a channel.');
@@ -30,15 +30,15 @@ module.exports.init = function() {
 	c.addAction('join', function(source, args) {
 		var chans = args[1].match(/#[\w]+/gi);
 		if (chans !== null) {
-			source.respond('ok, ' + source.nick + '!');
+			source.respond('okey, ' + source.nick + '! Lemme see what goes in \'' + chans.join('\', \'') + '\'.');
 
 			var fail = function(s, args) {
-				source.mention('joining the channel \'' + args[1] + '\' has failed! ' + args[2]);
+				source.mention('i cannot go to \'' + args[1] + '\'! Because ' + args[2]);
 				clean();
 			};
 			var ok = function(s, args) {
 				if (s.nick === irc.currentNick) {
-					source.respond('ok, i joined the channel \'' + args[0] + '\'');
+					source.respond('*ding*, i am now in \'' + args[0] + '\' too!');
 					clean();
 				}
 			};
@@ -70,19 +70,19 @@ module.exports.init = function() {
 	c.addAction('nick', function(source, args) {
 		var nick = args[2];
 		if (nick) {
-			source.respond('ok, ' + source.nick + ', lemmy try this new name');
+			source.respond('okey, ' + source.nick + '! Lemmy try this new name.');
 
 			var fail = function() {
-				source.mention('NICK change failed!');
+				source.mention('i failed in renaming myself!');
 				clean();
 			};
 			var inuse = function() {
-				source.mention('NICK change failed! Nick already in use!');
+				source.mention('i failed, somepony uses that name already!');
 				clean();
 			};
 			var ok = function(s) {
-				if (s.nick === irc.currentNick) {
-					source.mention('NICK change is success!');
+				if (s.nick === irc.lastNick) {
+					source.mention('success! Do u like my new name?');
 					clean();
 				}
 			};
@@ -110,7 +110,7 @@ module.exports.init = function() {
 
 	function help(source) {
 		//TODO: display only commands the asking user has persmission to
-		source.mention('available commands are: ' + c.commandDelimiter + Object.keys(c.commands).join(', ' + c.commandDelimiter));
+		source.mention('the available commands are: ' + c.commandDelimiter + Object.keys(c.commands).join(', ' + c.commandDelimiter));
 		//TODO: display only actions the asking user has persmission to and send them in PRIVMSG
 		//source.respond('available actions are: ' + Object.keys(c.actions).join(', '));
 	}
@@ -136,7 +136,7 @@ module.exports.init = function() {
 				source.respond('module \'' + m + '\' reloaded!');
 			}
 		};
-		source.mention('ok');
+		source.respond('okey, ' + source.nick + '! I reload it after i find it.');
 		modules.forEach(function(name) {
 			module.mm.reload(name, call);
 		});
@@ -151,7 +151,7 @@ module.exports.init = function() {
 				source.respond('module \'' + m + '\' loaded!');
 			}
 		};
-		source.mention('ok');
+		source.respond('okey, ' + source.nick + '! I\'m really eager to learn new things!');
 		modules.forEach(function(name) {
 			module.mm.load(name, call);
 		});
@@ -166,7 +166,7 @@ module.exports.init = function() {
 				source.respond('module \'' + m + '\' unloaded!');
 			}
 		};
-		source.mention('ok');
+		source.respond('okey, ' + source.nick + '! Let\'s throw it away!');
 		modules.forEach(function(name) {
 			module.mm.unload(name, call);
 		});
