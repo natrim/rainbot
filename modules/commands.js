@@ -15,6 +15,11 @@ module.exports.init = function() {
 		//dispatcher.on('irc/PART', ok);
 		//is not needed as nothing can stop us from parting
 
+		if (!irc.connected) {
+			source.respond('I\'m not connected to server!');
+			return;
+		}
+
 		var chans = args[1].match(/#[\w]+/gi);
 		if (chans !== null) {
 			source.respond('okey, ' + source.nick + '! I didnt like the \'' + chans.join('\', \'') + '\' either.');
@@ -28,6 +33,10 @@ module.exports.init = function() {
 	}, /^part([ ]+(.*)|)$/i, ['owner', 'operators']);
 
 	c.addAction('join', function(source, args) {
+		if (!irc.connected) {
+			source.respond('I\'m not connected to server!');
+			return;
+		}
 		var chans = args[1].match(/#[\w]+/gi);
 		if (chans !== null) {
 			source.respond('okey, ' + source.nick + '! Lemme see what goes in \'' + chans.join('\', \'') + '\'.');
@@ -68,6 +77,10 @@ module.exports.init = function() {
 	}, /^join([ ]+(.*)|)$/i, ['owner', 'operators']);
 
 	c.addAction('nick', function(source, args) {
+		if (!irc.connected) {
+			source.respond('I\'m not connected to server!');
+			return;
+		}
 		var nick = args[2];
 		if (nick) {
 			source.respond('okey, ' + source.nick + '! Lemmy try this new name.');
@@ -202,6 +215,10 @@ module.exports.init = function() {
 
 
 	c.addAction('say', function(source, args) {
+		if (!irc.connected) {
+			source.respond('I\'m not connected to server!');
+			return;
+		}
 		if (args[2].trim() === '') {
 			source.respond('you probadly should tell me what i should tell to \'' + args[1] + '\'');
 		} else {
