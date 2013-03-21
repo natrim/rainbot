@@ -3,6 +3,8 @@ var logger = require(LIBS_DIR + '/logger');
 var Server = require('./irc/server').Server;
 var Source = require('./irc/source').Source;
 
+var date = require(LIBS_DIR + '/helpers').dateFormat;
+
 //trim some strings
 if (!String.prototype.trim) {
 	String.prototype.trim = function() {
@@ -178,7 +180,11 @@ IRC.prototype.processLine = function(line) {
 	}
 
 	if (msg.command) {
-		logger.debug('[RECV]> ' + line);
+		if (this.config.log) {
+			console.log(date(undefined, this.config.logTimeFormat) + ' [RECV]> ' + line);
+		} else {
+			logger.debug('[RECV]> ' + line);
+		}
 
 		if (msg.command !== 'PING' && msg.command !== 'PONG') { //if not ping/pong then emit it
 			this.dispatcher.emit('irc/RECV', line);
@@ -276,7 +282,13 @@ IRC.prototype.send = function(msg, nolog) {
 		this.dispatcher.emit('irc/SEND', msg.replace(/\r\n$/, ''));
 	}
 
-	logger.debug('[SEND]> ' + msg.replace(/\r\n$/, ''));
+	if (this.config.log) {
+		if (!nolog) {
+			console.log(date(undefined, this.config.logTimeFormat) + ' [SEND]> ' + msg.replace(/\r\n$/, ''));
+		}
+	} else {
+		logger.debug('[SEND]> ' + msg.replace(/\r\n$/, ''));
+	}
 
 	this.server.write(msg);
 

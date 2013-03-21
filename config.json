@@ -8,7 +8,9 @@
 		"hostname": "irc.ponychat.net",
 		"port": 6667,
 		"ssl": false,
-		"channel": "#pony"
+		"channel": "#pony",
+		"log": true,
+		"logTimeFormat": "DD.MM.YYYY HH:II:SS"
 	},
 	"nickserv": {
 		"password": ""
