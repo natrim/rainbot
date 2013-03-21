@@ -14,5 +14,11 @@
 	},
 	"nickserv": {
 		"password": ""
+	},
+	"controls": {
+		"groups": {
+			"owner": [],
+			"operators": []
+		}
 	}
 }
