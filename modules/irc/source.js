@@ -19,23 +19,23 @@ Source.fromString = function(string) {
 };
 
 Source.prototype.reply = Source.prototype.respond = function(msg) {
-	this.irc.privMsg(this.channel || this.nick, msg);
+	return this.irc.privMsg(this.channel || this.nick, msg) !== null;
 };
 
 Source.prototype.mention = function(msg) {
-	this.irc.privMsg(this.channel || this.nick, this.nick + ", " + msg);
+	return this.irc.privMsg(this.channel || this.nick, this.nick + ", " + msg) !== null;
 };
 
 Source.prototype.action = function(msg) {
-	this.irc.action(this.channel || this.nick, msg);
+	return this.irc.action(this.channel || this.nick, msg) !== null;
 };
 
 Source.prototype.tell = Source.prototype.message = function(msg) {
-	this.irc.privMsg(this.nick, msg);
+	return this.irc.privMsg(this.nick, msg) !== null;
 };
 
 Source.prototype.note = Source.prototype.notice = function(msg) {
-	this.irc.notice(this.nick, msg);
+	return this.irc.notice(this.nick, msg) !== null;
 };
 
 exports.Source = Source;

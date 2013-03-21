@@ -329,8 +329,8 @@ IRC.prototype.quit = function(message) {
 IRC.prototype.privMsg = function(nick, message) {
 	var now = Date.now();
 
-	if (message === this.server.lastMsg && now - this.server.lastMsgTime < (this.config.msgDelay || 5000)) {
-		return;
+	if (message === this.server.lastMsg && now - this.server.lastMsgTime < (this.config.msgDelay || 1000)) {
+		return null;
 	}
 
 	this.server.lastMsgTo = nick;
@@ -343,8 +343,8 @@ IRC.prototype.privMsg = function(nick, message) {
 IRC.prototype.notice = function(nick, message) {
 	var now = Date.now();
 
-	if (message === this.server.lastMsg && now - this.server.lastMsgTime < (this.config.msgDelay || 5000)) {
-		return;
+	if (message === this.server.lastMsg && now - this.server.lastMsgTime < (this.config.msgDelay || 1000)) {
+		return null;
 	}
 
 	this.server.lastMsgTo = nick;
