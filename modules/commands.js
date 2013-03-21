@@ -219,6 +219,7 @@ module.exports.init = function() {
 			source.respond('I\'m not connected to server!');
 			return;
 		}
+		args.shift(); //remove the first one
 		if (args[2].trim() === '') {
 			source.respond('you probadly should tell me what i should tell to \'' + args[1] + '\'');
 		} else {
