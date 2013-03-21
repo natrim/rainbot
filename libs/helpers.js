@@ -1,7 +1,7 @@
 /**
  * date helper
  * @param {Date} d Date instance or nothing
- * @param {string} format Format with (YYYY-MM-DD HH:MM:SS TZ) placeholders
+ * @param {string} format Format with (YYYY-MM-DD HH:II:SS TZ) placeholders
  * @return {string}   returns date in defined format
  */
 module.exports.dateFormat = module.exports.formatDate = module.exports.formattedDate = function(d, format) {
@@ -9,7 +9,7 @@ module.exports.dateFormat = module.exports.formatDate = module.exports.formatted
 		d = new Date();
 	}
 	if (typeof(format) !== "string") {
-		format = "YYYY-MM-DD HH:MM:SS";
+		format = "YYYY-MM-DD HH:II:SS";
 	}
 	if (format.toLowerCase() === "utc") {
 		return d.toUTCString();
@@ -32,7 +32,7 @@ module.exports.dateFormat = module.exports.formatDate = module.exports.formatted
 	if (tz === 0) tz = "UTC";
 	else if (tz > 0) tz = "UTC+" + tz;
 	else tz = "UTC" + tz;
-	return format.replace("YYYY", year).replace("YY", year.toString().substr(-2)).replace("MM", month).replace("DD", day).replace("HH", hour).replace("MM", minute).replace("SS", second).replace("TZ", tz);
+	return format.replace("YYYY", year).replace("YY", year.toString().substr(-2)).replace("MM", month).replace("DD", day).replace("HH", hour).replace("II", minute).replace("SS", second).replace("TZ", tz);
 };
 
 /**
