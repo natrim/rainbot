@@ -1,4 +1,5 @@
 {
 	"commands": true,
-	"responses": true
+	"responses": true,
+	"shell": true
 }

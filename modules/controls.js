@@ -137,6 +137,11 @@ Controls.prototype.checkAccess = function(source, CorA) {
 		return true;
 	}
 
+	//shell can run everything
+	if (source.toString() === 'ItzAInternallPonyShell') {
+		return true;
+	}
+
 	//array means list of allowed groups
 	if (CorA.access instanceof Array) {
 		return CorA.access.some(function(name) {
