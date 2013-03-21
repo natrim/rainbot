@@ -43,6 +43,7 @@ module.exports.init = function() {
 				}
 			};
 
+			var timer = setTimeout(clean, 5000);
 			var clean = function() {
 				dispatcher.off('irc/405', fail);
 				dispatcher.off('irc/471', fail);
@@ -50,6 +51,7 @@ module.exports.init = function() {
 				dispatcher.off('irc/474', fail);
 				dispatcher.off('irc/475', fail);
 				dispatcher.off('irc/JOIN', ok);
+				clearTimeout(timer);
 			};
 
 			dispatcher.on('irc/405', fail);
@@ -58,8 +60,6 @@ module.exports.init = function() {
 			dispatcher.on('irc/474', fail);
 			dispatcher.on('irc/475', fail);
 			dispatcher.on('irc/JOIN', ok);
-
-			setTimeout(clean, 5000);
 
 			irc.join.apply(irc, chans);
 		} else {
@@ -90,6 +90,8 @@ module.exports.init = function() {
 					clean();
 				}
 			};
+
+			var timer = setTimeout(clean, 5000);
 			var clean = function() {
 				dispatcher.off('irc/430', fail);
 				dispatcher.off('irc/431', fail);
@@ -97,6 +99,7 @@ module.exports.init = function() {
 				dispatcher.off('irc/433', inuse);
 				dispatcher.off('irc/438', toofast);
 				dispatcher.off('irc/NICK', ok);
+				clearTimeout(timer);
 			};
 
 			dispatcher.on('irc/430', fail);
@@ -105,8 +108,6 @@ module.exports.init = function() {
 			dispatcher.on('irc/433', inuse);
 			dispatcher.on('irc/438', toofast);
 			dispatcher.on('irc/NICK', ok);
-
-			setTimeout(clean, 5000);
 
 			irc.nick(nick);
 		} else {
@@ -198,6 +199,47 @@ module.exports.init = function() {
 			module.mm.unload(name, call);
 		});
 	}, /^unload[ ]+(.*)$/, ['owner']);
+
+
+	c.addAction('say', function(source, args) {
+		if (args[2].trim() === '') {
+			source.respond('you probadly should tell me what i should tell to \'' + args[1] + '\'');
+		} else {
+			var resendreply = function(s, text) {
+				if (args[1] === s.nick) {
+					source.respond(args[1] + ' REPLY: ' + text);
+					clean();
+				}
+			};
+			var wrongnick = function(s, argv) {
+				source.respond('Nick or channel with name \'' + argv[1] + '\' was not found.');
+				clean();
+			};
+			var noExternal = function(s, argv) {
+				source.respond('Channel \'' + argv[1] + '\' has blocked external messages.');
+				clean();
+			};
+
+			var timer = setTimeout(clean, 5000);
+			var clean = function() {
+				dispatcher.off('irc/PRIVMSG', resendreply);
+				dispatcher.off('irc/NOTICE', resendreply);
+				dispatcher.off('irc/401', wrongnick);
+				dispatcher.off('irc/404', noExternal);
+				clearTimeout(timer);
+			};
+
+			//say it
+			if (irc.privMsg(args[1], args[2])) {
+				dispatcher.on('irc/PRIVMSG', resendreply);
+				dispatcher.on('irc/NOTICE', resendreply);
+				dispatcher.on('irc/401', wrongnick);
+				dispatcher.on('irc/404', noExternal);
+			} else {
+				source.mention('wait a little while...');
+			}
+		}
+	}, /^(say|tell)[ ]+(#?\w+)[ ]*(.*)$/i, ['owner', 'operators']);
 };
 
 module.exports.halt = function() {
@@ -205,6 +247,7 @@ module.exports.halt = function() {
 
 	c.removeActions(['quit', 'part', 'join', 'nick',
 		'help',
-		'lsmod', 'load', 'unload', 'reload']);
+		'lsmod', 'load', 'unload', 'reload',
+		'say']);
 	c.removeCommand('help');
 };
