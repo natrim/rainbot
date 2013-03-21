@@ -116,6 +116,7 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 				if (typeof module.halt === 'function') module.halt();
 			} catch (e) {
 				//ignore all exceptions in halt
+				logger.warn('Got error in module \'' + name + '\' halt: ' + e);
 			}
 
 			//puff it
