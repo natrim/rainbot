@@ -21,7 +21,7 @@ function Controls(irc, actions, commands, groups) {
 Controls.prototype.addCommand = function(name, action, access) {
 	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 	if (typeof this.commands[name] !== 'undefined') {
-		throw new Error('Defined command \'' + name + '\' already exists!');
+		throw new Error('Command \'' + name + '\' already exists!');
 	}
 	this.commands[name] = new Command(name, action, access);
 	return this;
@@ -30,7 +30,7 @@ Controls.prototype.addCommand = function(name, action, access) {
 Controls.prototype.addAction = function(name, action, regexp, access) {
 	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 	if (typeof this.actions[name] !== 'undefined') {
-		throw new Error('Defined action \'' + name + '\' already exists!');
+		throw new Error('Action \'' + name + '\' already exists!');
 	}
 	this.actions[name] = new Action(name, action, regexp, access);
 	return this;
