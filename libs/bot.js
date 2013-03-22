@@ -31,6 +31,7 @@ function Bot() {
 
 	//bot config
 	this.config = config;
+	this._configWatch = null;
 	//bot MM
 	this.modules = moduleManager;
 	//dispatcher
@@ -98,10 +99,21 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 		config = undefined;
 	}
 
+	if (bot._configWatch) { //stop watching config
+		bot._configWatch.close();
+		bot._configWatch = null;
+	}
+
 	if (typeof config === 'string') {
 		try {
 			bot.config.extend(require(BOT_DIR + '/' + config));
-			logger.info('Config loaded!');
+			bot._configWatch = require('fs').watch(BOT_DIR + '/' + config, {
+				persistent: false
+			}, function(event, filename) {
+				if (event === 'change') {
+					bot.loadConfig(filename);
+				}
+			});
 		} catch (e) {
 			logger.error('Cannot load config!');
 			error = new Error('Cannot load config!');
@@ -111,6 +123,13 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 	} else {
 		try {
 			bot.config.extend(require(BOT_DIR + '/config.json'));
+			bot._configWatch = require('fs').watch(BOT_DIR + '/config.json', {
+				persistent: false
+			}, function(event, filename) {
+				if (event === 'change') {
+					bot.loadConfig(filename);
+				}
+			});
 		} catch (e) {
 			logger.error('Cannot load config!');
 			error = new Error('Cannot load config!');
