@@ -106,6 +106,7 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 
 	if (typeof config === 'string') {
 		try {
+			require.cache[BOT_DIR + '/' + config] = null;
 			bot.config.extend(require(BOT_DIR + '/' + config));
 			bot._configWatch = require('fs').watch(BOT_DIR + '/' + config, {
 				persistent: false
@@ -122,6 +123,7 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 		bot.config.extend(config);
 	} else {
 		try {
+			require.cache[BOT_DIR + '/config.json'] = null;
 			bot.config.extend(require(BOT_DIR + '/config.json'));
 			bot._configWatch = require('fs').watch(BOT_DIR + '/config.json', {
 				persistent: false
