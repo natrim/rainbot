@@ -162,9 +162,9 @@ module.exports.init = function(reload) {
 	if (!reload) {
 		this.actions = {};
 		this.commands = {};
-		this.groups = this.config.groups || {};
 	}
 
+	this.groups = this.config.groups || {};
 	this.controls = new Controls(this.require('irc'), this.actions, this.commands, this.groups);
 
 	if (typeof this.config.commandDelimiter === 'string') {
