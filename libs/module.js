@@ -82,7 +82,7 @@ Module.prototype.halt = function halt(callback) {
 	return this;
 };
 
-Module.prototype.reload = function reload(callback) {
+Module.prototype.reload = function reload(callback, config) {
 	var error = null;
 	if (this.loaded) {
 		this.reloading = true;
@@ -106,6 +106,7 @@ Module.prototype.reload = function reload(callback) {
 			error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e.message);
 		}
 		if (this.loaded) {
+			if (config) this.config = config;
 			if (typeof this.context.init === 'function') this.context.init.call(this, true);
 		}
 
