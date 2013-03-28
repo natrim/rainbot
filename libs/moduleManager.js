@@ -89,7 +89,7 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 
 	logger.debug('Load of \'' + name + '\' module' + (error ? ' failed' : ' is success') + '.');
 
-	if (callback) callback(error, module, this);
+	if (callback) callback(error, error ? name : module, this);
 	else if (error) throw error;
 	return this;
 };
