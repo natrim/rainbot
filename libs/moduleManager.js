@@ -48,7 +48,7 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 	if (typeof name !== 'string' || name === '') {
 		error = new Error('Please enter a name!');
 	} else if (this.exists(name)) {
-		module = this.get(name);
+		error = new Error('Module \'' + name + '\' is already loaded!');
 	} else {
 		if (typeof this[name] !== 'undefined') {
 			error = new Error('Reserved module name! Please rename your module!');
