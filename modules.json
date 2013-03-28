@@ -1,5 +1,6 @@
 {
 	"commands": true,
 	"responses": true,
-	"shell": true
+	"shell": true,
+	"twitter": false
 }
