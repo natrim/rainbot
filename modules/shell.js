@@ -28,10 +28,11 @@ ShellSource.prototype.reply = ShellSource.prototype.respond = ShellSource.protot
 	console.log('[PONY] ' + msg);
 };
 
-function Shell(module, rl, c) {
+function Shell(module, rl, c, irc) {
 	this.module = module;
 	this.rl = rl;
 	this.c = c;
+	this.irc = irc;
 	this.promptString = 'PONY> ';
 
 	//clean what could be on before
@@ -58,6 +59,13 @@ Shell.prototype.parseLine = function(cmd) {
 	switch (cmd) {
 		case '':
 			//nothing
+			break;
+		case 'connect':
+			if (!this.irc.connected) {
+				this.irc.connect();
+			} else {
+				console.log('[SHELL] I\'m already connected to \'' + this.irc.server + '\'!');
+			}
 			break;
 		case 'exit':
 		case '.exit':
@@ -111,7 +119,7 @@ module.exports.init = function(reload) {
 		module.mm = bot.modules;
 	});
 
-	this.shell = new Shell(this, this.rl, this.require('controls').controls);
+	this.shell = new Shell(this, this.rl, this.require('controls').controls, this.require('irc'));
 };
 
 module.exports.halt = function(reload) {
