@@ -79,6 +79,9 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 						configurable: true,
 						value: module
 					});
+
+					//emit this joyfull event for others
+					this.dispatcher.emit('load', name, this, module);
 				}
 			} else {
 				error = new Error('Cannot load \'' + name + '\' module!');
@@ -116,12 +119,16 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 				if (typeof module.halt === 'function') module.halt();
 			} catch (e) {
 				//ignore all exceptions in halt
+				//just note it
 				logger.warn('Got error in module \'' + name + '\' halt: ' + e);
 			}
 
 			//puff it
 			delete this._modules[name];
 			if (this[name] === module) delete this[name];
+
+			//emit this tragic event for others
+			this.dispatcher.emit('unload', name, this, module);
 		} else {
 			error = new Error('Module \'' + name + '\' is not loaded!');
 		}
@@ -149,6 +156,11 @@ ModuleManager.prototype.reload = function(name, callback) {
 		}
 	} else {
 		error = new Error('Module \'' + name + '\' is not loaded!');
+	}
+
+	if (!error) {
+		//emit this somewhat sympatic event for others
+		this.dispatcher.emit('reload', name, this, module);
 	}
 
 	logger.debug('Reload of \'' + name + '\' module' + (error ? ' failed' : ' is success') + '.');
