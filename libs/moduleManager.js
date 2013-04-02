@@ -83,6 +83,8 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 					//add as property for quick access
 					Object.defineProperty(this, name, {
 						configurable: true,
+						enumerable: false,
+						writable: false,
 						value: module
 					});
 

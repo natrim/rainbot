@@ -2,21 +2,28 @@
 /* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
-function Source(nick, user, host) {
+function Source(irc, nick, user, host) {
 	this.nick = nick;
 	this.user = user;
 	this.host = host;
 	this.channel = '';
+
+	Object.defineProperty(this, 'irc', {
+		value: irc,
+		enumerable: false,
+		writable: false,
+		configurable: false
+	});
 }
 
 Source.prototype.valueOf = Source.prototype.toString = function() {
 	return this.nick + (this.host ? (this.user ? '!' + this.user : '') + '@' + this.host : '');
 };
 
-Source.fromString = function(string) {
+Source.fromString = function(irc, string) {
 	var m = string.match(/^([^ !@]+)(?:(?:!([^ @]+))?@([^ ]+))?$/);
 	if (m) {
-		return new Source(m[1], m[2], m[3]);
+		return new Source(irc, m[1], m[2], m[3]);
 	} else {
 		return null;
 	}

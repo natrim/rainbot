@@ -27,6 +27,7 @@ function IRC(server, dispatcher, config) {
 	this.dispatcher = dispatcher;
 
 	Object.defineProperty(this, 'connected', {
+		configurable: false,
 		enumerable: true,
 		get: function() {
 			return server.connected;
@@ -182,10 +183,7 @@ IRC.prototype.processLine = function(line) {
 	var source, text;
 
 	if (msg.prefix) {
-		source = Source.fromString(msg.prefix);
-		Object.defineProperty(source, 'irc', {
-			value: this
-		});
+		source = Source.fromString(this, msg.prefix);
 	}
 
 	if (msg.command) {
@@ -438,22 +436,27 @@ exports.init = function(reload) {
 	var module = this;
 
 	if (!reload) {
-		Object.defineProperty(this, 'connected', {
-			enumerable: true,
-			get: function() {
-				return module.server.connected;
-			}
-		});
-		Object.defineProperty(this, 'lastNick', {
-			enumerable: true,
-			get: function() {
-				return module.server.lastNick;
-			}
-		});
-		Object.defineProperty(this, 'currentNick', {
-			enumerable: true,
-			get: function() {
-				return module.server.currentNick;
+		Object.defineProperties(this, {
+			'connected': {
+				enumerable: true,
+				configurable: false,
+				get: function() {
+					return module.server.connected;
+				}
+			},
+			'lastNick': {
+				enumerable: true,
+				configurable: false,
+				get: function() {
+					return module.server.lastNick;
+				}
+			},
+			'currentNick': {
+				enumerable: true,
+				configurable: false,
+				get: function() {
+					return module.server.currentNick;
+				}
 			}
 		});
 	}
