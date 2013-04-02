@@ -55,17 +55,15 @@ function Bot() {
 	//bind to exit event of main process
 	var bot = this;
 	process.on('exit', function() {
-		if (!bot.halting) bot.emit('halt', bot);
+		if (!bot.halting) {
+			bot.halting = true;
+			bot.emit('halt', bot);
+		}
 		bot.unloadModules();
 	});
 
 	//shutdown on ctrl+c gracefully
-	process.on('SIGINT', function() {
-		bot.halting = true;
-		logger.info(':SIGINT Received, Exiting ...');
-		bot.emit('halt', bot);
-		setTimeout(process.exit, 1000);
-	});
+	process.on('SIGINT', this.end.bind(this));
 
 	// This will override SIGTSTP and prevent the program from going to the background.
 	process.on('SIGTSTP', function() {});
@@ -317,10 +315,12 @@ Bot.prototype.run = Bot.prototype.start = function run() {
 };
 
 Bot.prototype.end = Bot.prototype.stop = function end() {
-	this.halting = true;
-	this.emit('halt', this);
-	logger.info('Exiting ...');
-	setTimeout(process.exit, 1000);
+	if (!this.halting) {
+		this.halting = true;
+		this.emit('halt', this);
+		logger.info('Exiting ...');
+		setTimeout(process.exit, 1000); //delay it for a sec
+	}
 };
 
 module.exports.Bot = Bot;
