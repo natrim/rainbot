@@ -17,7 +17,7 @@ ShellSource.prototype.valueOf = ShellSource.prototype.toString = function() {
 };
 
 ShellSource.prototype.reply = ShellSource.prototype.respond = ShellSource.prototype.mention = ShellSource.prototype.action = ShellSource.prototype.tell = ShellSource.prototype.message = ShellSource.prototype.note = ShellSource.prototype.notice = function(msg) {
-	console.log(msg);
+	console.log('[PONY] ' + msg);
 };
 
 function Shell(module, rl, c) {
