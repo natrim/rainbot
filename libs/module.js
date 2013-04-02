@@ -140,10 +140,9 @@ Module.prototype.injectModuleManager = function(mm, callback) {
 };
 
 Module.prototype.injectDispatcher = function(dispatchBase, callback) {
-	var name = this.name;
 	var error = null;
 	if (typeof dispatchBase !== 'object' || dispatchBase === null) {
-		error = new Error('Wrong dispatcher type for \'' + name + '\' module injected!');
+		error = new Error('Wrong dispatcher type for \'' + this.name + '\' module injected!');
 	} else {
 		var events = [];
 		var module = this;
@@ -197,11 +196,11 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 			emit: function(event) {
 				var args = [];
 				//all emited events needs to be prefixed by module name
-				if (event.search(name + '/') === -1) {
+				if (event.search(module.name + '/') === -1) {
 					for (var val in arguments) {
 						args.push(val);
 					}
-					event = name + '/' + event;
+					event = module.name + '/' + event;
 					args[0] = event;
 				} else {
 					args = arguments;
