@@ -187,13 +187,13 @@ IRC.prototype.processLine = function(line) {
 	}
 
 	if (msg.command) {
-		if (this.config.log) {
-			console.log(date(undefined, this.config.logTimeFormat) + ' [RECV]> ' + line);
-		} else {
-			logger.debug('[RECV]> ' + line);
-		}
+		if (msg.command !== 'PING' && msg.command !== 'PONG') { //if not ping/pong then log and emit it
+			if (this.config.log) {
+				console.log(date(undefined, this.config.logTimeFormat) + ' [RECV]> ' + line);
+			} else {
+				logger.debug('[RECV]> ' + line);
+			}
 
-		if (msg.command !== 'PING' && msg.command !== 'PONG') { //if not ping/pong then emit it
 			this.dispatcher.emit('irc/RECV', line);
 		}
 
