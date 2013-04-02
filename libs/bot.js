@@ -38,12 +38,14 @@ function Bot() {
 	this.dispatcher = dispatcher;
 
 	//list of core modules
-	this.core_modules = {
-		'irc': true,
-		'controls': true,
-		'nickserv': true
-	};
+	this._core_modules = ['irc', 'controls'];
 
+	//protect the core modules from unload
+	this._core_modules.forEach(function(m) {
+		moduleManager.protect(m, true);
+	});
+
+	//set to true if halting the bot
 	this.halting = false;
 
 	//bind to exit event of main process
@@ -200,10 +202,8 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 	}
 
 	//first load core modules
-	Object.keys(bot.core_modules).forEach(function(name) {
-		if (bot.core_modules[name] === true) {
-			bot.modules.load(name);
-		}
+	bot._core_modules.forEach(function(name) {
+		bot.modules.load(name);
 	});
 
 	//then custom modules

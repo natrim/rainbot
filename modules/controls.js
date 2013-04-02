@@ -1,3 +1,7 @@
+/**
+ * Core module
+ */
+
 var logger = require(LIBS_DIR + '/logger');
 
 var Command = require('./controls/command').Command;

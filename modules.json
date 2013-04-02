@@ -1,4 +1,5 @@
 {
+	"nickserv": true,
 	"commands": true,
 	"responses": true,
 	"shell": true,
