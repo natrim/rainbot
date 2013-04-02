@@ -461,9 +461,18 @@ exports.init = function(reload) {
 	//export functions
 	require(LIBS_DIR + '/helpers').export(this, this.irc, ['command', 'join', 'part', 'connect', 'quit', 'nick', 'ctcp', 'action', 'notice', 'privMsg']);
 
+	//check the autoconnect config
+	if (typeof this.config.autoconnect !== 'boolean') {
+		this.config.autoconnect = false;
+	}
+
 	//connect to server on bot init
 	this.dispatcher.on('init', function() {
-		module.irc.connect();
+		if (module.config.autoconnect) {
+			module.irc.connect();
+		} else {
+			logger.info('IRC ready, autoconnect disabled...');
+		}
 	});
 
 	//quit irc on bot halt

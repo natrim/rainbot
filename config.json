@@ -6,6 +6,7 @@
 	},
 	"irc": {
 		"hostname": "irc.ponychat.net",
+		"autoconnect": true,
 		"port": 6667,
 		"ssl": false,
 		"channel": "#pony",
