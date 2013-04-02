@@ -12,6 +12,11 @@ module.exports.init = function() {
 	var irc = this.require('irc');
 
 	c.addAction('quit', function(source, args) {
+		if (!irc.connected) {
+			source.respond('I\'m not connected to server!');
+			return;
+		}
+
 		source.respond('okey, ' + source.nick + '! Goodbye everypony!');
 		args.shift();
 		irc.quit(args.join(' '));
