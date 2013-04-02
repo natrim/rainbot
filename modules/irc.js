@@ -292,8 +292,6 @@ IRC.prototype.send = function(msg, nolog) {
 	if (this.config.log) {
 		if (!nolog) {
 			console.log(date(undefined, this.config.logTimeFormat) + ' [SEND]> ' + msg.replace(/\r\n$/, ''));
-		} else {
-			logger.debug('[SEND]> ' + msg.replace(/\r\n$/, ''));
 		}
 	} else {
 		logger.debug('[SEND]> ' + msg.replace(/\r\n$/, ''));
