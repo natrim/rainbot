@@ -67,6 +67,13 @@ Shell.prototype.parseLine = function(cmd) {
 				console.log('[SHELL] I\'m already connected to \'' + this.irc.server + '\'!');
 			}
 			break;
+		case 'disconnect':
+			if (this.irc.connected) {
+				this.irc.quit('Pony sleep...');
+			} else {
+				console.log('[SHELL] I\'m not connected to server!');
+			}
+			break;
 		case 'exit':
 		case '.exit':
 			process.emit('SIGINT');
@@ -114,12 +121,16 @@ module.exports.init = function(reload) {
 		});
 	}
 
+	var irc = this.require('irc');
 	var module = this;
 	this.dispatcher.on('init', function(bot) {
 		module.mm = bot.modules;
+		if (!irc.config.autoconnect) {
+			console.log('[SHELL] You can connect to IRC using \'connect\'!');
+		}
 	});
 
-	this.shell = new Shell(this, this.rl, this.require('controls').controls, this.require('irc'));
+	this.shell = new Shell(this, this.rl, this.require('controls').controls, irc);
 };
 
 module.exports.halt = function(reload) {
