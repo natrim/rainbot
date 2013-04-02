@@ -235,8 +235,19 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 
 Bot.prototype.unloadModules = function() {
 	var bot = this;
+	//unprotect core modules
+	bot._core_modules.forEach(function(name) {
+		bot.modules.protect(name, false);
+	});
+	//unload all modules
 	bot.modules.getModules().reverse().forEach(function(m) {
-		bot.modules.unload(m);
+		try {
+			bot.modules.unload(m);
+		} catch (e) {
+			//ignore all errors
+			//just note them
+			logger.warn('Caught error on module \'' + m + '\' unload: ' + e);
+		}
 	});
 	logger.info('Modules unloaded!');
 };
