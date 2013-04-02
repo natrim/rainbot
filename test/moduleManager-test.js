@@ -89,6 +89,10 @@ suite.addBatch({
 			},
 			'then i get it loaded': function(err, module, mm) {
 				assert.isNull(err);
+				assert.equal(module, 'test');
+
+				module = mm.get(module);
+
 				assert.isObject(module);
 				assert.instanceOf(module, M);
 				assert.equal(module.name, 'test');
@@ -107,7 +111,6 @@ suite.addBatch({
 			'then i get error': function(err, module, mm) {
 				assert.isError(err);
 				assert.equal(err.message, 'Error happened during module initialization: Failed loading context of \'test2\' module! Cannot find module \'../modules/test2.js\'');
-				assert.isNull(module);
 				assert.isFalse(mm.has('test2'));
 			}
 		},
