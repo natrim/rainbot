@@ -38,7 +38,7 @@ Logger.prototype.log = function(msg, level) {
         console.error(colors.red[0] + '[ERROR] ' + colors.red[1] + msg);
         break;
       case 'warn':
-        console.warn(colors.yellow[0] + '[WARNING] ' + msg + colors.yellow[1]);
+        console.warn(colors.yellow[0] + '[WARNING] ' + colors.yellow[1] + msg);
         break;
       case 'info':
         console.info(colors.cyan[0] + '[INFO] ' + colors.cyan[1] + msg);
