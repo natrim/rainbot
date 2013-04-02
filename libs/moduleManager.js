@@ -15,6 +15,8 @@ function ModuleManager(dispatcher, config) {
 	} else {
 		this.config = require(LIBS_DIR + '/config').create();
 	}
+
+	this._protected_modules = {};
 }
 
 ModuleManager.prototype.getModules = function() {
@@ -105,7 +107,9 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 	if (typeof name !== 'string' || name === '') {
 		error = new Error('Please enter a name!');
 	} else {
-		if (this.exists(name)) {
+		if (typeof this._protected_modules[name] !== 'undefined' || this._protected_modules[name]) {
+			error = new Error('Module \'' + name + '\' is protected!');
+		} else if (this.exists(name)) {
 			var module = this.get(name);
 
 			//disable event binding on halt with uncatched exception so users gets kicked in face
@@ -179,6 +183,20 @@ ModuleManager.prototype.require = function(name) {
 	}
 
 	return this.get(name);
+};
+
+ModuleManager.prototype.protect = function(name, prot) {
+	if (typeof name !== 'string' || name === '') {
+		throw new Error('Please enter a name!');
+	}
+
+	if (typeof prot === 'undefined') { //emtpy == true
+		prot = true;
+	}
+
+	this._protected_modules[name] = prot ? true : false;
+
+	return this;
 };
 
 module.exports.ModuleManager = ModuleManager;

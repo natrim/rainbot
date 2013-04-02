@@ -192,7 +192,28 @@ suite.addBatch({
 			}
 		}
 	}
+});
 
+
+suite.addBatch({
+	'When i load module and protected it': {
+		topic: function() {
+			var mm = (new MM());
+			mm.load('test');
+			mm.protect('test');
+			return mm;
+		},
+		'then i cannot unload it': {
+			topic: function(mm) {
+				mm.unload('test', this.callback);
+			},
+			'so, i get error': function(err, m, mm) {
+				assert.isError(err);
+				assert.equal(err.message, 'Module \'test\' is protected!');
+				assert.isTrue(mm.has('test'));
+			}
+		}
+	}
 });
 
 suite.export(module);
