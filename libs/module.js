@@ -201,16 +201,11 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 				var args = [];
 				//all emited events needs to be prefixed by module name
 				if (event.search(module.name + '/') === -1) {
-					for (var val in arguments) {
-						args.push(val);
-					}
 					event = module.name + '/' + event;
-					args[0] = event;
-				} else {
-					args = arguments;
+					arguments[0] = event;
 				}
 				try {
-					dispatchBase.emit.apply(dispatchBase, args);
+					dispatchBase.emit.apply(dispatchBase, arguments);
 				} catch (e) {
 					dispatchBase.emit.call(dispatchBase, 'dispatchError', event, e, module);
 				}
