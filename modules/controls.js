@@ -185,6 +185,7 @@ module.exports.init = function(reload) {
 	if (!reload) {
 		Object.defineProperty(this, 'commandDelimiter', {
 			enumerable: true,
+			configurable: false,
 			get: function() {
 				return module.controls.commandDelimiter;
 			}
