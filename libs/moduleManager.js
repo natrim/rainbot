@@ -107,7 +107,7 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 	if (typeof name !== 'string' || name === '') {
 		error = new Error('Please enter a name!');
 	} else {
-		if (typeof this._protected_modules[name] !== 'undefined' || this._protected_modules[name]) {
+		if (typeof this._protected_modules[name] !== 'undefined' && this._protected_modules[name] === true) {
 			error = new Error('Module \'' + name + '\' is protected!');
 		} else if (this.exists(name)) {
 			var module = this.get(name);
