@@ -1,6 +1,12 @@
-module.exports.init = function() {
-	'use strict';
+/**
+ * Some basic commands for bot
+ */
 
+/* jslint node: true */
+/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
+'use strict';
+
+module.exports.init = function() {
 	var dispatcher = this.dispatcher;
 	var c = this.require('controls');
 	var irc = this.require('irc');

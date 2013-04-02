@@ -1,3 +1,7 @@
+/* jslint node: true */
+/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
+'use strict';
+
 function Source(nick, user, host) {
 	this.nick = nick;
 	this.user = user;

@@ -1,3 +1,6 @@
+/* jslint node: true */
+'use strict';
+
 //create bot
 
 var botDomain = require('domain').create();

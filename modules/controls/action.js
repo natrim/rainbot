@@ -1,3 +1,7 @@
+/* jslint node: true */
+/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
+'use strict';
+
 function Action(name, action, rule, access) {
 	if (!(rule instanceof RegExp)) {
 		throw new Error('Rule must be RegExp!');

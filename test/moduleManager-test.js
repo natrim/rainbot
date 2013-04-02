@@ -1,3 +1,5 @@
+/* jslint node: true */
+/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 var vows = require('vows'),
@@ -9,7 +11,7 @@ if (!global.LIBS_DIR) global.LIBS_DIR = '../libs';
 if (!global.MODULES_DIR) global.MODULES_DIR = '../modules';
 
 //disable logger
-require('../libs/logger').enabled = false;
+require(LIBS_DIR + '/logger').enabled = false;
 
 var MM = require(LIBS_DIR + '/moduleManager').ModuleManager;
 var M = require(LIBS_DIR + '/module').Module;

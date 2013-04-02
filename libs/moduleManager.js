@@ -1,3 +1,7 @@
+/* jslint node: true */
+/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
+'use strict';
+
 var MODULE = require(LIBS_DIR + '/module').Module;
 
 var logger = require(LIBS_DIR + '/logger');

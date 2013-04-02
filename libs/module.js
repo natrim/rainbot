@@ -1,3 +1,7 @@
+/* jslint node: true */
+/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
+'use strict';
+
 var logger = require(LIBS_DIR + '/logger');
 
 function Module(name) {

@@ -1,3 +1,11 @@
+/**
+ * Twitter reader
+ */
+
+/* jslint node: true */
+/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
+'use strict';
+
 var https = require('https');
 var df = require(LIBS_DIR + '/helpers').dateFormat;
 

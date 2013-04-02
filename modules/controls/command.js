@@ -1,3 +1,7 @@
+/* jslint node: true */
+/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
+'use strict';
+
 function Command(name, action, access) {
 	this.name = name;
 	this.action = action;

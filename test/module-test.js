@@ -1,3 +1,5 @@
+/* jslint node: true */
+/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 var vows = require('vows'),
@@ -9,16 +11,16 @@ if (!global.LIBS_DIR) global.LIBS_DIR = '../libs';
 if (!global.MODULES_DIR) global.MODULES_DIR = '../modules';
 
 //disable logger
-require('../libs/logger').enabled = false;
+require(LIBS_DIR + '/logger').enabled = false;
 
-var M = require('../libs/module').Module;
+var M = require(LIBS_DIR + '/module').Module;
 
-var h = require('../libs/helpers');
+var h = require(LIBS_DIR + '/helpers');
 
 //disable file resolving of test2 module
 M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
 	if (this.name === 'test2') {
-		return '../modules/' + this.fileName;
+		return MODULES_DIR + '/' + this.fileName;
 	} else {
 		return resol.apply(this);
 	}

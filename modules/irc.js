@@ -1,6 +1,11 @@
 /**
- * Core module
+ * IRC Core module
+ * all the IRC parasprites
  */
+
+/* jslint node: true */
+/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
+'use strict';
 
 var logger = require(LIBS_DIR + '/logger');
 

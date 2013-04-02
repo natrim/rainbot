@@ -1,6 +1,12 @@
-exports.init = function() {
-	'use strict';
+/**
+ * Nickserv support - basic
+ */
 
+/* jslint node: true */
+/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
+'use strict';
+
+exports.init = function() {
 	if (typeof this.config.password === 'undefined') {
 		this.config.password = '';
 	}

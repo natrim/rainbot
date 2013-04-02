@@ -1,3 +1,11 @@
+/**
+ * Some default responses
+ */
+
+/* jslint node: true */
+/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
+'use strict';
+
 module.exports.init = function() {
 	var c = this.require('controls');
 	c.addAction('question', function(source) {
