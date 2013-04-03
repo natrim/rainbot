@@ -5,5 +5,6 @@
 	"responses": true,
 	"shell": true,
 	"twitter": false,
-	"countdown": false
+	"countdown": false,
+	"dice": false
 }
