@@ -26,11 +26,27 @@ function IRC(server, dispatcher, config) {
 	this.config = config;
 	this.dispatcher = dispatcher;
 
-	Object.defineProperty(this, 'connected', {
-		configurable: false,
-		enumerable: true,
-		get: function() {
-			return server.connected;
+	Object.defineProperties(this, {
+		'connected': {
+			enumerable: true,
+			configurable: false,
+			get: function() {
+				return server.connected;
+			}
+		},
+		'lastNick': {
+			enumerable: true,
+			configurable: false,
+			get: function() {
+				return server.lastNick;
+			}
+		},
+		'currentNick': {
+			enumerable: true,
+			configurable: false,
+			get: function() {
+				return server.currentNick;
+			}
 		}
 	});
 
