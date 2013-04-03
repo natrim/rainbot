@@ -63,16 +63,16 @@ function getTweet(source, user, number, wait, dateFormat) {
 exports.init = function() {
     var config = this.config;
 
-    if (typeof config.tweets === 'undefined') {
-        config.tweets = 5;
+    if (typeof config.maxTweets === 'undefined') {
+        config.maxTweets = 5;
     }
 
-    if (typeof config.wait === 'undefined') {
-        config.wait = 1000;
+    if (typeof config.waitBetweenMessages === 'undefined') {
+        config.waitBetweenMessages = 1000;
     }
 
-    if (typeof config.user === 'undefined') {
-        config.user = 'MyLittlePony';
+    if (typeof config.defaultUser === 'undefined') {
+        config.defaultUser = 'MyLittlePony';
     }
 
     if (typeof config.dateFormat === 'undefined') {
@@ -80,7 +80,7 @@ exports.init = function() {
     }
 
     function twitterCommand(source, argv) {
-        var user = config.user;
+        var user = config.defaultUser;
         var number = 1;
 
         if (argv[0]) {
@@ -97,13 +97,13 @@ exports.init = function() {
             }
         }
 
-        if (number > config.tweets) {
-            source.mention('i can catch only last ' + config.tweets + ' birds at once!');
-            number = config.tweets;
+        if (number > config.maxTweets) {
+            source.mention('i can catch only last ' + config.maxTweets + ' birds at once!');
+            number = config.maxTweets;
         }
 
         source.action('is catching' + (number > 1 ? ' ' + number : '') + ' blue bird' + (number > 1 ? 's' : '') + ' with message from \'' + user + '\'!');
-        getTweet(source, user, number, config.wait, config.dateFormat);
+        getTweet(source, user, number, config.waitBetweenMessages, config.dateFormat);
     }
 
     var c = this.require('controls');

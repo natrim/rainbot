@@ -5,8 +5,11 @@
 		"debug": false
 	},
 	"irc": {
-		"hostname": "irc.ponychat.net",
 		"autoconnect": true,
+		"nick": "RD",
+		"username": "pony",
+		"realname": "Rainbot Dash",
+		"hostname": "irc.ponychat.net",
 		"port": 6667,
 		"ssl": false,
 		"channel": "#pony",
@@ -17,9 +20,21 @@
 		"password": ""
 	},
 	"controls": {
+		"commandDelimiter": ".",
 		"groups": {
 			"owner": [],
 			"operators": []
 		}
+	},
+	"twitter": {
+		"maxTweets": 5,
+		"waitBetweenMessages": 1000,
+		"defaultUser": "MyLittlePony",
+		"dateFormat": "DD.MM.YYYY HH:II:SS"
+	},
+	"countdown": {
+		"checkEvery": 3600000,
+		"defaultSerial": "My Little Pony",
+		"dateFormat": "DD.MM.YYYY HH:II TZ"
 	}
 }
