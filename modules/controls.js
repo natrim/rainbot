@@ -113,7 +113,7 @@ Controls.prototype.processCommand = function(source, text) {
 		if (command == this.commands[name].name) { //use == to not check type
 			if (this.checkAccess(source, this.commands[name])) { //run the command only if the user has access
 				logger.debug('Processing Command \'' + name + '\'');
-				this.commands[name].action(source, args, text);
+				this.commands[name].action(source, args, text, command);
 			} else {
 				logger.debug('Command \'' + name + '\' access for user \'' + source + '\' denied!');
 				source.notice('Command Access denied! Do i know you?');
