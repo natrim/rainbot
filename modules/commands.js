@@ -283,6 +283,7 @@ module.exports.init = function() {
 			var message = stdouts.shift();
 			var updated_modules = [];
 			var updated_core = false;
+			var npm = false;
 			var uptodate = false;
 
 			if (message) {
@@ -302,6 +303,11 @@ module.exports.init = function() {
 						tmp = value.match(/app\.js|libs\//);
 						if (tmp) {
 							updated_core = true;
+						} else {
+							tmp = value.match(/package\.json\//);
+							if (tmp) {
+								npm = true;
+							}
 						}
 					}
 				});
@@ -309,6 +315,10 @@ module.exports.init = function() {
 
 			if (updated_core) {
 				source.respond('CORE was updated, please restart the bot! ... Eh, i mean\'t: release the pony!');
+			}
+
+			if (npm) {
+				source.respond('package.json was updated, please use \'npm install\'');
 			}
 
 			if (updated_modules.length > 0) {
