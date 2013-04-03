@@ -269,6 +269,57 @@ module.exports.init = function() {
 			}
 		}
 	}, /^(say|tell)[ ]+(#?\w+)[ ]*(.*)$/i, ['owner', 'operators']);
+
+	c.addAction('update', function(source) {
+		source.action('is fetching updates...');
+
+		require('child_process').exec('cd ' + BOT_DIR + ' && git pull', function(error, stdout, stderr) {
+			if (error) {
+				source.respond('Update failed!');
+				return;
+			}
+
+			var stdouts = stdout.replace(/\n$/, '').split('\n');
+			var message = stdouts.shift();
+			var updated_modules = [];
+			var updated_core = false;
+			var uptodate = false;
+
+			if (message) {
+				if (message.match(/up\-to\-date/)) uptodate = true;
+				source.respond(message);
+			} else {
+				source.respond('Update failed!');
+				return;
+			}
+
+			if (stdouts.length > 0) {
+				stdouts.forEach(function(value) {
+					var tmp = value.match(/modules\/(.+)\.js/);
+					if (tmp) {
+						updated_modules.push(tmp[1]);
+					} else {
+						tmp = value.match(/app\.js|libs\//);
+						if (tmp) {
+							updated_core = true;
+						}
+					}
+				});
+			}
+
+			if (updated_core) {
+				source.respond('CORE was updated, please restart the bot! ... Eh, i mean\'t: release the pony!');
+			}
+
+			if (updated_modules.length > 0) {
+				source.respond('Don\'t forget to reload updated modules: ' + updated_modules.join(', '));
+			}
+
+			if (!updated_core && updated_modules.length <= 0 && !uptodate) {
+				source.respond('Nothing important has been updated.');
+			}
+		});
+	}, /^update$/, ['owner']);
 };
 
 module.exports.halt = function() {
@@ -277,6 +328,7 @@ module.exports.halt = function() {
 	c.removeActions(['quit', 'part', 'join', 'nick',
 		'help',
 		'lsmod', 'load', 'unload', 'reload',
-		'say']);
+		'say',
+		'update']);
 	c.removeCommand('help');
 };
