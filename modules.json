@@ -4,9 +4,10 @@
 	"commands": true,
 	"responses": true,
 	"shell": true,
-	"twitter": false,
-	"countdown": false,
-	"calc": false,
-	"dice": false,
-	"coin": false
+	"twitter": true,
+	"yayponies": true,
+	"countdown": true,
+	"calc": true,
+	"dice": true,
+	"coin": true
 }
