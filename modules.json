@@ -6,5 +6,6 @@
 	"shell": true,
 	"twitter": false,
 	"countdown": false,
-	"dice": false
+	"dice": false,
+	"coin": false
 }
