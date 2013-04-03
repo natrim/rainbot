@@ -16,4 +16,7 @@ botDomain.run(function() {
 	bot.loadConfig(); //load the config from file - default is config.json
 	bot.loadModules(); //preload all active modules - default is from config or modules.json
 	bot.run(); //and run the bot
+
+	//export the bot
+	module.exports = bot;
 });
