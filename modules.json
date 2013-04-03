@@ -3,5 +3,6 @@
 	"commands": true,
 	"responses": true,
 	"shell": true,
-	"twitter": false
+	"twitter": false,
+	"countdown": false
 }
