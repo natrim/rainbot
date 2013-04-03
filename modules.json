@@ -1,4 +1,5 @@
 {
+	"irclog": false,
 	"nickserv": true,
 	"commands": true,
 	"responses": true,

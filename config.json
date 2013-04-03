@@ -16,6 +16,9 @@
 		"log": true,
 		"logTimeFormat": "DD.MM.YYYY HH:II:SS"
 	},
+	"irclog": {
+		"logfile": "irc.log"
+	},
 	"nickserv": {
 		"password": ""
 	},
