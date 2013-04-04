@@ -45,13 +45,6 @@ var formats = {
 	'itunes': 'itunes1080p'
 };
 
-var bookFormats = {
-	'epub': 'epub',
-	'e': 'epub',
-	'pdf': 'pdf',
-	'cbz': 'cbz'
-};
-
 var yayPoniesMirror = 'http://main.yayponies.eu/';
 var scanPages = [
 	['7it1.php', 1], //720 raw
@@ -77,8 +70,7 @@ var scanPages = [
 	['4st3.php', 3], //SD
 	['1st1.php', 1], //1080 hdtv
 	['1st2.php', 2], //1080 hdtv
-	['1st3.php', 3], //1080 hdtv
-	['book.php', -1] //books - 1season
+	['1st3.php', 3] //1080 hdtv
 	];
 
 var episodes = [];
@@ -150,49 +142,6 @@ function scanPage(page, season, callback) {
 						}
 					});
 				}
-			} else {
-				match = text.match(/[CK]OMI[CX][ ]+#?(\d+)/i);
-				if (match) {
-					episode = parseInt(match[1], 10);
-					if (episode) {
-						$(this).find('td').each(function() {
-							var lines = $(this).html().replace(/<br[ ]*\/?>/ig, '\n').split('\n');
-							for (var K = 0; K < lines.length; K++) {
-								var con = lines[K];
-								if (con) {
-									var type = '';
-
-									if (con.match(/EPUB/i)) {
-										type = 'epub';
-									} else if (con.match(/PDF/i)) {
-										type = 'pdf';
-									} else if (con.match(/CBZ/i)) {
-										type = 'cbz';
-									}
-
-									if (type) {
-										$(con).find('a[href*=magnet]').each(function() {
-											var magnet = $(this).attr('href') ? $(this).attr('href').match(/magnet:\?xt=urn:btih:(.*)/) : null;
-											if (magnet && $(this).text()) {
-												if (typeof episodes[season - 1][episode - 1] === 'undefined') {
-													episodes[season - 1][episode - 1] = {
-														season: season,
-														episode: episode,
-														name: 'COMIC #' + episode
-													};
-												}
-												if (typeof episodes[season - 1][episode - 1][type] === 'undefined') {
-													episodes[season - 1][episode - 1][type] = {};
-												}
-												episodes[season - 1][episode - 1][type].btih = magnet[1];
-											}
-										});
-									}
-								}
-							}
-						});
-					}
-				}
 			}
 		});
 
@@ -250,58 +199,37 @@ function getPonies(source, arg) {
 
 		var ep = arg[0].match(/s?(\d+)[xe]+(\d+)/i);
 		if (ep === null) {
-			ep = arg[0].match(/(book|comic|komix|b|c|k)(\d+)/i);
-			if (ep === null) {
-				source.mention('specify episode using \'s??e??\' or \'??x??\' or \'??e??\'!');
-				return;
-			} else {
-				ep[1] = -1; //books
-			}
+			source.mention('specify episode using \'s??e??\' or \'??x??\' or \'??e??\'!');
+			return;
 		}
 
 		//make int
 		ep[1] = parseInt(ep[1], 10);
 		ep[2] = parseInt(ep[2], 10);
 
-		var format = formats[typeof arg[2] !== 'undefined' ? arg[1].toLowerCase() : (ep[1] === -1 ? 'epub' : 'itunes1080p')];
+		var format = formats[typeof arg[2] !== 'undefined' ? arg[1].toLowerCase() : 'itunes1080p'];
 
 		if (!format) {
-			if (ep[1] == -1) {
-				format = bookFormats[typeof arg[1] !== 'undefined' ? arg[1].toLowerCase() : 'epub'];
-				if (!format) {
-					source.mention('wrong book format! you can use: epub, pdf, cbz');
-					return;
-				}
-			} else {
-				source.mention('wrong format! you can use: cc1080p, itunes1080p, itunes1080au, hdtv1080p, cc720p, itunes720p, itunes720au, sd');
-				return;
-			}
+			source.mention('wrong format! you can use: cc1080p, itunes1080p, itunes1080au, hdtv1080p, cc720p, itunes720p, itunes720au, sd');
+			return;
 		}
 
 		if ((episode = episodes[ep[1] - 1]) && (episode = episode[ep[2] - 1]) && episode[format] && episode[format].btih) {
 			//try derpy first
 			if (typeof arg[2] === 'undefined' || arg[2].substr(0, 2) !== 'no') {
-				if (format === 'itunes720p' && episode['yp720p'] && episode['yp720p'].btih) {
+				if (format === 'itunes720p' && episode.yp720p && episode.yp720p.btih) {
 					format = 'yp720p';
-				} else if (format === 'itunes1080p' && episode['yp1080p'] && episode['yp1080p'].btih) {
+				} else if (format === 'itunes1080p' && episode.yp1080p && episode.yp1080p.btih) {
 					format = 'yp1080p';
 				}
 			}
 
-			if (ep[1] == -1) {
-				source.mention('book #' + ep[2] + ' in format ' + format + ' - magnet:?xt=urn:btih:' + episode[format].btih);
-			} else {
-				source.mention('episode S' + (episode.season < 10 ? '0' + episode.season : episode.season) + 'E' + (episode.episode < 10 ? '0' + episode.episode : episode.episode) + (episode.name ? ' (' + episode.name + ')' : '') + ' in format ' + format + ' - magnet:?xt=urn:btih:' + episode[format].btih);
-			}
+			source.mention('episode S' + (episode.season < 10 ? '0' + episode.season : episode.season) + 'E' + (episode.episode < 10 ? '0' + episode.episode : episode.episode) + (episode.name ? ' (' + episode.name + ')' : '') + ' in format ' + format + ' - magnet:?xt=urn:btih:' + episode[format].btih);
 		} else {
 			if ((episode = episodes[ep[1] - 1]) && (episode = episode[ep[2] - 1])) {
-				if (ep[1] == -1) {
-					source.mention('book #' + ep[2] + ' in format ' + format + ' is not available, try different format (epub, pdf, cbz)');
-				} else {
-					source.mention('episode S' + (ep[1] < 10 ? '0' + ep[1] : ep[1]) + 'E' + (ep[2] < 10 ? '0' + ep[2] : ep[2]) + ' in format ' + format + ' is not available, try different format (cc1080p, itunes1080p, itunes1080au, hdtv1080p, cc720p, itunes720p, itunes720au, sd)');
-				}
+				source.mention('episode S' + (ep[1] < 10 ? '0' + ep[1] : ep[1]) + 'E' + (ep[2] < 10 ? '0' + ep[2] : ep[2]) + ' in format ' + format + ' is not available, try different format (cc1080p, itunes1080p, itunes1080au, hdtv1080p, cc720p, itunes720p, itunes720au, sd)');
 			} else {
-				source.mention('i can\'t find a download link for that ' + (ep[1] == -1 ? 'book #' + ep[2] : 'episode S' + (ep[1] < 10 ? '0' + ep[1] : ep[1]) + 'E' + (ep[2] < 10 ? '0' + ep[2] : ep[2])));
+				source.mention('i can\'t find a download link for that ' + 'episode S' + (ep[1] < 10 ? '0' + ep[1] : ep[1]) + 'E' + (ep[2] < 10 ? '0' + ep[2] : ep[2]));
 			}
 		}
 	} else {
@@ -339,5 +267,6 @@ exports.init = function(reload) {
 exports.halt = function() {
 	var c = this.require('controls');
 	c.removeCommands(['ponies', 'pony', 'yayponies']);
+	c.removeAction('refresh');
 	clearInterval(this._refresh);
 };
