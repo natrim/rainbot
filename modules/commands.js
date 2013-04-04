@@ -284,6 +284,7 @@ module.exports.init = function() {
 			var updated_modules = [];
 			var updated_core = false;
 			var npm = false;
+			var config = false;
 			var uptodate = false;
 
 			if (message) {
@@ -304,9 +305,14 @@ module.exports.init = function() {
 						if (tmp) {
 							updated_core = true;
 						} else {
-							tmp = value.match(/package\.json\//);
+							tmp = value.match(/package\.json/);
 							if (tmp) {
 								npm = true;
+							} else {
+								tmp = value.match(/example-config\.json/);
+								if (tmp) {
+									config = true;
+								}
 							}
 						}
 					}
@@ -319,6 +325,10 @@ module.exports.init = function() {
 
 			if (npm) {
 				source.respond('package.json was updated, please use \'npm install\'');
+			}
+
+			if (config) {
+				source.respond('example-config.json was updated, please use check your configuration');
 			}
 
 			if (updated_modules.length > 0) {
