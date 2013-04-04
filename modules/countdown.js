@@ -14,7 +14,7 @@ function parseDecimal(v) {
     return parseInt(v, 10);
 }
 
-function TvCountDownFactory(event, what, serial) {
+function TvCountDownFactory(what, serial, callback) {
     http.get({
         host: 'tvcountdown.com',
         path: '/s/' + what
@@ -48,20 +48,20 @@ function TvCountDownFactory(event, what, serial) {
                         if (typeof episode[i] === 'string') {
                             eptext = episode[i].split('_').pop();
                         }
-                        event.emit('countdown/FOUND' + what, airing, epname, eptext, dnow);
+                        callback(null, what, airing, epname, eptext, dnow);
                         return;
                     }
                 }
             }
 
-            event.emit('countdown/NOTFOUND' + what);
+            callback(new Error('i did not found next episode' + (serial ? ' of \'' + serial + '\'' : '') + '!'), what);
         });
     }).on('error', function(e) {
-        event.emit('countdown/ERROR' + what, 'i got error while counting down!');
+        callback(new Error('i got error while counting down!'), what);
     });
 }
 
-function MLPCountDownFactory(event, what) {
+function MLPCountDownFactory(what, serial, callback) {
     http.get({
         host: 'ponycountdown.com',
         path: '/api.js'
@@ -86,22 +86,20 @@ function MLPCountDownFactory(event, what) {
                             eptext = 'S' + (tep[1] < 10 ? '0' + tep[1] : tep[1]) + 'E' + (tep[2] < 10 ? '0' + tep[2] : tep[2]) + ' (' + tep[3].replace(/"/g, '') + ')';
                         }
 
-                        event.emit('countdown/FOUND' + what, pt, 'MLP:FiM', eptext, dnow);
+                        callback(null, what, pt, 'MLP:FiM', eptext, dnow);
                         return;
                     }
                 }
             }
 
-            event.emit('countdown/NOTFOUND' + what);
+            callback(new Error('no next pony episode found!'), what);
         });
     }).on('error', function(e) {
-        event.emit('countdown/ERROR' + what, 'i got error while counting my little ponies!');
+        callback(new Error('i got error while counting counting my little ponies!'), what);
     });
 }
 
-function Countdown(dispatcher) {
-    this.event = dispatcher;
-
+function Countdown() {
     this.checkEvery = 3600000;
     this.dateFormat = 'DD.MM.YYYY HH:II TZ';
     this.defaultSerial = 'My Little Pony';
@@ -204,15 +202,15 @@ Countdown.prototype.createReplyWithCountdown = function(source, serial) {
     }
 
     var now = new time.Date().getTime();
-    var what = cd.getSlug(serial);
+    var what = this.getSlug(serial);
 
     if (!what) {
         source.mention('i failed to get what you wanted...');
         return;
     }
 
-    if (typeof cd.cache[what] === 'undefined') {
-        cd.cache[what] = {
+    if (typeof this.cache[what] === 'undefined') {
+        this.cache[what] = {
             name: serial,
             episode: '',
             date: 0,
@@ -220,56 +218,35 @@ Countdown.prototype.createReplyWithCountdown = function(source, serial) {
         };
     }
 
-    if (((now - cd.cache[what].lastCheck) > cd.checkEvery) || ((cd.cache[what].date - now) < 0)) { //if itz time for update or time in past
-        var found = function(airing, name, episode, now) {
-            cd.cache[what].date = airing;
-            cd.cache[what].lastCheck = now || new time.Date().getTime();
-            if (name && name !== '') {
-                cd.cache[what].name = name;
-            }
-            if (episode) {
-                cd.cache[what].episode = episode;
-            } else {
-                cd.cache[what].episode = '';
-            }
-
-            source.mention(cd.formatCountdown(cd.cache[what].date, cd.cache[what].name, cd.cache[what].episode, now));
-
-            cd.event.removeListener('countdown/ERROR' + what, error);
-            cd.event.removeListener('countdown/NOTFOUND' + what, notfound);
-        };
-
-        var notfound = function() {
-            var name = cd.cache[what].name;
-            source.mention('i did not found next episode' + (name ? ' of \'' + name + '\'' : ''));
-
-            cd.event.removeListener('countdown/FOUND' + what, found);
-            cd.event.removeListener('countdown/ERROR' + what, error);
-        };
-
-        var error = function(custom_message) {
-            if (custom_message) {
-                source.mention(custom_message);
-            } else {
-                source.mention('i got error');
-            }
-
-            cd.event.removeListener('countdown/FOUND' + what, found);
-            cd.event.removeListener('countdown/NOTFOUND' + what, notfound);
-        };
-
-        cd.event.once('countdown/FOUND' + what, found);
-        cd.event.once('countdown/NOTFOUND' + what, notfound);
-        cd.event.once('countdown/ERROR' + what, error);
-
-        if (typeof cd.countdownFactories[what] !== 'undefined') {
-            cd.countdownFactories[what](cd.event, what, cd.cache[what].name);
+    if (((now - this.cache[what].lastCheck) > this.checkEvery) || ((this.cache[what].date - now) < 0)) { //if itz time for update or time in past
+        if (typeof this.countdownFactories[what] !== 'undefined') {
+            this.countdownFactories[what](what, this.cache[what].name, this.respond.bind(this, source));
         } else {
-            cd.countdownFactories['default'](cd.event, what, cd.cache[what].name);
+            this.countdownFactories['default'](what, this.cache[what].name, this.respond.bind(this, source));
         }
     } else {
-        source.mention(cd.formatCountdown(cd.cache[what].date, cd.cache[what].name, cd.cache[what].episode, now));
+        source.mention(this.formatCountdown(this.cache[what].date, this.cache[what].name, this.cache[what].episode, now));
     }
+};
+
+Countdown.prototype.respond = function(source, error, what, airing, name, episode, now) {
+    if (error) {
+        source.mention(error);
+        return;
+    }
+
+    this.cache[what].date = airing;
+    this.cache[what].lastCheck = now || new time.Date().getTime();
+    if (name && name !== '') {
+        this.cache[what].name = name;
+    }
+    if (episode) {
+        this.cache[what].episode = episode;
+    } else {
+        this.cache[what].episode = '';
+    }
+
+    source.mention(this.formatCountdown(this.cache[what].date, this.cache[what].name, this.cache[what].episode, now));
 };
 
 Countdown.prototype.command = function(source, args, text, command) {
@@ -324,7 +301,7 @@ Countdown.prototype.actions = function(source, args) {
 };
 
 exports.init = function() {
-    this.countdown = new Countdown(this.dispatcher);
+    this.countdown = new Countdown();
 
     if (typeof this.config.checkEvery !== 'undefined') {
         this.countdown.checkEvery = this.config.checkEvery;
