@@ -1,6 +1,6 @@
 {
 	"bot": {
-		"name": "IRC-PONY",
+		"name": "Rainbot",
 		"modules": "modules.json",
 		"debug": false
 	},

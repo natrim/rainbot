@@ -1,9 +1,9 @@
-IRC-PONY
+Rainbot
 ========
 Simple IRC Pony Bot
 --------------------
 I Am A Real Pony!
 
 #### Install
-
-Do not forget to run `npm install` to install node modules!
+- Copy example-config.json to config.json and change setting to your liking
+- Do not forget to run `npm install` to install node modules!

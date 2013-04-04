@@ -145,12 +145,12 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 	//make sure we have important values
 	if (typeof bot.config.bot === 'undefined') {
 		bot.config.bot = {
-			'name': 'IRC-PONY',
+			'name': 'Rainbot',
 			'modules': 'modules.json'
 		};
 	} else {
 		if (typeof bot.config.bot.name === 'undefined') {
-			bot.config.bot.name = 'IRC-PONY';
+			bot.config.bot.name = 'Rainbot';
 		}
 		if (typeof bot.config.bot.modules === 'undefined') {
 			bot.config.bot.modules = 'modules.json';
