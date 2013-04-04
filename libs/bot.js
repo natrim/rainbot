@@ -3,9 +3,9 @@
 'use strict';
 
 //set main entry point path
-global.BOT_DIR = require('path').resolve(__dirname, '..');
-global.LIBS_DIR = require('path').resolve(BOT_DIR, 'libs');
-global.MODULES_DIR = require('path').resolve(BOT_DIR, 'modules');
+if (!global.BOT_DIR) global.BOT_DIR = require('path').resolve(__dirname, '..');
+if (!global.LIBS_DIR) global.LIBS_DIR = require('path').resolve(BOT_DIR, 'libs');
+if (!global.MODULES_DIR) global.MODULES_DIR = require('path').resolve(BOT_DIR, 'modules');
 
 var logger = require(LIBS_DIR + '/logger');
 var helpers = require(LIBS_DIR + '/helpers');

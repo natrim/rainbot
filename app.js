@@ -1,5 +1,11 @@
 /* jslint node: true */
+/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
+
+//set main entry point path
+global.BOT_DIR = require('path').resolve(__dirname, '.');
+global.LIBS_DIR = require('path').resolve(BOT_DIR, 'libs');
+global.MODULES_DIR = require('path').resolve(BOT_DIR, 'modules');
 
 //create bot
 
