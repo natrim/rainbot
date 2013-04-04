@@ -2,8 +2,12 @@
 /* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
-var MODULE = require(LIBS_DIR + '/module').Module;
+//check main entry point path
+if (!global.BOT_DIR) throw new Error('Wrong entry point! No \'BOT_DIR\' defined!');
+if (!global.LIBS_DIR) throw new Error('Wrong entry point! No \'LIBS_DIR\' defined!');
+if (!global.MODULES_DIR) throw new Error('Wrong entry point! No \'MODULES_DIR\' defined!');
 
+var MODULE = require(LIBS_DIR + '/module').Module;
 var logger = require(LIBS_DIR + '/logger');
 
 function ModuleManager(dispatcher, config) {

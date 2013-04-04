@@ -2,12 +2,17 @@
 /* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
+//set main entry point path
+global.BOT_DIR = require('path').resolve(__dirname, '..');
+global.LIBS_DIR = require('path').resolve(BOT_DIR, 'libs');
+global.MODULES_DIR = require('path').resolve(BOT_DIR, 'modules');
+
 var vows = require('vows'),
 	assert = require('assert');
 
 var suite = vows.describe('Bot class');
 
-var BOT = require('../libs/bot').Bot;
+var BOT = require(LIBS_DIR + '/bot').Bot;
 var FS = require('fs');
 
 //disable logger

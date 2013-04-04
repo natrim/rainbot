@@ -2,13 +2,15 @@
 /* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
+//set main entry point path
+global.BOT_DIR = require('path').resolve(__dirname, '..');
+global.LIBS_DIR = require('path').resolve(BOT_DIR, 'libs');
+global.MODULES_DIR = require('path').resolve(BOT_DIR, 'modules');
+
 var vows = require('vows'),
 	assert = require('assert');
 
 var suite = vows.describe('ModuleManager class');
-
-if (!global.LIBS_DIR) global.LIBS_DIR = '../libs';
-if (!global.MODULES_DIR) global.MODULES_DIR = '../modules';
 
 //disable logger
 require(LIBS_DIR + '/logger').enabled = false;
@@ -21,7 +23,7 @@ var h = require(LIBS_DIR + '/helpers');
 //disable file resolving of test2 module
 M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
 	if (this.name === 'test2') {
-		return MODULES_DIR + '/' + this.fileName;
+		return '../modules/' + this.fileName;
 	} else {
 		return resol.apply(this);
 	}
