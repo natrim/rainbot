@@ -229,7 +229,7 @@ function getPonies(source, arg) {
 			if ((episode = episodes[ep[1] - 1]) && (episode = episode[ep[2] - 1])) {
 				source.mention('episode S' + (ep[1] < 10 ? '0' + ep[1] : ep[1]) + 'E' + (ep[2] < 10 ? '0' + ep[2] : ep[2]) + ' in format ' + format + ' is not available, try different format (cc1080p, itunes1080p, itunes1080au, hdtv1080p, cc720p, itunes720p, itunes720au, sd)');
 			} else {
-				source.mention('i can\'t find a download link for that ' + 'episode S' + (ep[1] < 10 ? '0' + ep[1] : ep[1]) + 'E' + (ep[2] < 10 ? '0' + ep[2] : ep[2]));
+				source.mention('i can\'t find magnet for ' + 'episode S' + (ep[1] < 10 ? '0' + ep[1] : ep[1]) + 'E' + (ep[2] < 10 ? '0' + ep[2] : ep[2]));
 			}
 		}
 	} else {
