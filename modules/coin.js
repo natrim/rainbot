@@ -4,6 +4,7 @@
 
 /* jslint node: true */
 /* global BOT_DIR, LIBS_DIR, MODULES_DIR */
+'use strict';
 
 exports.init = function(bot) {
 	this.require('controls').addCommand('coin', function(source, args) {

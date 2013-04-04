@@ -4,6 +4,7 @@
 
 /* jslint node: true */
 /* global BOT_DIR, LIBS_DIR, MODULES_DIR */
+'use strict';
 
 function Dice() {
 	//dice rolling: roll [XdY] - rolls a Y-sided dice X times, defaults to 1d6
