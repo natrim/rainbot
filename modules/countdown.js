@@ -231,7 +231,7 @@ Countdown.prototype.createReplyWithCountdown = function(source, serial) {
 
 Countdown.prototype.respond = function(source, error, what, airing, name, episode, now) {
     if (error) {
-        source.mention(error);
+        source.mention(typeof error === 'string' ? error : error instanceof Error ? error.message : 'no next episode found!');
         return;
     }
 
