@@ -39,5 +39,11 @@
 		"checkEvery": 3600000,
 		"defaultSerial": "My Little Pony",
 		"dateFormat": "DD.MM.YYYY HH:II TZ"
+	},
+	"dice": {
+		"maxDices": 20,
+		"minDices": 1,
+		"maxFaces": 100,
+		"minFaces": 1
 	}
 }
