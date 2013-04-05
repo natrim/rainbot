@@ -207,7 +207,7 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 			emit: function(event) {
 				var args = [];
 				//all emited events needs to be prefixed by module name
-				if (event.search(module.name + '/') === -1) {
+				if (!((new RegExp('^' + module.name + '/')).test(event))) {
 					event = module.name + '/' + event;
 					arguments[0] = event;
 				}

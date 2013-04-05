@@ -95,7 +95,7 @@ Controls.prototype.parse = function(source, text) {
 		text = text.substr(this.commandDelimiter.length);
 
 		this.processCommand(source, text.trim());
-	} else if (text.substr(0, this._irc.currentNick.length + 1).search(new RegExp(this._irc.currentNick + '[ ,;:]')) !== -1) { //itz higlight in channel
+	} else if ((new RegExp('^' + this._irc.currentNick + '[ ,;:]')).test(text.substr(0, this._irc.currentNick.length + 1))) { //itz higlight in channel
 		//remove the trigger
 		text = text.substr(this._irc.currentNick.length + 1);
 

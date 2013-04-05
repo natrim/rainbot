@@ -180,7 +180,7 @@ function getPonies(source, arg) {
 	var episode;
 
 	if (arg[0] && arg[0] !== 'help') {
-		if (arg[0].search(/(count|how|number|episode|stat|release)( )?(s|many)?/) !== -1) {
+		if (/(count|how|number|episode|stat|release)( )?(s|many)?/i.test(arg[0])) {
 			var count = countEpisodes();
 			var reply = 'i have many ponies in ' + count[0] + ' seasons and ' + count[1] + ' episodes';
 

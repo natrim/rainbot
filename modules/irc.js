@@ -433,7 +433,7 @@ IRC.prototype.tryAutoJoin = function() {
 	}
 
 	this.join.apply(this, channels.map(function(c) {
-		if (c.search(/^#/) === -1) c = '#' + c;
+		if (!(/^#/.test(c))) c = '#' + c;
 		return c.trim();
 	}));
 };
