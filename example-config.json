@@ -6,6 +6,7 @@
 	},
 	"irc": {
 		"autoconnect": true,
+		"reconnect": true,
 		"nick": "RD",
 		"username": "pony",
 		"realname": "Rainbot Dash",

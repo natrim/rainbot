@@ -57,7 +57,7 @@ function IRC(server, dispatcher, config) {
 
 	//irc client heartbeat ping - because the socket sometimes hangs
 	this._heartbeat = 0;
-	if (typeof config.heartbeat === 'undefined') {
+	if (typeof config.heartbeat !== 'number') {
 		config.heartbeat = 120000; //default heartbeat interval
 	}
 	if (config.heartbeat > 0) {
@@ -68,6 +68,9 @@ function IRC(server, dispatcher, config) {
 			}
 		}, config.heartbeat);
 	}
+
+	//reconnect support
+	this._reconnect = 0;
 }
 
 
@@ -141,12 +144,14 @@ IRC.prototype.connect = function() {
 	});
 
 	socket.on('timeout', function() {
+		if (irc.server.connected) if (irc.__reconnect()) return;
 		irc.connecting = false;
 		irc.server.connected = false;
 		dispatcher.emit.call(dispatcher, 'irc/timeout', irc);
 	});
 
 	socket.on('close', function(had_error) {
+		if (irc.server.connected) if (irc.__reconnect()) return;
 		irc.connecting = false;
 		irc.server.connected = false;
 		if (irc.server.secured && !had_error && irc._ssl_had_error) { //ssl does not push the error to next
@@ -171,11 +176,28 @@ IRC.prototype.connect = function() {
 	return this;
 };
 
-IRC.prototype.processData = function(data) {
-	if (!this.server.connected) {
-		this.server.connected = true;
+IRC.prototype.__reconnect = function() {
+	if (!this.config.reconnect) return false;
+
+	this.connecting = false;
+	this.server.connected = false;
+	if (this._ssl_had_error) delete this._ssl_had_error;
+
+	if (this._reconnect === 0) {
+		this.server.socket.destroy();
+		logger.info('CONNECTION TIMEOUT');
+		logger.info('Automatic reconnect in ' + (this.config.reconnectRetryDelay / 1000) + 's');
+		var irc = this;
+		this._reconnect = setTimeout(function() {
+			irc._reconnect = 0;
+			irc.connect();
+		}, this.config.reconnectRetryDelay);
 	}
 
+	return true;
+};
+
+IRC.prototype.processData = function(data) {
 	var lines = (this.recvBuffer + data).split("\r\n");
 	for (var i = 0; i < lines.length - 1; i++) {
 		this.processLine(lines[i]);
@@ -219,6 +241,13 @@ IRC.prototype.processLine = function(line) {
 		var handled = false;
 
 		switch (msg.command) {
+			case 'ERROR':
+				//handle error timeout
+				if (/(timeout|timed out)/i.test(args[0]) && this.server.connected) {
+					if (this.__reconnect()) return;
+					handled = true;
+				}
+				break;
 			case 'NOTICE':
 				source.channel = args[0] === this.server.currentNick ? '' : args[0];
 				text = args[1] || '';
@@ -313,7 +342,12 @@ IRC.prototype.send = function(msg, nolog) {
 		logger.debug('[SEND]> ' + msg.replace(/\r\n$/, ''));
 	}
 
-	this.server.write(msg);
+	if (/^QUIT /.test(msg)) {
+		this.server.connected = false;
+		this.server.end(msg);
+	} else {
+		this.server.write(msg);
+	}
 
 	return this;
 };
@@ -355,10 +389,7 @@ IRC.prototype.part = function() {
 };
 
 IRC.prototype.quit = function(message) {
-	var ret = this.command(null, 'QUIT', message || this.config.quitMessage || 'Terminating...');
-	this.server.connected = false;
-	this.server.end();
-	return ret;
+	return this.command(null, 'QUIT', message || this.config.quitMessage || 'Terminating...');
 };
 
 IRC.prototype.privMsg = function(nick, message) {
@@ -483,6 +514,15 @@ exports.init = function(reload) {
 		this.config.autoconnect = false;
 	}
 
+	//check the reconnect config
+	if (typeof this.config.reconnect !== 'boolean') {
+		this.config.reconnect = false;
+	}
+
+	if (typeof this.config.reconnectRetryDelay !== 'number') {
+		this.config.reconnectRetryDelay = 120000;
+	}
+
 	//connect to server on bot init
 	this.dispatcher.on('init', function() {
 		if (module.config.autoconnect) {
@@ -512,6 +552,9 @@ exports.halt = function(reload) {
 	//stop heartbeat
 	if (this.irc._heartbeat) {
 		clearInterval(this.irc._heartbeat);
+	}
+	if (this.irc._reconnect) {
+		clearInterval(this.irc._reconnect);
 	}
 	//quit on module halt
 	if (!reload && this.server.connected) {
