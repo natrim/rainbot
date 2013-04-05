@@ -167,7 +167,7 @@ suite.addBatch({
 	'When i reload context': {
 		'of loadable module': {
 			topic: function() {
-				(new M('test')).init().reload(this.callback);
+				(new M('test')).init().reload(undefined, this.callback);
 			},
 			'then i get ok': function(err, m) {
 				assert.isNull(err);
@@ -178,11 +178,11 @@ suite.addBatch({
 		},
 		'of not loaded loadable module': {
 			topic: function() {
-				(new M('test')).reload(this.callback);
+				(new M('test')).reload(undefined, this.callback);
 			},
 			'then i get error': function(err, m) {
 				assert.isError(err);
-				assert.equal(err.message, 'Module \'test\' is not loaded!');
+				assert.equal(err.message, 'Context of module \'test\' is not loaded!');
 			}
 		}
 	}

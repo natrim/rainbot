@@ -114,7 +114,7 @@ suite.addBatch({
 			},
 			'then i get error': function(err, module, mm) {
 				assert.isError(err);
-				assert.equal(err.message, 'Error happened during module initialization: Failed loading context of \'test2\' module! Cannot find module \'../modules/test2.js\'');
+				assert.equal(err.message, 'Error happened during module \'test2\' initialization: Failed loading context of \'test2\' module! Cannot find module \'../modules/test2.js\'');
 				assert.isFalse(mm.has('test2'));
 			}
 		},

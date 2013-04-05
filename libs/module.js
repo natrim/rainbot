@@ -91,7 +91,7 @@ Module.prototype.halt = function halt(callback) {
 	return this;
 };
 
-Module.prototype.reload = function reload(callback, config) {
+Module.prototype.reload = function reload(config, callback, hollaback) {
 	var error = null;
 	if (this.loaded) {
 		this.reloading = true;
@@ -108,6 +108,8 @@ Module.prototype.reload = function reload(callback, config) {
 
 		if (this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
 
+		if (hollaback) hollaback(error, this);
+
 		try {
 			this.context = require(this.fullPath);
 			this.loaded = true;
@@ -121,7 +123,7 @@ Module.prototype.reload = function reload(callback, config) {
 
 		this.reloading = false;
 	} else {
-		error = new Error('Module \'' + this.name + '\' is not loaded!');
+		error = new Error('Context of module \'' + this.name + '\' is not loaded!');
 	}
 
 	if (callback) callback(error, this);
