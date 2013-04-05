@@ -109,7 +109,7 @@ IRC.prototype.connect = function() {
 		logger.info('CONNECTED');
 
 		//emit the connect event for other modules
-		dispatcher.emit('irc/connect', irc);
+		dispatcher.emit.call(irc, 'irc/connect');
 
 		if (typeof config.pass === 'string' && config.pass.trim() !== '') {
 			irc.pass(config.pass);
@@ -136,7 +136,7 @@ IRC.prototype.connect = function() {
 
 	socket.on('error', function(err) {
 		irc.connecting = false;
-		dispatcher.emit.call(dispatcher, 'irc/error', err, irc);
+		dispatcher.emit.call(irc, 'irc/error', err);
 		logger.error(err);
 		if (irc.server.secured) { //ssl does not push the error to next
 			irc._ssl_had_error = true;
@@ -147,7 +147,7 @@ IRC.prototype.connect = function() {
 		if (irc.server.connected) if (irc.__reconnect()) return;
 		irc.connecting = false;
 		irc.server.connected = false;
-		dispatcher.emit.call(dispatcher, 'irc/timeout', irc);
+		dispatcher.emit.call(irc, 'irc/timeout');
 	});
 
 	socket.on('close', function(had_error) {
@@ -158,12 +158,12 @@ IRC.prototype.connect = function() {
 			had_error = true;
 			delete irc._ssl_had_error;
 		}
-		dispatcher.emit.call(dispatcher, 'irc/disconnect', had_error, irc);
+		dispatcher.emit.call(irc, 'irc/disconnect', had_error);
 		logger.info('DISCONNECTED' + (had_error ? ' WITH ERROR' : ''));
 	});
 
 	socket.on('data', function(data) {
-		dispatcher.emit.call(dispatcher, 'irc/data', data, irc);
+		dispatcher.emit.call(irc, 'irc/data', data);
 		irc.processData(data);
 	});
 
@@ -232,7 +232,7 @@ IRC.prototype.processLine = function(line) {
 				logger.debug('[RECV]> ' + line);
 			}
 
-			this.dispatcher.emit('irc/RECV', line);
+			this.dispatcher.emit.call(this, 'irc/RECV', line);
 		}
 
 		var args = msg.params.slice(0);
@@ -254,9 +254,9 @@ IRC.prototype.processLine = function(line) {
 				if (text.charCodeAt(0) === 1 && text.charCodeAt((text.length - 1)) === 1) {
 					text = text.slice(1);
 					text = text.slice(0, (text.length - 1));
-					if (this.processCTCP(source, text, 'notice')) this.dispatcher.emit('irc/CTCP', source, text, 'notice', this);
+				if (this.processCTCP(source, text, 'notice')) this.dispatcher.emit.call(this, 'irc/CTCP', source, text, 'notice');
 				} else {
-					this.dispatcher.emit('irc/NOTICE', source, text, this);
+					this.dispatcher.emit.call(this, 'irc/NOTICE', source, text);
 				}
 
 				handled = true;
@@ -267,9 +267,9 @@ IRC.prototype.processLine = function(line) {
 				if (text.charCodeAt(0) === 1 && text.charCodeAt((text.length - 1)) === 1) {
 					text = text.slice(1);
 					text = text.slice(0, (text.length - 1));
-					if (this.processCTCP(source, text, 'privmsg')) this.dispatcher.emit('irc/CTCP', source, text, 'privmsg', this);
+					if (this.processCTCP(source, text, 'privmsg')) this.dispatcher.emit.call(this, 'irc/CTCP', source, text, 'privmsg');
 				} else {
-					this.dispatcher.emit('irc/PRIVMSG', source, text, this);
+					this.dispatcher.emit.call(this, 'irc/PRIVMSG', source, text);
 				}
 
 				handled = true;
@@ -306,7 +306,7 @@ IRC.prototype.processLine = function(line) {
 				break;
 		}
 
-		if (!handled) this.dispatcher.emit('irc/' + msg.command.toUpperCase(), source, args, this);
+		if (!handled) this.dispatcher.emit.call(this, 'irc/' + msg.command.toUpperCase(), source, args);
 	}
 };
 
@@ -332,7 +332,7 @@ IRC.prototype.send = function(msg, nolog) {
 
 	var callback = function() {
 		if (!nolog) {
-			this.dispatcher.emit('irc/SEND', msg.replace(/\r\n$/, ''));
+			this.dispatcher.emit.call(this, 'irc/SEND', msg.replace(/\r\n$/, ''));
 		}
 
 		if (this.config.log) {
