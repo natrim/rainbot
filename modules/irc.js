@@ -330,23 +330,27 @@ IRC.prototype.send = function(msg, nolog) {
 		msg += '\r\n';
 	}
 
-	if (!nolog) {
-		this.dispatcher.emit('irc/SEND', msg.replace(/\r\n$/, ''));
-	}
-
-	if (this.config.log) {
+	var callback = function() {
 		if (!nolog) {
-			console.log(date(undefined, this.config.logTimeFormat) + ' [SEND]> ' + msg.replace(/\r\n$/, ''));
+			this.dispatcher.emit('irc/SEND', msg.replace(/\r\n$/, ''));
 		}
-	} else {
-		logger.debug('[SEND]> ' + msg.replace(/\r\n$/, ''));
-	}
+
+		if (this.config.log) {
+			if (!nolog) {
+				console.log(date(undefined, this.config.logTimeFormat) + ' [SEND]> ' + msg.replace(/\r\n$/, ''));
+			}
+		} else {
+			logger.debug('[SEND]> ' + msg.replace(/\r\n$/, ''));
+		}
+	};
 
 	if (/^QUIT /.test(msg)) {
 		this.server.connected = false;
-		this.server.end(msg);
+		this.server.write(msg, callback.bind(this));
+		this.server.end();
 	} else {
-		this.server.write(msg);
+
+		this.server.write(msg, callback.bind(this));
 	}
 
 	return this;
