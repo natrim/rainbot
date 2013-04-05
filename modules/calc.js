@@ -50,7 +50,7 @@ WolframAlpha.prototype.search = function(query, callback) {
 exports.init = function(bot, dispatcher, calc) {
 	var wa = new WolframAlpha();
 
-	this.require('controls').addCommand('calc', function(source, argv) {
+	this.addCommand('calc', function(source, argv) {
 		if (!argv[0]) {
 			source.mention('please tell me what to calculate. beep boop.');
 			return;
@@ -62,8 +62,4 @@ exports.init = function(bot, dispatcher, calc) {
 			source.mention(result.data ? 'the answer to your equation is: ' + result.data.replace(/\\'/g, '\'') : 'i don\'t know the answer...');
 		});
 	});
-};
-
-exports.halt = function(bot) {
-	this.require('controls').removeCommand('calc');
 };

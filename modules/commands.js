@@ -8,10 +8,9 @@
 
 module.exports.init = function() {
 	var dispatcher = this.dispatcher;
-	var c = this.require('controls');
 	var irc = this.require('irc');
 
-	c.addAction('quit', function(source, args) {
+	this.addAction('quit', function(source, args) {
 		if (!irc.connected) {
 			source.respond('I\'m not connected to server!');
 			return;
@@ -22,7 +21,7 @@ module.exports.init = function() {
 		irc.quit(args.join(' '));
 	}, /^quit[ ]?(.*)$/i, ['owner']);
 
-	c.addAction('part', function(source, args) {
+	this.addAction('part', function(source, args) {
 		//dispatcher.on('irc/PART', ok);
 		//is not needed as nothing can stop us from parting
 
@@ -43,7 +42,7 @@ module.exports.init = function() {
 		}
 	}, /^part([ ]+(.*)|)$/i, ['owner', 'operators']);
 
-	c.addAction('join', function(source, args) {
+	this.addAction('join', function(source, args) {
 		if (!irc.connected) {
 			source.respond('I\'m not connected to server!');
 			return;
@@ -87,7 +86,7 @@ module.exports.init = function() {
 		}
 	}, /^join([ ]+(.*)|)$/i, ['owner', 'operators']);
 
-	c.addAction('nick', function(source, args) {
+	this.addAction('nick', function(source, args) {
 		if (!irc.connected) {
 			source.respond('I\'m not connected to server!');
 			return;
@@ -139,14 +138,15 @@ module.exports.init = function() {
 		}
 	}, /^nick([ ]+(.*)|)$/i, ['owner', 'operators']);
 
+	var controls = this.require('controls');
 
 	function actionList(source) {
 		var actions = [];
-		Object.keys(c.actions).forEach(function(n) {
+		Object.keys(controls.actions).forEach(function(n) {
 			if (this.controls.checkAccess(source, this.actions[n])) {
 				actions.push(n);
 			}
-		}, c);
+		}, controls);
 
 		source.message('actions that can be triggered by you are: ' + actions.join(', '));
 	}
@@ -158,16 +158,16 @@ module.exports.init = function() {
 		}
 
 		var commands = [];
-		Object.keys(c.commands).forEach(function(n) {
+		Object.keys(controls.commands).forEach(function(n) {
 			if (this.controls.checkAccess(source, this.commands[n])) {
 				commands.push(n);
 			}
-		}, c);
+		}, controls);
 
-		source.mention('the available commands are: ' + c.commandDelimiter + commands.join(', ' + c.commandDelimiter));
+		source.mention('the available commands are: ' + controls.commandDelimiter + commands.join(', ' + controls.commandDelimiter));
 	}
 
-	c.addCommand('help', commandList).addAction('help', commandList, /^help( actions)?$/);
+	this.addCommand('help', commandList).addAction('help', commandList, /^help( actions)?$/);
 
 	//get moduleManager and save it for the commands
 	var module = this;
@@ -175,11 +175,11 @@ module.exports.init = function() {
 		module.mm = bot.modules;
 	});
 
-	c.addAction('lsmod', function(source) {
+	this.addAction('lsmod', function(source) {
 		source.mention('i have these modules active: ' + module.mm.getModules().join(', '));
 	}, /^lsmod|modules$/, ['owner']);
 
-	c.addAction('reload', function(source, args) {
+	this.addAction('reload', function(source, args) {
 		var modules = args[1].match(/\w+/gi);
 		var call = function(err, m) {
 			if (err) {
@@ -194,7 +194,7 @@ module.exports.init = function() {
 		});
 	}, /^reload[ ]+(.*)$/, ['owner']);
 
-	c.addAction('load', function(source, args) {
+	this.addAction('load', function(source, args) {
 		var modules = args[1].match(/\w+/gi);
 		var call = function(err, m) {
 			if (err) {
@@ -209,7 +209,7 @@ module.exports.init = function() {
 		});
 	}, /^load[ ]+(.*)$/, ['owner']);
 
-	c.addAction('unload', function(source, args) {
+	this.addAction('unload', function(source, args) {
 		var modules = args[1].match(/\w+/gi);
 		var call = function(err, m) {
 			if (err) {
@@ -225,7 +225,7 @@ module.exports.init = function() {
 	}, /^unload[ ]+(.*)$/, ['owner']);
 
 
-	c.addAction('say', function(source, args) {
+	this.addAction('say', function(source, args) {
 		if (!irc.connected) {
 			source.respond('I\'m not connected to server!');
 			return;
@@ -270,7 +270,7 @@ module.exports.init = function() {
 		}
 	}, /^(say|tell)[ ]+(#?\w+)[ ]*(.*)$/i, ['owner', 'operators']);
 
-	c.addAction('update', function(source) {
+	this.addAction('update', function(source) {
 		source.action('is fetching updates...');
 
 		require('child_process').exec('cd ' + BOT_DIR + ' && git pull', function(error, stdout, stderr) {
@@ -340,15 +340,4 @@ module.exports.init = function() {
 			}
 		});
 	}, /^update$/, ['owner']);
-};
-
-module.exports.halt = function() {
-	var c = this.require('controls');
-
-	c.removeActions(['quit', 'part', 'join', 'nick',
-		'help',
-		'lsmod', 'load', 'unload', 'reload',
-		'say',
-		'update']);
-	c.removeCommand('help');
 };

@@ -315,16 +315,8 @@ exports.init = function() {
         this.countdown.dateFormat = this.config.dateFormat;
     }
 
-    var c = this.require('controls');
-    c.addCommand('cd', this.countdown.command.bind(this.countdown));
-    c.addCommand('tv', this.countdown.command.bind(this.countdown));
+    this.addCommand('cd', this.countdown.command.bind(this.countdown));
+    this.addCommand('tv', this.countdown.command.bind(this.countdown));
 
-    c.addAction('countdown', this.countdown.actions.bind(this.countdown), /^countdown(([ ]+(\w+)([ ]+(.*)|))*)/, ['owner', 'operators']);
-};
-
-exports.halt = function(bot, dispatcher, cd) {
-    var c = this.require('controls');
-    c.removeCommand('cd');
-    c.removeCommand('tv');
-    c.removeAction('countdown');
+    this.addAction('countdown', this.countdown.actions.bind(this.countdown), /^countdown(([ ]+(\w+)([ ]+(.*)|))*)/, ['owner', 'operators']);
 };

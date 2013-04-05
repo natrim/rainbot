@@ -113,11 +113,6 @@ exports.init = function() {
 
     this.twitter = new Twitter(this.config);
 
-    var c = this.require('controls');
-    c.addCommand('tweet', this.twitter.respond.bind(this.twitter));
-    c.addCommand('twitter', this.twitter.respond.bind(this.twitter));
-};
-
-exports.halt = function(bot) {
-    this.require('controls').removeCommands(['tweet', 'twitter']);
+    this.addCommand('tweet', this.twitter.respond.bind(this.twitter));
+    this.addCommand('twitter', this.twitter.respond.bind(this.twitter));
 };

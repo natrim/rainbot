@@ -67,8 +67,6 @@ Dice.prototype.reply = function(source, args) {
 };
 
 exports.init = function(bot) {
-	var c = this.require('controls');
-
 	this.dice = new Dice();
 
 	if (typeof this.config.maxDices === 'number') this.dice.maxDices = this.config.maxDices;
@@ -85,9 +83,5 @@ exports.init = function(bot) {
 	//not realy sure if somepony want to throw more than 1k dices
 	if (this.dice.maxDices > 1000) this.dice.maxDices = 1000;
 
-	c.addCommand('dice', this.dice.reply.bind(this.dice));
-};
-
-exports.halt = function(bot) {
-	this.require('controls').removeCommand('dice');
+	this.addCommand('dice', this.dice.reply.bind(this.dice));
 };

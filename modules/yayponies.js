@@ -247,13 +247,11 @@ exports.init = function(reload) {
 		formats = formats.concat(this.config.formats);
 	}
 
-	var c = this.require('controls');
+	this.addCommand('ponies', getPonies);
+	this.addCommand('pony', getPonies);
+	this.addCommand('yayponies', getPonies);
 
-	c.addCommand('ponies', getPonies);
-	c.addCommand('pony', getPonies);
-	c.addCommand('yayponies', getPonies);
-
-	c.addAction('refresh', refreshEpisodes, /^refresh$/, ['owner', 'operators']);
+	this.addAction('refresh', refreshEpisodes, /^refresh$/, ['owner', 'operators']);
 
 	//first load eps
 	process.nextTick(function() {
@@ -266,8 +264,5 @@ exports.init = function(reload) {
 };
 
 exports.halt = function() {
-	var c = this.require('controls');
-	c.removeCommands(['ponies', 'pony', 'yayponies']);
-	c.removeAction('refresh');
 	clearInterval(this._refresh);
 };

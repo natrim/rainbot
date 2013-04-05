@@ -110,7 +110,7 @@ Controls.prototype.processCommand = function(source, text) {
 	var command = args.shift();
 	//execute the command
 	Object.keys(this.commands).some(function(name) {
-		if (command == this.commands[name].name) { //use == to not check type
+		if (this.commands[name] && command == this.commands[name].name) { //use == to not check type
 			if (this.checkAccess(source, this.commands[name])) { //run the command only if the user has access
 				logger.debug('Processing Command \'' + name + '\'');
 				this.commands[name].action(source, args, text, command);
@@ -127,14 +127,16 @@ Controls.prototype.processCommand = function(source, text) {
 Controls.prototype.processAction = function(source, text) {
 	//proces all actions that triggers rule
 	Object.keys(this.actions).forEach(function(name) {
-		var args = text.match(this.actions[name].rule);
-		if (args !== null) {
-			if (this.checkAccess(source, this.actions[name])) { //run the action only if the user has access
-				logger.debug('Processing Action \'' + name + '\'');
-				this.actions[name].action(source, args, text);
-			} else {
-				logger.debug('Action \'' + name + '\' access for user \'' + source + '\' denied!');
-				source.notice('Action Access denied! Derpy in action!');
+		if (this.actions[name]) {
+			var args = text.match(this.actions[name].rule);
+			if (args !== null) {
+				if (this.checkAccess(source, this.actions[name])) { //run the action only if the user has access
+					logger.debug('Processing Action \'' + name + '\'');
+					this.actions[name].action(source, args, text);
+				} else {
+					logger.debug('Action \'' + name + '\' access for user \'' + source + '\' denied!');
+					source.notice('Action Access denied! Derpy in action!');
+				}
 			}
 		}
 	}, this);
@@ -193,8 +195,75 @@ module.exports.init = function(reload) {
 	}
 
 	//export some functions from Controls
-	require(LIBS_DIR + '/helpers').export(this, this.controls, ['addCommand', 'addAction', 'removeCommand', 'removeAction', 'removeCommands', 'removeActions']);
+	//require(LIBS_DIR + '/helpers').export(this, this.controls, ['addCommand', 'addAction', 'removeCommand', 'removeAction', 'removeCommands', 'removeActions']);
+	require(LIBS_DIR + '/helpers').export(this, this.controls, ['removeCommand', 'removeAction', 'removeCommands', 'removeActions']);
+
+	/**
+	 * bind the controls to module core
+	 */
+
+	if (!reload) {
+		this.moduleActions = {};
+		this.moduleCommands = {};
+	}
+
+	var proto = require(LIBS_DIR + '/module').Module.prototype;
+	proto.addCommand = function(name) {
+		module.controls.addCommand.apply(module.controls, arguments);
+		if (typeof module.moduleCommands[this.name] === 'undefined') module.moduleCommands[this.name] = {};
+		module.moduleCommands[this.name][name] = name;
+		return this;
+	};
+	proto.addAction = function(name) {
+		module.controls.addAction.apply(module.controls, arguments);
+		if (typeof module.moduleActions[this.name] === 'undefined') module.moduleActions[this.name] = {};
+		module.moduleActions[this.name][name] = name;
+		return this;
+	};
+	proto.removeCommand = function() {
+		module.controls.removeCommand.apply(module.controls, arguments);
+		return this;
+	};
+	proto.removeAction = function() {
+		module.controls.removeAction.apply(module.controls, arguments);
+		return this;
+	};
+
+	this.addCommand = this.addAction = function() {
+		throw new Error('Deprecated! Dont use \'controls\' module directly!');
+	};
+
+	//clean up the module commands/actions on unload
+
+	function clean(name) {
+		if (typeof module.moduleActions[name] !== 'undefined') {
+			Object.keys(module.moduleActions[name]).forEach(function(action) {
+				if (typeof module.actions[action] !== 'undefined') {
+					module.controls.removeAction(action);
+				}
+			});
+			delete module.moduleActions[name];
+		}
+		if (typeof module.moduleCommands[name] !== 'undefined') {
+			Object.keys(module.moduleCommands[name]).forEach(function(command) {
+				if (typeof module.commands[command] !== 'undefined') {
+					module.controls.removeCommand(command);
+				}
+			});
+			delete module.moduleCommands[name];
+		}
+	}
+
+	this.dispatcher.on('unload', clean).on('reload-unload', clean);
 
 	//bind
 	this.dispatcher.on('irc/PRIVMSG', this.controls.parse.bind(this.controls)).on('irc/NOTICE', this.controls.parse.bind(this.controls));
+};
+
+module.exports.halt = function() {
+	var proto = require(LIBS_DIR + '/module').Module.prototype;
+	delete proto.addCommand;
+	delete proto.addAction;
+	delete proto.removeCommand;
+	delete proto.removeAction;
 };
