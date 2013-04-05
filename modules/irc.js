@@ -326,8 +326,8 @@ IRC.prototype.send = function(msg, nolog) {
 		return this;
 	}
 
-	if (!/\r\n$/.test(msg)) {
-		msg += "\r\n";
+	if (!(/\r\n$/.test(msg))) {
+		msg += '\r\n';
 	}
 
 	if (!nolog) {
