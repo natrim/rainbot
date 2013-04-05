@@ -17,8 +17,7 @@ module.exports.init = function() {
 		}
 
 		source.respond('okey, ' + source.nick + '! Goodbye everypony!');
-		args.shift();
-		irc.quit(args.join(' '));
+		irc.quit(args[1]);
 	}, /^quit[ ]?(.*)$/i, ['owner']);
 
 	this.addAction('part', function(source, args) {
@@ -230,13 +229,14 @@ module.exports.init = function() {
 			source.respond('I\'m not connected to server!');
 			return;
 		}
-		args.shift(); //remove the first one
-		if (args[2].trim() === '') {
-			source.respond('you probadly should tell me what i should tell to \'' + args[1] + '\'');
+		var target = args[2];
+		var msg = args[3];
+		if (msg.trim() === '') {
+			source.respond('you probadly should tell me what i should tell to \'' + target + '\'');
 		} else {
 			var resendreply = function(s, text) {
-				if (args[1] === s.nick) {
-					source.respond(args[1] + ' REPLY: ' + text);
+				if (target === s.nick) {
+					source.respond(target + ' REPLY: ' + text);
 					clean();
 				}
 			};
@@ -259,7 +259,7 @@ module.exports.init = function() {
 			};
 
 			//say it
-			if (irc.privMsg(args[1], args[2])) {
+			if (irc.privMsg(target, msg)) {
 				dispatcher.on('irc/PRIVMSG', resendreply);
 				dispatcher.on('irc/NOTICE', resendreply);
 				dispatcher.on('irc/401', wrongnick);
