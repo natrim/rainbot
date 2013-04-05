@@ -1,16 +1,18 @@
+/**
+ * Rainbot main file
+ */
+
 /* jslint node: true */
 /* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 //check main entry point path
-if (!global.BOT_DIR) throw new Error('Wrong entry point! No \'BOT_DIR\' defined!');
-if (!global.LIBS_DIR) throw new Error('Wrong entry point! No \'LIBS_DIR\' defined!');
-if (!global.MODULES_DIR) throw new Error('Wrong entry point! No \'MODULES_DIR\' defined!');
+if (!global.BOT_DIR) global.BOT_DIR = require('path').resolve(__dirname, '..');
+if (!global.LIBS_DIR) global.LIBS_DIR = require('path').resolve(BOT_DIR, 'libs');
+if (!global.MODULES_DIR) global.MODULES_DIR = require('path').resolve(BOT_DIR, 'modules');
 
 var logger = require(LIBS_DIR + '/logger');
 var helpers = require(LIBS_DIR + '/helpers');
-
-process.setMaxListeners(0); //fix the possible memory leak warning, by unlimiting listeners
 
 function Bot() {
 	//events
