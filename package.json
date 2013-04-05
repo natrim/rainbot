@@ -2,6 +2,10 @@
 	"name": "rainbot",
 	"version": "1.0.0",
 	"description": "Simple js IRC pony bot",
+	"scripts": {
+		"start": "node ./app",
+		"test": "./run-test.sh"
+	},
 	"dependencies": {
 		"request": "*",
 		"cheerio": "*",
@@ -10,6 +14,6 @@
 	"devDependencies": {
 		"vows": "*"
 	},
-	"main": "./app.js",
+	"main": "./libs/bot",
 	"author": "Natrim"
 }
