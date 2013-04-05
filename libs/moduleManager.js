@@ -61,12 +61,12 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 		error = new Error('Module \'' + name + '\' is already loaded!');
 	} else {
 		if (typeof this[name] !== 'undefined') {
-			error = new Error('Reserved module name! Please rename your module!');
+			error = new Error('Reserved module name \'' + name + '\'! Please rename your module!');
 		} else {
 			try {
 				module = new MODULE(name);
 			} catch (e) {
-				error = new Error('Error happened during module construction: ' + e.message);
+				error = new Error('Error happened during module \'' + name + '\' construction: ' + e.message);
 				module = null;
 			}
 			if (module instanceof MODULE) {
@@ -77,7 +77,7 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 				try {
 					if (typeof module.init === 'function') module.init();
 				} catch (e) {
-					error = new Error('Error happened during module initialization: ' + e.message);
+					error = new Error('Error happened during module \'' + name + '\' initialization: ' + e.message);
 					module = null;
 				}
 
@@ -125,7 +125,7 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 			//disable event binding on halt with uncatched exception so users gets kicked in face
 			if (typeof module.dispatcher === 'object') {
 				module.dispatcher.on = module.dispatcher.once = module.dispatcher.addListener = function() {
-					throw new Error('You cannot bind events on module halt!');
+					throw new Error('You cannot bind events on module \'' + name + '\' halt!');
 				};
 			}
 
@@ -166,7 +166,7 @@ ModuleManager.prototype.reload = function(name, callback) {
 		try {
 			module.reload(undefined, require(LIBS_DIR + '/config').create(this.config[name])); //reload with new config
 		} catch (e) {
-			error = new Error('Error happened during module reload: ' + e.message);
+			error = new Error('Error happened during module \'' + name + '\' reload: ' + e.message);
 		}
 	} else {
 		error = new Error('Module \'' + name + '\' is not loaded!');
