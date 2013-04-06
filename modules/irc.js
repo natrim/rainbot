@@ -79,9 +79,9 @@ IRC.prototype.connect = function() {
 		logger.warn('Already connected.');
 		return this;
 	}
-	if (this.irc._reconnect) {
-		clearInterval(this.irc._reconnect);
-		this.irc._reconnect = 0;
+	if (this._reconnect) {
+		clearInterval(this._reconnect);
+		this._reconnect = 0;
 	}
 	if (this.config.nick instanceof Array && this.config.nick.length > 0) {
 		this.tryNick = this.config.nick.slice(0); //use clone
