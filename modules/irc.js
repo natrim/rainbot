@@ -81,6 +81,7 @@ IRC.prototype.connect = function() {
 	}
 	if (this.irc._reconnect) {
 		clearInterval(this.irc._reconnect);
+		this.irc._reconnect = 0;
 	}
 	if (this.config.nick instanceof Array && this.config.nick.length > 0) {
 		this.tryNick = this.config.nick.slice(0); //use clone
@@ -558,9 +559,11 @@ exports.halt = function(reload) {
 	//stop heartbeat
 	if (this.irc._heartbeat) {
 		clearInterval(this.irc._heartbeat);
+		this.irc._heartbeat = 0;
 	}
 	if (this.irc._reconnect) {
 		clearInterval(this.irc._reconnect);
+		this.irc._reconnect = 0;
 	}
 	//quit on module halt
 	if (!reload && this.server.connected) {
