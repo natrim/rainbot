@@ -24,7 +24,7 @@ WolframAlpha.prototype.search = function(query, callback) {
 	var WA = this;
 	request(result.url, function(error, response, body) {
 		if (error || response.statusCode !== 200) {
-			callback.call(this, result);
+			callback.call(WA, result);
 			return;
 		}
 
@@ -41,7 +41,7 @@ WolframAlpha.prototype.search = function(query, callback) {
 			}
 		}
 
-		callback.call(this, result);
+		callback.call(WA, result);
 	});
 };
 

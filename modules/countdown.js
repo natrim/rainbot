@@ -10,10 +10,6 @@ var time = require('time');
 var http = require('http');
 var formattedDate = require(LIBS_DIR + '/helpers').dateFormat;
 
-function parseDecimal(v) {
-    return parseInt(v, 10);
-}
-
 function TvCountDownFactory(what, serial, callback) {
     http.get({
         host: 'tvcountdown.com',
