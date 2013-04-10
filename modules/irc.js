@@ -141,8 +141,9 @@ IRC.prototype.connect = function() {
 		irc.connecting = false;
 		dispatcher.emit('irc/error', err, irc);
 		logger.error(err);
-		if (irc.server.secured) { //ssl does not push the error to next
-			irc._ssl_had_error = true;
+		if (irc.server.secured) { //ssl fixes
+			irc._ssl_had_error = true; //ssl does not push the error to next
+			socket.destroy(); //ssl does not end connection on error
 		}
 	});
 
