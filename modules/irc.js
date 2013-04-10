@@ -138,30 +138,28 @@ IRC.prototype.connect = function() {
 	socket.setTimeout(0);
 
 	socket.on('error', function(err) {
-		irc.connecting = false;
 		dispatcher.emit('irc/error', err, irc);
 		logger.error(err);
 		if (irc.server.secured) { //ssl fixes
 			irc._ssl_had_error = true; //ssl does not push the error to next
-			socket.destroy(); //ssl does not end connection on error
+			socket.destroy(); //ssl does not autoclose socket on error
 		}
+		//socket.destroy(); //net is closing the socket on error itself
 	});
 
 	socket.on('timeout', function() {
-		if (irc.server.connected) if (irc.__reconnect()) return;
-		irc.connecting = false;
-		irc.server.connected = false;
 		dispatcher.emit('irc/timeout', irc);
+		socket.destroy(); //close socket
 	});
 
 	socket.on('close', function(had_error) {
-		if (irc.server.connected) if (irc.__reconnect()) return;
-		irc.connecting = false;
-		irc.server.connected = false;
-		if (irc.server.secured && !had_error && irc._ssl_had_error) { //ssl does not push the error to next
+		if (irc.server.secured && !had_error && irc._ssl_had_error) { //ssl does not push the error to close
 			had_error = true;
 			delete irc._ssl_had_error;
 		}
+		if (irc.__reconnect()) return;
+		irc.connecting = false;
+		irc.server.connected = false;
 		dispatcher.emit('irc/disconnect', had_error, irc);
 		logger.info('DISCONNECTED' + (had_error ? ' WITH ERROR' : ''));
 	});
@@ -182,6 +180,7 @@ IRC.prototype.connect = function() {
 
 IRC.prototype.__reconnect = function() {
 	if (!this.config.reconnect) return false;
+	if (!this.server.connected) return false;
 
 	this.connecting = false;
 	this.server.connected = false;
@@ -247,8 +246,10 @@ IRC.prototype.processLine = function(line) {
 		switch (msg.command) {
 			case 'ERROR':
 				//handle error timeout
-				if (/(timeout|timed out)/i.test(args[0]) && this.server.connected) {
-					if (this.__reconnect()) return;
+				if (/(timeout|timed out)/i.test(args[0])) {
+					var error = new Error('connection ETIMEDOUT');
+					error.code = 'ETIMEDOUT';
+					this.server.socket.emit('error', error); //mask it as socket error
 					handled = true;
 				}
 				break;
@@ -349,6 +350,7 @@ IRC.prototype.send = function(msg, nolog) {
 	};
 
 	if (/^QUIT /.test(msg)) {
+		this.connecting = false;
 		this.server.connected = false;
 		this.server.write(msg, callback.bind(this));
 		this.server.end();
