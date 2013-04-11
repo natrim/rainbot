@@ -345,57 +345,42 @@ IRC.prototype.send = function(msg, nolog) {
 		}
 	};
 
-	if (/^QUIT /.test(msg)) {
-		this.connecting = false;
-		this.server.connected = false;
-		this.server.write(msg, callback.bind(this));
-		this.server.end();
-	} else {
-
-		this.server.write(msg, callback.bind(this));
-	}
+	this.server.write(msg, callback.bind(this));
 
 	return this;
 };
 
-IRC.prototype.command = function(source, command) {
-	var args = '';
-	for (var i = 2; i < arguments.length - 1; i++) {
-		args += ' ' + arguments[i];
-	}
-
-	command = command.toUpperCase();
-
-	var hasLongArg = arguments.length > 2 && arguments[arguments.length - 1] !== null;
-
-	return this.send((source ? ':' + source.toString() + ' ' : '') + command + args + (hasLongArg ? ' :' + arguments[arguments.length - 1] : ''));
+IRC.prototype.end = function(msg, nolog) {
+	this.send(msg, nolog);
+	this.server.end();
+	return this;
 };
 
 IRC.prototype.pass = function(pass) {
-	return this.command(null, 'PASS', pass, null);
+	return this.send('PASS :' + pass);
 };
 
 IRC.prototype.nick = function(nick) {
 	if (this.connecting) {
 		this.server.currentNick = nick;
 	}
-	return this.command(null, 'NICK', nick);
+	return this.send('NICK :' + nick);
 };
 
 IRC.prototype.user = function(username, realname, mode) {
-	return this.command(null, 'USER', username, mode, '*', realname);
+	return this.send('USER ' + username + ' ' + mode + ' * :' + realname);
 };
 
 IRC.prototype.join = function() {
-	return this.command(null, 'JOIN', Array.prototype.join.call(arguments, ','), null);
+	return this.send('JOIN ' + Array.prototype.join.call(arguments, ','));
 };
 
 IRC.prototype.part = function() {
-	return this.command(null, 'PART', Array.prototype.join.call(arguments, ','), null);
+	return this.send('PART ' + Array.prototype.join.call(arguments, ','));
 };
 
 IRC.prototype.quit = function(message) {
-	return this.command(null, 'QUIT', message || this.config.quitMessage || 'Terminating...');
+	return this.end('QUIT :' + (message || this.config.quitMessage || 'Terminating...'));
 };
 
 IRC.prototype.privMsg = function(nick, message) {
@@ -409,7 +394,7 @@ IRC.prototype.privMsg = function(nick, message) {
 	this.server.lastMsg = message;
 	this.server.lastMsgTime = now;
 
-	return this.command(null, 'PRIVMSG', nick, message);
+	return this.send('PRIVMSG ' + nick + ' :' + message);
 };
 
 IRC.prototype.notice = function(nick, message) {
@@ -423,7 +408,7 @@ IRC.prototype.notice = function(nick, message) {
 	this.server.lastMsg = message;
 	this.server.lastMsgTime = now;
 
-	return this.command(null, 'NOTICE', nick, message);
+	return this.send('NOTICE ' + nick + ' :' + message);
 };
 
 IRC.prototype.ctcp = function(nick, message, type) {
