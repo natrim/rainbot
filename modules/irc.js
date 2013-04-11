@@ -293,13 +293,16 @@ IRC.prototype.processLine = function(line) {
 				//autojoin
 				if (this.shouldAutoJoin) this.tryAutoJoin();
 				break;
+			case '430':
+			case '431':
+			case '432':
 			case '433':
-				//nick already in use
+				//nick problem
 				if (this.connecting) {
 					if (this.tryNick.length > 0) { //if we still have some nicks then try them
 						this.nick(this.tryNick.shift());
 					} else {
-						logger.error('No free nick found!');
+						logger.error('No available nick found!');
 						this.quit('Nooo...');
 					}
 					handled = true;
