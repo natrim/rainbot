@@ -140,22 +140,19 @@ IRC.prototype.connect = function() {
 	socket.on('error', function(err) {
 		dispatcher.emit('irc/error', err, irc);
 		logger.error(err);
-		if (irc.server.secured) { //ssl fixes
-			irc._ssl_had_error = true; //ssl does not push the error to next
-			socket.destroy(); //ssl does not autoclose socket on error
-		}
-		//socket.destroy(); //net is closing the socket on error itself
+		irc._had_error = err; //push the error
+		socket.destroy(); //destroy socket
 	});
 
 	socket.on('timeout', function() {
 		dispatcher.emit('irc/timeout', irc);
-		socket.destroy(); //close socket
+		socket.destroy(); //destroy socket
 	});
 
 	socket.on('close', function(had_error) {
-		if (irc.server.secured && !had_error && irc._ssl_had_error) { //ssl does not push the error to close
-			had_error = true;
-			delete irc._ssl_had_error;
+		if (irc._had_error) { //get pushed error as primary one
+			had_error = irc._had_error;
+			delete irc._had_error;
 		}
 		if (irc.__reconnect()) return;
 		irc.connecting = false;
@@ -184,7 +181,6 @@ IRC.prototype.__reconnect = function() {
 
 	this.connecting = false;
 	this.server.connected = false;
-	if (this._ssl_had_error) delete this._ssl_had_error;
 
 	if (this._reconnect === 0) {
 		this.server.socket.destroy();
