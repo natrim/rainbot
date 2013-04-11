@@ -80,7 +80,7 @@ IRC.prototype.connect = function() {
 		return this;
 	}
 	if (this._reconnect) {
-		clearInterval(this._reconnect);
+		clearTimeout(this._reconnect);
 		this._reconnect = 0;
 	}
 	if (this.config.nick instanceof Array && this.config.nick.length > 0) {
@@ -561,7 +561,7 @@ exports.halt = function(reload) {
 		this.irc._heartbeat = 0;
 	}
 	if (this.irc._reconnect) {
-		clearInterval(this.irc._reconnect);
+		clearTimeout(this.irc._reconnect);
 		this.irc._reconnect = 0;
 	}
 	//quit on module halt
