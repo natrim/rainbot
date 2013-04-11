@@ -354,7 +354,12 @@ IRC.prototype.send = function(msg, nolog) {
 };
 
 IRC.prototype.end = function(msg, nolog) {
-	this.send(msg, nolog);
+	if (!this.server.connected) { //dont write if no connection
+		return this;
+	}
+	if (msg) {
+		this.send(msg, nolog);
+	}
 	this.server.end();
 	return this;
 };
