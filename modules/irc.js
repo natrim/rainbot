@@ -53,6 +53,7 @@ function IRC(server, dispatcher, config) {
 	this.recvBuffer = '';
 	this.tryNick = [];
 	this.connecting = false;
+	this.disconnecting = false;
 	this.shouldAutoJoin = true;
 
 	//irc client heartbeat ping - because the socket sometimes hangs
@@ -93,6 +94,7 @@ IRC.prototype.connect = function() {
 	}
 
 	this.connecting = true;
+	this.disconnecting = false;
 
 	logger.info('CONNECTING TO \'' + this.server + '\'');
 
@@ -154,9 +156,10 @@ IRC.prototype.connect = function() {
 			had_error = irc._had_error;
 			delete irc._had_error;
 		}
-		if (irc.__reconnect()) return;
 		irc.connecting = false;
 		irc.server.connected = false;
+		if (irc.__reconnect()) return;
+		this.disconnecting = false;
 		dispatcher.emit('irc/disconnect', had_error, irc);
 		logger.info('DISCONNECTED' + (had_error ? ' WITH ERROR' : ''));
 	});
@@ -177,13 +180,9 @@ IRC.prototype.connect = function() {
 
 IRC.prototype.__reconnect = function() {
 	if (!this.config.reconnect) return false;
-	if (!this.server.connected) return false;
-
-	this.connecting = false;
-	this.server.connected = false;
+	if (this.disconnecting) return false;
 
 	if (this._reconnect === 0) {
-		this.server.socket.destroy();
 		logger.info('CONNECTION TIMEOUT');
 		logger.info('Automatic reconnect in ' + (this.config.reconnectRetryDelay / 1000) + 's');
 		var irc = this;
@@ -354,9 +353,10 @@ IRC.prototype.send = function(msg, nolog) {
 };
 
 IRC.prototype.end = function(msg, nolog) {
-	if (!this.server.connected) { //dont write if no connection
+	if (!this.server.connected) {
 		return this;
 	}
+	this.disconnecting = true;
 	if (msg) {
 		this.send(msg, nolog);
 	}
