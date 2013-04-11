@@ -1,6 +1,6 @@
 {
 	"name": "rainbot",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"description": "Simple js IRC pony bot",
 	"scripts": {
 		"start": "node ./app",
