@@ -29,7 +29,7 @@ module.exports.init = function() {
 			return;
 		}
 
-		var chans = args[1].match(/#[\w]+/gi);
+		var chans = args[1].match(/#[\w\-\_]+/gi);
 		if (chans !== null) {
 			source.respond('okey, ' + source.nick + '! I didnt like the \'' + chans.join('\', \'') + '\' either.');
 			irc.part.apply(irc, chans);
@@ -46,7 +46,7 @@ module.exports.init = function() {
 			source.respond('I\'m not connected to server!');
 			return;
 		}
-		var chans = args[1].match(/#[\w]+/gi);
+		var chans = args[1].match(/#[\w\-\_]+/gi);
 		if (chans !== null) {
 			source.respond('okey, ' + source.nick + '! Lemme see what goes in \'' + chans.join('\', \'') + '\'.');
 
@@ -268,7 +268,7 @@ module.exports.init = function() {
 				source.mention('wait a little while...');
 			}
 		}
-	}, /^(say|tell)[ ]+(#?\w+)[ ]*(.*)$/i, ['owner', 'operators']);
+	}, /^(say|tell)[ ]+(#?[\w\_\-\\\[\]\{\}\^\`\|]+)[ ]*(.*)$/i, ['owner', 'operators']);
 
 	this.addAction('update', function(source) {
 		source.action('is fetching updates...');
