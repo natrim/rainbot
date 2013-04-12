@@ -187,7 +187,7 @@ module.exports.init = function() {
 				source.respond('module \'' + m + '\' reloaded!');
 			}
 		};
-		source.respond('okey, ' + source.nick + '! I reload it after i find it.');
+		source.respond('okey, ' + source.nick + '! Gimmie a sec to tune it.');
 		modules.forEach(function(name) {
 			module.mm.reload(name, call);
 		});
