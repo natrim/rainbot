@@ -290,7 +290,9 @@ IRC.prototype.processLine = function(line) {
 				//done connecting
 				this.connecting = false;
 				//autojoin
-				if (this.shouldAutoJoin) this.tryAutoJoin();
+				if (this.shouldAutoJoin) {
+					setTimeout(this.tryAutoJoin.bind(this), 2000); //give it a sec or two
+				}
 				break;
 			case '430':
 			case '431':
