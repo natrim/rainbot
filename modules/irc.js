@@ -196,7 +196,7 @@ IRC.prototype.__reconnect = function() {
 };
 
 IRC.prototype.processData = function(data) {
-	var lines = (this.recvBuffer + data).split("\r\n");
+	var lines = (this.recvBuffer + data).split('\r\n');
 	for (var i = 0; i < lines.length - 1; i++) {
 		this.processLine(lines[i]);
 	}
