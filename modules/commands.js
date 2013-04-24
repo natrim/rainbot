@@ -270,6 +270,16 @@ module.exports.init = function() {
 		}
 	}, /^(say|tell)[ ]+(#?[\w\_\-\\\[\]\{\}\^\`\|]+)[ ]*(.*)$/i, ['owner', 'operators']);
 
+	//pass the command
+	this.addAction('command', function(source, args) {
+		if (args[1]) {
+			irc.irc.send(args[1]);
+			source.mention('okey');
+		} else {
+			source.mention('tell me what');
+		}
+	}, /^command[ ]+(.*)/i, ['owner']);
+
 	this.addAction('update', function(source) {
 		source.action('is fetching updates...');
 
