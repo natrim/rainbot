@@ -115,7 +115,6 @@ suite.addBatch({
 		},
 		'and working config': function(err, m) {
 			assert.isObject(m.config);
-			assert.instanceOf(m.config, require(LIBS_DIR + '/config').Config);
 		}
 	},
 	'When i init loadable module return': {
