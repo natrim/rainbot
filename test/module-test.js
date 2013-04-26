@@ -72,7 +72,7 @@ suite.addBatch({
 	'When i init broken module': {
 		'callback': {
 			topic: function() {
-				var m = (new M('test2'));
+				var m = (new M('test2')).injectDispatcher(new(require('events').EventEmitter)()).injectConfig(new(require(LIBS_DIR + '/config').Config)());
 				m.init(this.callback);
 			},
 			'then i get error': function(err, m) {
@@ -82,7 +82,7 @@ suite.addBatch({
 		},
 		'return': {
 			topic: function() {
-				var m = (new M('test2'));
+				var m = (new M('test2')).injectDispatcher(new(require('events').EventEmitter)()).injectConfig(new(require(LIBS_DIR + '/config').Config)());
 				return m.init();
 			},
 			'then i get error': function(err) {
@@ -93,7 +93,10 @@ suite.addBatch({
 	},
 	'When i init loadable module callback': {
 		topic: function() {
-			(new M('test')).init(this.callback);
+			var m = new M('test');
+			m.injectDispatcher(new(require('events').EventEmitter)());
+			m.injectConfig(new(require(LIBS_DIR + '/config').Config)());
+			m.init(this.callback);
 		},
 		'then i should get module context': function(err, m) {
 			assert.isNull(err);
@@ -103,21 +106,25 @@ suite.addBatch({
 			assert.equal(m.context.test, 'Pony');
 			assert.equal(m.test_init, 'Many ponies!');
 		},
-		'and dispatcher': function(err, m) {
+		'and working dispatcher': function(err, m) {
 			assert.isObject(m.dispatcher);
 			assert.include(m.dispatcher, 'emit');
 			assert.include(m.dispatcher, 'on');
 			assert.include(m.dispatcher, 'once');
 			assert.include(m.dispatcher, 'off');
 		},
-		'and config': function(err, m) {
+		'and working config': function(err, m) {
 			assert.isObject(m.config);
 			assert.instanceOf(m.config, require(LIBS_DIR + '/config').Config);
 		}
 	},
 	'When i init loadable module return': {
 		topic: function() {
-			return (new M('test')).init();
+			var m = new M('test');
+			m.injectDispatcher(new(require('events').EventEmitter)());
+			m.injectConfig(new(require(LIBS_DIR + '/config').Config)());
+			m.init();
+			return m;
 		},
 		'then ok': function(m) {
 			assert.isModule(m);
@@ -128,23 +135,10 @@ suite.addBatch({
 			assert.equal(m.test_init, 'Many ponies!');
 		}
 	},
-	'When i inject EventEmitter': {
-		topic: function() {
-			(new M('test')).injectDispatcher(new(require('events').EventEmitter)(), this.callback);
-		},
-		'then i get bound events on module': function(err, dispatcher, m) {
-			assert.isNull(err);
-			assert.isObject(dispatcher);
-			assert.include(dispatcher, 'emit');
-			assert.include(dispatcher, 'on');
-			assert.include(dispatcher, 'once');
-			assert.include(dispatcher, 'off');
-		}
-	},
 	'When i halt': {
 		'loaded module return': {
 			topic: function() {
-				return (new M('test')).init().halt();
+				return (new M('test')).injectDispatcher(new(require('events').EventEmitter)()).injectConfig(new(require(LIBS_DIR + '/config').Config)()).init().halt();
 			},
 			'then it unloads': function(m) {
 				assert.isObject(m);
@@ -154,7 +148,7 @@ suite.addBatch({
 		},
 		'loaded module callback': {
 			topic: function() {
-				(new M('test')).init().halt(this.callback);
+				(new M('test')).injectDispatcher(new(require('events').EventEmitter)()).injectConfig(new(require(LIBS_DIR + '/config').Config)()).init().halt(this.callback);
 			},
 			'then it unloads': function(err, m) {
 				assert.isNull(err);
@@ -167,7 +161,7 @@ suite.addBatch({
 	'When i reload context': {
 		'of loadable module': {
 			topic: function() {
-				(new M('test')).init().reload(undefined, this.callback);
+				(new M('test')).injectDispatcher(new(require('events').EventEmitter)()).injectConfig(new(require(LIBS_DIR + '/config').Config)()).init().reload(undefined, this.callback);
 			},
 			'then i get ok': function(err, m) {
 				assert.isNull(err);

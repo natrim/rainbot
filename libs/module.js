@@ -36,6 +36,15 @@ Module.prototype._resolvePath = function() {
 //called on load
 Module.prototype.init = function init(callback) {
 	var error = null;
+
+	if (typeof this.dispatcher !== 'object') error = new Error('No dispatcher given!');
+	if (typeof this.config !== 'object') error = new Error('No config given!');
+
+	if (error) {
+		if (callback) callback(error, this);
+		else throw error;
+	}
+
 	try {
 		this.context = require(this.fullPath);
 		this.loaded = true;
@@ -44,12 +53,6 @@ Module.prototype.init = function init(callback) {
 	}
 
 	if (this.loaded) {
-		//self inject new dispatcher if none
-		if (typeof this.dispatcher !== 'object') this.injectDispatcher(new(require('events').EventEmitter)());
-
-		//self inject empty config if none
-		if (typeof this.config !== 'object') this.injectConfig(new(require(LIBS_DIR + '/config').Config)());
-
 		//init the context
 		if (typeof this.context.init === 'function') this.context.init.call(this, false);
 	}
