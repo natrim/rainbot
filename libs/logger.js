@@ -10,7 +10,7 @@ function Logger() {
 Logger.prototype.onBeforeLog = function() {};
 Logger.prototype.onAfterLog = function() {};
 
-var colors = {
+var colorize = {
   //styles
   'bold': ['\x1B[1m', '\x1B[22m'],
   'italic': ['\x1B[3m', '\x1B[23m'],
@@ -30,6 +30,13 @@ var colors = {
   'yellow': ['\x1B[33m', '\x1B[39m']
 };
 
+Object.keys(colorize).forEach(function(colorName) {
+  var colorColor = colorize[colorName];
+  colorize[colorName] = function(val) {
+    return colorColor[0] + val + colorColor[1];
+  };
+});
+
 Logger.prototype.log = function(msg, level) {
   if (!this.enabled) {
     return;
@@ -39,16 +46,16 @@ Logger.prototype.log = function(msg, level) {
   if (!dontlog) {
     switch (level) {
       case 'error':
-        console.error(colors.red[0] + '[ERROR] ' + colors.red[1] + msg);
+        console.error(colorize.red('[ERROR] ') + msg);
         break;
       case 'warn':
-        console.warn(colors.yellow[0] + '[WARNING] ' + colors.yellow[1] + msg);
+        console.warn(colorize.yellow('[WARNING] ') + msg);
         break;
       case 'info':
-        console.info(colors.cyan[0] + '[INFO] ' + colors.cyan[1] + msg);
+        console.info(colorize.cyan('[INFO] ') + msg);
         break;
       case 'debug':
-        if (this.debugging) console.log(colors.magenta[0] + '[DEBUG] ' + colors.magenta[1] + msg);
+        if (this.debugging) console.log(colorize.magenta('[DEBUG] ') + msg);
         break;
       default:
         console.log(msg);
@@ -75,3 +82,4 @@ Logger.prototype.debug = function(msg) {
 
 module.exports = new Logger();
 module.exports.Logger = Logger;
+module.exports.colorize = colorize;
