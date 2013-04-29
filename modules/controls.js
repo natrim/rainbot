@@ -19,12 +19,20 @@ if (!String.prototype.trim) {
 	};
 }
 
-function Controls(irc, actions, commands, groups) {
+function Controls(irc, actions, commands, config) {
 	this._irc = irc;
 	this.actions = actions;
 	this.commands = commands;
-	this.commandDelimiter = '.';
-	this.groups = groups;
+	this.groups = config.groups;
+	this.config = config;
+
+	Object.defineProperty(this, 'commandDelimiter', {
+		enumerable: true,
+		configurable: false,
+		get: function() {
+			return config.commandDelimiter;
+		}
+	});
 }
 
 Controls.prototype.addCommand = function(name, action, access) {
@@ -90,9 +98,9 @@ Controls.prototype.parse = function(source, text) {
 
 	if (!source.channel) { //itz direct message
 		this.processAction(source, text.trim());
-	} else if (source.channel && text.substr(0, this.commandDelimiter.length) === this.commandDelimiter) { //itz command in channel
+	} else if (source.channel && text.substr(0, this.config.commandDelimiter.length) === this.config.commandDelimiter) { //itz command in channel
 		//remove the delimiter
-		text = text.substr(this.commandDelimiter.length);
+		text = text.substr(this.config.commandDelimiter.length);
 
 		this.processCommand(source, text.trim());
 	} else if ((new RegExp('^' + this._irc.currentNick + '[ ,;:]')).test(text.substr(0, this._irc.currentNick.length + 1))) { //itz higlight in channel
@@ -174,13 +182,14 @@ module.exports.init = function(reload) {
 		this.actions = {};
 		this.commands = {};
 	}
-
-	this.groups = this.config.groups || {};
-	this.controls = new Controls(this.require('irc'), this.actions, this.commands, this.groups);
-
-	if (typeof this.config.commandDelimiter === 'string') {
-		this.controls.commandDelimiter = this.config.commandDelimiter;
+	if (typeof this.config.groups !== 'object') {
+		this.config.groups = {};
 	}
+	if (typeof this.config.commandDelimiter !== 'string') {
+		this.config.commandDelimiter = '.';
+	}
+
+	this.controls = new Controls(this.require('irc'), this.actions, this.commands, this.config);
 
 	var module = this;
 
@@ -189,7 +198,7 @@ module.exports.init = function(reload) {
 			enumerable: true,
 			configurable: false,
 			get: function() {
-				return module.controls.commandDelimiter;
+				return module.config.commandDelimiter;
 			}
 		});
 	}
