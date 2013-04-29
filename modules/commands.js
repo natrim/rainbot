@@ -168,15 +168,25 @@ module.exports.init = function() {
 
 	this.addCommand('help', commandList).addAction('help', commandList, /^help( actions)?$/);
 
-	//get moduleManager and save it for the commands
+	//get moduleManager and bot and save it for the commands
 	var module = this;
 	this.dispatcher.on('init', function(bot) {
 		module.mm = bot.modules;
+		module.bot = bot;
 	});
+
+	this.addAction('save', function(source) {
+		if (module.bot._configFile) {
+			module.bot.saveConfig(module.bot._configFile);
+			if (source.toString() !== 'ItzAInternallPonyShell') source.respond('Config saved!');
+		} else {
+			source.respond('Config cannot be saved!');
+		}
+	}, /^save$/i);
 
 	this.addAction('lsmod', function(source) {
 		source.mention('i have these modules active: ' + module.mm.getModules().join(', '));
-	}, /^lsmod|modules$/, ['owner']);
+	}, /^lsmod|modules$/i, ['owner']);
 
 	this.addAction('reload', function(source, args) {
 		var modules = args[1].match(/\w+/gi);
@@ -191,7 +201,7 @@ module.exports.init = function() {
 		modules.forEach(function(name) {
 			module.mm.reload(name, call);
 		});
-	}, /^reload[ ]+(.*)$/, ['owner']);
+	}, /^reload[ ]+(.*)$/i, ['owner']);
 
 	this.addAction('load', function(source, args) {
 		var modules = args[1].match(/\w+/gi);
@@ -206,7 +216,7 @@ module.exports.init = function() {
 		modules.forEach(function(name) {
 			module.mm.load(name, call);
 		});
-	}, /^load[ ]+(.*)$/, ['owner']);
+	}, /^load[ ]+(.*)$/i, ['owner']);
 
 	this.addAction('unload', function(source, args) {
 		var modules = args[1].match(/\w+/gi);
@@ -221,7 +231,7 @@ module.exports.init = function() {
 		modules.forEach(function(name) {
 			module.mm.unload(name, call);
 		});
-	}, /^unload[ ]+(.*)$/, ['owner']);
+	}, /^unload[ ]+(.*)$/i, ['owner']);
 
 
 	this.addAction('say', function(source, args) {
@@ -349,5 +359,5 @@ module.exports.init = function() {
 				source.respond('Nothing important has been updated.');
 			}
 		});
-	}, /^update$/, ['owner']);
+	}, /^update$/i, ['owner']);
 };

@@ -38,6 +38,7 @@ function Bot() {
 	//bot config
 	this.config = config;
 	this._configWatch = null;
+	this._configFile = '';
 	//bot MM
 	this.modules = moduleManager;
 	//dispatcher
@@ -62,6 +63,7 @@ function Bot() {
 			bot.emit('halt', bot);
 		}
 		bot.unloadModules();
+		if (bot.config.bot.autosave && bot._configFile) bot.saveConfig(bot._configFile);
 	});
 
 	//shutdown on ctrl+c gracefully
@@ -121,12 +123,14 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 					bot.loadConfig(filename);
 				}
 			});
+			this._configFile = BOT_DIR + '/' + config;
 		} catch (e) {
 			logger.error('Cannot load config!');
 			error = new Error('Cannot load config!');
 		}
 	} else if (config instanceof Object) {
 		bot.config.extend(config);
+		this._configFile = '';
 	} else {
 		try {
 			require.cache[BOT_DIR + '/config.json'] = null;
@@ -138,6 +142,7 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 					bot.loadConfig(filename);
 				}
 			});
+			this._configFile = BOT_DIR + '/config.json';
 		} catch (e) {
 			logger.error('Cannot load config!');
 			error = new Error('Cannot load config!');
@@ -148,14 +153,22 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 	if (typeof bot.config.bot === 'undefined') {
 		bot.config.bot = {
 			'name': 'Rainbot',
-			'modules': 'modules.json'
+			'modules': 'modules.json',
+			'debug': false,
+			'autosave': false
 		};
 	} else {
-		if (typeof bot.config.bot.name === 'undefined') {
+		if (typeof bot.config.bot.name !== 'string') {
 			bot.config.bot.name = 'Rainbot';
 		}
 		if (typeof bot.config.bot.modules === 'undefined') {
 			bot.config.bot.modules = 'modules.json';
+		}
+		if (typeof bot.config.bot.debug !== 'boolean') {
+			bot.config.bot.debug = false;
+		}
+		if (typeof bot.config.bot.autosave !== 'boolean') {
+			bot.config.bot.autosave = false;
 		}
 	}
 
@@ -169,6 +182,18 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 	}
 
 	return bot;
+};
+
+Bot.prototype.saveConfig = function(savefile) {
+	var fs = require('fs');
+
+	//blocking write
+	var err = fs.writeFileSync(savefile, JSON.stringify(this.config, null, 4));
+	if (err) {
+		logger.error('Failed to save config with error: ' + err);
+	} else {
+		logger.info('Config saved to \'' + savefile + '\'.');
+	}
 };
 
 Bot.prototype.loadModules = function loadModules(modules, callback) {

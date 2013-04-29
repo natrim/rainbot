@@ -17,7 +17,7 @@ function Module(name) {
 	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 
 	this.name = name;
-	this.fileName = name + ".js";
+	this.fileName = name + '.js';
 	this.loaded = false;
 	this.reloading = false;
 	this.context = null;
@@ -94,7 +94,7 @@ Module.prototype.halt = function halt(callback) {
 	return this;
 };
 
-Module.prototype.reload = function reload(config, callback, hollaback) {
+Module.prototype.reload = function reload(callback, hollaback) {
 	var error = null;
 	if (this.loaded) {
 		this.reloading = true;
@@ -120,7 +120,6 @@ Module.prototype.reload = function reload(config, callback, hollaback) {
 			error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e.message);
 		}
 		if (this.loaded) {
-			if (config) this.config = config;
 			if (typeof this.context.init === 'function') this.context.init.call(this, true);
 		}
 
@@ -136,7 +135,14 @@ Module.prototype.reload = function reload(config, callback, hollaback) {
 };
 
 Module.prototype.injectConfig = function(config, callback) {
-	this.config = config;
+	Object.defineProperty(this, 'config', {
+		configurable: false,
+		enumerable: true,
+		get: function() {
+			return config[this.name] || {};
+		}
+	});
+
 	if (callback) callback(null, this);
 
 	logger.debug('Module \'' + this.name + '\' Config inject.');
@@ -146,6 +152,7 @@ Module.prototype.injectConfig = function(config, callback) {
 
 Module.prototype.injectModuleManager = function(mm, callback) {
 	this.require = mm.require.bind(mm);
+
 	if (callback) callback(null, this);
 
 	logger.debug('Module \'' + this.name + '\' MM inject.');

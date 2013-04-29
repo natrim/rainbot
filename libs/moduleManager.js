@@ -70,7 +70,7 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 			}
 			if (module instanceof MODULE) {
 				if (typeof module.injectModuleManager === 'function') module.injectModuleManager(this);
-				if (typeof module.injectConfig === 'function') module.injectConfig(require(LIBS_DIR + '/config').create(this.config[name]));
+				if (typeof module.injectConfig === 'function') module.injectConfig(this.config);
 				if (typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
 
 				try {
@@ -164,7 +164,7 @@ ModuleManager.prototype.reload = function(name, callback) {
 	if (module) {
 		try {
 			if (typeof module.reload === 'function') {
-				module.reload(require(LIBS_DIR + '/config').create(this.config[name]), function(err) {
+				module.reload(function(err) {
 					if (err) throw err;
 					mm.dispatcher.emit('reload-load', name, mm, module);
 				}, function(err) {

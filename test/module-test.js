@@ -164,7 +164,7 @@ suite.addBatch({
 	'When i reload context': {
 		'of loadable module': {
 			topic: function() {
-				makeModule('test').init().reload(undefined, this.callback);
+				makeModule('test').init().reload(this.callback);
 			},
 			'then i get ok': function(err, m) {
 				assert.isNull(err);
@@ -175,7 +175,7 @@ suite.addBatch({
 		},
 		'of not loaded loadable module': {
 			topic: function() {
-				makeModule('test').reload(undefined, this.callback);
+				makeModule('test').reload(this.callback);
 			},
 			'then i get error': function(err, m) {
 				assert.isError(err);
