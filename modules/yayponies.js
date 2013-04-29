@@ -239,14 +239,6 @@ function getPonies(source, arg) {
 }
 
 exports.init = function(reload) {
-	if (typeof this.config.scanPages !== 'undefined' && this.config.scanPages instanceof Array) {
-		scanPages = this.config.scanPages;
-	}
-
-	if (typeof this.config.formats !== 'undefined' && this.config.formats instanceof Array) {
-		formats = formats.concat(this.config.formats);
-	}
-
 	this.addCommand('ponies', getPonies);
 	this.addCommand('pony', getPonies);
 	this.addCommand('yayponies', getPonies);
