@@ -95,25 +95,12 @@ function MLPCountDownFactory(what, serial, callback) {
     });
 }
 
-function Countdown() {
+function Countdown(aliases) {
     this.checkEvery = 3600000;
     this.dateFormat = 'DD.MM.YYYY HH:II TZ';
     this.defaultSerial = 'My Little Pony';
     this.cache = {};
-    this.aliases = {
-        'got': 'Game Of Thrones',
-        'gots': 'Game Of Thrones',
-        'reddwarf': 'Red Dwarf',
-        'dwarf': 'Red Dwarf',
-        'rd': 'Red Dwarf',
-        'bbt': 'The Big Bang Theory',
-        'tbbt': 'The Big Bang Theory',
-        'mlp': 'My Little Pony',
-        'mlpfim': 'My Little Pony',
-        'mlp:fim': 'My Little Pony',
-        'My Little Pony: Friendship is Magic': 'My Little Pony',
-        'himym': 'How I Met Your Mother'
-    };
+    this.aliases = aliases || {};
     this.countdownFactories = {
         'my-little-pony': MLPCountDownFactory,
         'default': TvCountDownFactory
@@ -297,19 +284,31 @@ Countdown.prototype.actions = function(source, args) {
 };
 
 exports.init = function() {
-    this.countdown = new Countdown();
-
-    if (typeof this.config.checkEvery !== 'undefined') {
-        this.countdown.checkEvery = this.config.checkEvery;
+    if (typeof this.config.checkEvery !== 'number') {
+        this.config.checkEvery = 3600000;
     }
 
-    if (typeof this.config.defaultSerial !== 'undefined') {
-        this.countdown.defaultSerial = this.config.defaultSerial;
+    if (typeof this.config.defaultSerial !== 'string') {
+        this.config.defaultSerial = 'My Little Pony';
     }
 
-    if (typeof this.config.dateFormat !== 'undefined') {
-        this.countdown.dateFormat = this.config.dateFormat;
+    if (typeof this.config.dateFormat !== 'string') {
+        this.config.dateFormat = 'DD.MM.YYYY HH:II TZ';
     }
+
+    if (typeof this.config.aliases !== 'object') {
+        this.config.aliases = {
+            'mlp': 'My Little Pony',
+            'mlpfim': 'My Little Pony',
+            'mlp:fim': 'My Little Pony',
+            'My Little Pony: Friendship is Magic': 'My Little Pony'
+        };
+    }
+
+    this.countdown = new Countdown(this.config.aliases);
+    this.countdown.checkEvery = this.config.checkEvery;
+    this.countdown.defaultSerial = this.config.defaultSerial;
+    this.countdown.dateFormat = this.config.dateFormat;
 
     this.addCommand('cd', this.countdown.command.bind(this.countdown));
     this.addCommand('tv', this.countdown.command.bind(this.countdown));
