@@ -155,7 +155,7 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 			'name': 'Rainbot',
 			'modules': 'modules.json',
 			'debug': false,
-			'autosave': false
+			'autosave': true
 		};
 	} else {
 		if (typeof bot.config.bot.name !== 'string') {
@@ -168,7 +168,7 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 			bot.config.bot.debug = false;
 		}
 		if (typeof bot.config.bot.autosave !== 'boolean') {
-			bot.config.bot.autosave = false;
+			bot.config.bot.autosave = true;
 		}
 	}
 
