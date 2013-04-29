@@ -188,11 +188,11 @@ Bot.prototype.saveConfig = function(savefile) {
 	var fs = require('fs');
 
 	//blocking write
-	var err = fs.writeFileSync(savefile, JSON.stringify(this.config, null, 4));
-	if (err) {
-		logger.error('Failed to save config with error: ' + err);
-	} else {
+	try {
+		fs.writeFileSync(savefile, JSON.stringify(this.config, null, 4));
 		logger.info('Config saved to \'' + savefile + '\'.');
+	} catch (err) {
+		logger.error('Failed to save config with error: ' + err);
 	}
 };
 
