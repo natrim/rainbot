@@ -95,12 +95,9 @@ function MLPCountDownFactory(what, serial, callback) {
     });
 }
 
-function Countdown(aliases) {
-    this.checkEvery = 3600000;
-    this.dateFormat = 'DD.MM.YYYY HH:II TZ';
-    this.defaultSerial = 'My Little Pony';
+function Countdown(config) {
+    this.config = config;
     this.cache = {};
-    this.aliases = aliases || {};
     this.countdownFactories = {
         'my-little-pony': MLPCountDownFactory,
         'default': TvCountDownFactory
@@ -134,7 +131,7 @@ Countdown.prototype.formatCountdown = function(airing, serial, episode, now) {
         returnstr += 'less than a second';
     }
 
-    returnstr += ' - ' + (formattedDate(new time.Date(airing), this.dateFormat));
+    returnstr += ' - ' + (formattedDate(new time.Date(airing), this.config.dateFormat));
 
     return returnstr;
 };
@@ -145,8 +142,8 @@ Countdown.prototype.getSerial = function(word) {
     }
 
     var alias = word;
-    if (typeof this.aliases[word.toLowerCase()] !== 'undefined') {
-        alias = this.aliases[word.toLowerCase()];
+    if (typeof this.config.aliases[word.toLowerCase()] !== 'undefined') {
+        alias = this.config.aliases[word.toLowerCase()];
     }
 
     if (alias instanceof Array) {
@@ -201,7 +198,7 @@ Countdown.prototype.createReplyWithCountdown = function(source, serial) {
         };
     }
 
-    if (((now - this.cache[what].lastCheck) > this.checkEvery) || ((this.cache[what].date - now) < 0)) { //if itz time for update or time in past
+    if (((now - this.cache[what].lastCheck) > this.config.checkEvery) || ((this.cache[what].date - now) < 0)) { //if itz time for update or time in past
         if (typeof this.countdownFactories[what] !== 'undefined') {
             this.countdownFactories[what](what, this.cache[what].name, this.respond.bind(this, source));
         } else {
@@ -237,10 +234,10 @@ Countdown.prototype.command = function(source, args, text, command) {
 
     if (args.length > 0) {
         word = this.getSerial(args.join(' '));
-    } else if (typeof this.aliases[('personalized-' + source.nick).toLowerCase()] !== 'undefined') {
+    } else if (typeof this.config.aliases[('personalized-' + source.nick).toLowerCase()] !== 'undefined') {
         word = this.getSerial('personalized-' + source.nick);
     } else if (command === 'cd') {
-        word = this.getSerial(this.defaultSerial);
+        word = this.getSerial(this.config.defaultSerial);
     } else {
         source.mention('tell me what serial should i count down!');
         return;
@@ -261,16 +258,16 @@ Countdown.prototype.actions = function(source, args) {
             var nick = tmp.shift();
             var alias = tmp.join(' ');
             if (alias === 'null' || alias === 'false') {
-                delete this.aliases[((mode === 'default' ? 'personalized-' : '') + nick).toLowerCase()];
+                delete this.config.aliases[((mode === 'default' ? 'personalized-' : '') + nick).toLowerCase()];
                 source.respond(mode === 'default' ? 'ok, personalized default removed' : 'ok, alias removed');
             } else {
                 tmp = alias.match(/^\[(.*)\]$/);
 
                 if (tmp !== null) {
                     //no need for this.getSerial as itz array and will be done just in time
-                    this.aliases[((mode === 'default' ? 'personalized-' : '') + nick).toLowerCase()] = tmp[1].replace(/"|'/g, '').split(',');
+                    this.config.aliases[((mode === 'default' ? 'personalized-' : '') + nick).toLowerCase()] = tmp[1].replace(/"|'/g, '').split(',');
                 } else {
-                    this.aliases[((mode === 'default' ? 'personalized-' : '') + nick).toLowerCase()] = this.getSerial(alias);
+                    this.config.aliases[((mode === 'default' ? 'personalized-' : '') + nick).toLowerCase()] = this.getSerial(alias);
                 }
 
                 source.respond(mode === 'default' ? 'ok, personalized default changed' : 'ok, alias changed');
@@ -305,10 +302,7 @@ exports.init = function() {
         };
     }
 
-    this.countdown = new Countdown(this.config.aliases);
-    this.countdown.checkEvery = this.config.checkEvery;
-    this.countdown.defaultSerial = this.config.defaultSerial;
-    this.countdown.dateFormat = this.config.dateFormat;
+    this.countdown = new Countdown(this.config);
 
     this.addCommand('cd', this.countdown.command.bind(this.countdown));
     this.addCommand('tv', this.countdown.command.bind(this.countdown));
