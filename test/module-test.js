@@ -28,6 +28,15 @@ M.prototype._resolvePath = h.wrap(M.prototype._resolvePath, function(resol) {
 	}
 });
 
+//helper for module making
+
+function makeModule(name) {
+	var m = new M(name);
+	m.injectDispatcher(new(require('events').EventEmitter)());
+	m.injectConfig(new(require(LIBS_DIR + '/config').Config)());
+	return m;
+}
+
 //isError assert
 assert.isError = function(val) {
 	assert.isObject(val);
@@ -62,18 +71,17 @@ suite.addBatch({
 	},
 	'When i construct module with nonexistent file': {
 		topic: function() {
-			return new M('idontexists');
+			return new M('idontexist');
 		},
 		'then i should get error': function(err) {
 			assert.isError(err);
-			assert.equal(err.message, 'Module \'idontexists\' does not exists in MODULE_DIR!');
+			assert.equal(err.message, 'Module \'idontexist\' does not exists in MODULE_DIR!');
 		}
 	},
 	'When i init broken module': {
 		'callback': {
 			topic: function() {
-				var m = (new M('test2')).injectDispatcher(new(require('events').EventEmitter)()).injectConfig(new(require(LIBS_DIR + '/config').Config)());
-				m.init(this.callback);
+				makeModule('test2').init(this.callback);
 			},
 			'then i get error': function(err, m) {
 				assert.isError(err);
@@ -82,7 +90,7 @@ suite.addBatch({
 		},
 		'return': {
 			topic: function() {
-				var m = (new M('test2')).injectDispatcher(new(require('events').EventEmitter)()).injectConfig(new(require(LIBS_DIR + '/config').Config)());
+				var m = makeModule('test2');
 				return m.init();
 			},
 			'then i get error': function(err) {
@@ -93,9 +101,7 @@ suite.addBatch({
 	},
 	'When i init loadable module callback': {
 		topic: function() {
-			var m = new M('test');
-			m.injectDispatcher(new(require('events').EventEmitter)());
-			m.injectConfig(new(require(LIBS_DIR + '/config').Config)());
+			var m = makeModule('test');
 			m.init(this.callback);
 		},
 		'then i should get module context': function(err, m) {
@@ -119,9 +125,7 @@ suite.addBatch({
 	},
 	'When i init loadable module return': {
 		topic: function() {
-			var m = new M('test');
-			m.injectDispatcher(new(require('events').EventEmitter)());
-			m.injectConfig(new(require(LIBS_DIR + '/config').Config)());
+			var m = makeModule('test');
 			m.init();
 			return m;
 		},
@@ -137,7 +141,7 @@ suite.addBatch({
 	'When i halt': {
 		'loaded module return': {
 			topic: function() {
-				return (new M('test')).injectDispatcher(new(require('events').EventEmitter)()).injectConfig(new(require(LIBS_DIR + '/config').Config)()).init().halt();
+				return makeModule('test').init().halt();
 			},
 			'then it unloads': function(m) {
 				assert.isObject(m);
@@ -147,7 +151,7 @@ suite.addBatch({
 		},
 		'loaded module callback': {
 			topic: function() {
-				(new M('test')).injectDispatcher(new(require('events').EventEmitter)()).injectConfig(new(require(LIBS_DIR + '/config').Config)()).init().halt(this.callback);
+				makeModule('test').init().halt(this.callback);
 			},
 			'then it unloads': function(err, m) {
 				assert.isNull(err);
@@ -160,7 +164,7 @@ suite.addBatch({
 	'When i reload context': {
 		'of loadable module': {
 			topic: function() {
-				(new M('test')).injectDispatcher(new(require('events').EventEmitter)()).injectConfig(new(require(LIBS_DIR + '/config').Config)()).init().reload(undefined, this.callback);
+				makeModule('test').init().reload(undefined, this.callback);
 			},
 			'then i get ok': function(err, m) {
 				assert.isNull(err);
@@ -171,7 +175,7 @@ suite.addBatch({
 		},
 		'of not loaded loadable module': {
 			topic: function() {
-				(new M('test')).reload(undefined, this.callback);
+				makeModule('test').reload(undefined, this.callback);
 			},
 			'then i get error': function(err, m) {
 				assert.isError(err);
