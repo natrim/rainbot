@@ -6,22 +6,18 @@
 /* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
-function Dice() {
-	//dice rolling: roll [XdY] - rolls a Y-sided dice X times, defaults to 1d6
-	this.maxDices = 20;
-	this.minDices = 1;
-
-	this.maxFaces = 100;
-	this.minFaces = 1;
+function Dice(config) {
+	//dice rolling: roll [XdY] - rolls a Y-sided dice X times
+	this.config = config;
 }
 
 Dice.prototype.roll = function(dice, faces) {
 	var sum = 0,
 		results = [];
-	dice = Math.max(dice, this.minDices);
-	dice = Math.min(dice, this.maxDices);
-	faces = Math.max(faces, this.minFaces);
-	faces = Math.min(faces, this.maxFaces);
+	dice = Math.max(dice, this.config.minDices);
+	dice = Math.min(dice, this.config.maxDices);
+	faces = Math.max(faces, this.config.minFaces);
+	faces = Math.min(faces, this.config.maxFaces);
 
 	for (var i = 0; i < dice; i++) {
 		results[i] = Math.floor(Math.random() * faces) + 1;
@@ -37,27 +33,27 @@ Dice.prototype.reply = function(source, args) {
 		dice = args[0].match(/(\d+)d(\d+)/);
 
 		if (dice === null) {
-			source.mention('the only parameter is XdY - where X is number of dice (up to ' + this.maxDices + ') and Y is sides per dice (up to ' + this.maxFaces + ')');
+			source.mention('the only parameter is XdY - where X is number of dice (up to ' + this.config.maxDices + ') and Y is sides per dice (up to ' + this.config.maxFaces + ')');
 			return;
 		}
 
-		if (dice[1] > this.maxDices) {
-			source.mention('the max. number of dices is ' + this.maxDices + ' !');
+		if (dice[1] > this.config.maxDices) {
+			source.mention('the max. number of dices is ' + this.config.maxDices + ' !');
 			return;
 		}
 
-		if (dice[1] < this.minDices) {
-			source.mention('the min. number of dices is ' + this.minDices + ' !');
+		if (dice[1] < this.config.minDices) {
+			source.mention('the min. number of dices is ' + this.config.minDices + ' !');
 			return;
 		}
 
-		if (dice[2] > this.maxFaces) {
-			source.mention('the max. number of sides for dice is ' + this.maxFaces + ' !');
+		if (dice[2] > this.config.maxFaces) {
+			source.mention('the max. number of sides for dice is ' + this.config.maxFaces + ' !');
 			return;
 		}
 
-		if (dice[2] < this.minFaces) {
-			source.mention('the min. number of sides for dice is ' + this.minFaces + ' !');
+		if (dice[2] < this.config.minFaces) {
+			source.mention('the min. number of sides for dice is ' + this.config.minFaces + ' !');
 			return;
 		}
 	}
@@ -67,21 +63,21 @@ Dice.prototype.reply = function(source, args) {
 };
 
 exports.init = function(bot) {
-	this.dice = new Dice();
-
-	if (typeof this.config.maxDices === 'number') this.dice.maxDices = this.config.maxDices;
-	if (typeof this.config.minDices === 'number') this.dice.minDices = this.config.minDices;
-	if (typeof this.config.maxFaces === 'number') this.dice.maxFaces = this.config.maxFaces;
-	if (typeof this.config.minFaces === 'number') this.dice.minFaces = this.config.minFaces;
+	if (typeof this.config.maxDices !== 'number') this.config.maxDices = 20;
+	if (typeof this.config.minDices !== 'number') this.config.minDices = 1;
+	if (typeof this.config.maxFaces !== 'number') this.config.maxFaces = 100;
+	if (typeof this.config.minFaces !== 'number') this.config.minFaces = 1;
 
 	//the sides will stop between 1-100
-	if (this.dice.minFaces < 1) this.dice.minFaces = 1;
-	if (this.dice.maxFaces > 100) this.dice.maxFaces = 100;
+	if (this.config.minFaces < 1) this.config.minFaces = 1;
+	if (this.config.maxFaces > 100) this.config.maxFaces = 100;
 
 	//throw atleast one!
-	if (this.dice.minDices < 1) this.dice.minDices = 1;
+	if (this.config.minDices < 1) this.config.minDices = 1;
 	//not realy sure if somepony want to throw more than 1k dices
-	if (this.dice.maxDices > 1000) this.dice.maxDices = 1000;
+	if (this.config.maxDices > 1000) this.config.maxDices = 1000;
+
+	this.dice = new Dice(this.config);
 
 	this.addCommand('dice', this.dice.reply.bind(this.dice));
 };
