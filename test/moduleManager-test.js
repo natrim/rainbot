@@ -35,10 +35,16 @@ assert.isError = function(val) {
 	assert.instanceOf(val, Error);
 };
 
+//helper
+
+function makeMM() {
+	return new MM(new(require('events').EventEmitter)(), new(require(LIBS_DIR + '/config').Config)());
+}
+
 suite.addBatch({
 	'When i construct class': {
 		topic: function() {
-			return new MM();
+			return makeMM();
 		},
 		'then i get ModuleManager class': function(context) {
 			assert.isObject(context);
@@ -73,7 +79,7 @@ suite.addBatch({
 	'When i load': {
 		'empty': {
 			topic: function() {
-				(new MM()).load(undefined, this.callback);
+				makeMM().load(undefined, this.callback);
 			},
 			'then i get error': function(err, module) {
 				assert.isError(err);
@@ -81,7 +87,7 @@ suite.addBatch({
 		},
 		'nonexistent module': {
 			topic: function() {
-				(new MM()).load('someunknownpony', this.callback);
+				makeMM().load('someunknownpony', this.callback);
 			},
 			'then i get error': function(err, module) {
 				assert.isError(err);
@@ -89,7 +95,7 @@ suite.addBatch({
 		},
 		'test module': {
 			topic: function() {
-				(new MM()).load('test', this.callback);
+				makeMM().load('test', this.callback);
 			},
 			'then i get it loaded': function(err, module, mm) {
 				assert.isNull(err);
@@ -110,7 +116,7 @@ suite.addBatch({
 		},
 		'broken test2 module callback': {
 			topic: function() {
-				(new MM()).load('test2', this.callback);
+				makeMM().load('test2', this.callback);
 			},
 			'then i get error': function(err, module, mm) {
 				assert.isError(err);
@@ -120,7 +126,7 @@ suite.addBatch({
 		},
 		'broken test2 module return': {
 			topic: function() {
-				this.mm = (new MM());
+				this.mm = makeMM();
 				return this.mm.load('test2');
 			},
 			'then i get err': function(err) {
@@ -132,7 +138,7 @@ suite.addBatch({
 	'When i unload': {
 		'empty': {
 			topic: function() {
-				(new MM()).unload(undefined, this.callback);
+				makeMM().unload(undefined, this.callback);
 			},
 			'then i get error': function(err, name, mm) {
 				assert.isError(err);
@@ -140,7 +146,7 @@ suite.addBatch({
 		},
 		'nonexistent module': {
 			topic: function() {
-				(new MM()).unload('someunknownpony', this.callback);
+				makeMM().unload('someunknownpony', this.callback);
 			},
 			'then i get error': function(err, name, mm) {
 				assert.isError(err);
@@ -148,7 +154,7 @@ suite.addBatch({
 		},
 		'test module': {
 			topic: function() {
-				var mm = (new MM());
+				var mm = makeMM();
 				mm.load('test');
 				return mm;
 			},
@@ -166,7 +172,7 @@ suite.addBatch({
 	},
 	'When i require': {
 		topic: function() {
-			return (new MM()).require('test');
+			return makeMM().require('test');
 		},
 		'then i get the module': function(m) {
 			assert.isObject(m);
@@ -178,7 +184,7 @@ suite.addBatch({
 	'When i reload': {
 		'not loaded module': {
 			topic: function() {
-				(new MM()).reload('test', this.callback);
+				makeMM().reload('test', this.callback);
 			},
 			'then i get error': function(err, m, mm) {
 				assert.isObject(err);
@@ -187,7 +193,7 @@ suite.addBatch({
 		},
 		'loaded module': {
 			topic: function() {
-				(new MM()).load('test').reload('test', this.callback);
+				makeMM().load('test').reload('test', this.callback);
 			},
 			'then i get ok': function(err, m, mm) {
 				assert.isNull(err);
@@ -202,7 +208,7 @@ suite.addBatch({
 suite.addBatch({
 	'When i load module and protected it': {
 		topic: function() {
-			var mm = (new MM());
+			var mm = makeMM();
 			mm.load('test');
 			mm.protect('test');
 			return mm;

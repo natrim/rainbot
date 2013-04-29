@@ -15,13 +15,12 @@ function ModuleManager(dispatcher, config) {
 	if (typeof dispatcher === 'object') {
 		this.dispatcher = dispatcher;
 	} else {
-		this.dispatcher = new(require('events').EventEmitter)();
-		this.dispatcher.setMaxListeners(0);
+		throw new Error('No dispatcher given!');
 	}
 	if (typeof config === 'object') {
 		this.config = config;
 	} else {
-		this.config = require(LIBS_DIR + '/config').create();
+		throw new Error('No config given!');
 	}
 
 	this._protected_modules = {};
