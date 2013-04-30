@@ -23,7 +23,6 @@ function Controls(irc, actions, commands, config) {
 	this._irc = irc;
 	this.actions = actions;
 	this.commands = commands;
-	this.groups = config.groups;
 	this.config = config;
 
 	Object.defineProperty(this, 'commandDelimiter', {
@@ -164,8 +163,8 @@ Controls.prototype.checkAccess = function(source, CorA) {
 	//array means list of allowed groups
 	if (CorA.access instanceof Array) {
 		return CorA.access.some(function(name) {
-			if (this.groups[name]) {
-				return this.groups[name].some(function(user) {
+			if (this.config.groups[name]) {
+				return this.config.groups[name].some(function(user) {
 					return source.toString().match(user) !== null;
 				});
 			}
