@@ -63,7 +63,7 @@ function Bot() {
 			bot.emit('halt', bot);
 		}
 		bot.unloadModules();
-		if (bot.config.bot.autosave && bot._configFile) bot.saveConfig(bot._configFile);
+		if (bot.config.bot && bot.config.bot.autosave && bot._configFile) bot.saveConfig(bot._configFile);
 	});
 
 	//shutdown on ctrl+c gracefully
@@ -98,90 +98,92 @@ Bot.prototype.emit = function() {
 	return this;
 };
 
-Bot.prototype.loadConfig = function loadConfig(config, callback) {
-	var bot = this;
+Bot.prototype._setConfigWatch = function(file) {
+	var fs = require('fs');
 
+	if (!fs.existsSync(file)) {
+		return false;
+	}
+
+	if (this._configWatch) { //stop watching config
+		this._configWatch.close();
+		this._configWatch = null;
+	}
+
+	var bot = this;
+	this._configWatch = fs.watch(file, {
+		persistent: false
+	}, function(event, filename) {
+		if (event === 'change') {
+			bot.loadConfig(filename);
+		}
+	});
+
+	return true;
+};
+
+Bot.prototype.loadConfig = function loadConfig(config, callback) {
 	var error = null;
 	if (typeof config === 'function' && typeof callback === 'undefined') {
 		callback = config;
 		config = undefined;
 	}
 
-	if (bot._configWatch) { //stop watching config
-		bot._configWatch.close();
-		bot._configWatch = null;
-	}
-
 	if (typeof config === 'string') {
-		try {
-			require.cache[BOT_DIR + '/' + config] = null;
-			bot.config.extend(require(BOT_DIR + '/' + config));
-			bot._configWatch = require('fs').watch(BOT_DIR + '/' + config, {
-				persistent: false
-			}, function(event, filename) {
-				if (event === 'change') {
-					bot.loadConfig(filename);
-				}
-			});
-			this._configFile = BOT_DIR + '/' + config;
-		} catch (e) {
-			logger.error('Cannot load config!');
-			error = new Error('Cannot load config!');
-		}
+		this._configFile = BOT_DIR + '/' + config;
 	} else if (config instanceof Object) {
-		bot.config.extend(config);
 		this._configFile = '';
 	} else {
-		try {
-			require.cache[BOT_DIR + '/config.json'] = null;
-			bot.config.extend(require(BOT_DIR + '/config.json'));
-			bot._configWatch = require('fs').watch(BOT_DIR + '/config.json', {
-				persistent: false
-			}, function(event, filename) {
-				if (event === 'change') {
-					bot.loadConfig(filename);
-				}
-			});
-			this._configFile = BOT_DIR + '/config.json';
-		} catch (e) {
-			logger.error('Cannot load config!');
-			error = new Error('Cannot load config!');
+		this._configFile = BOT_DIR + '/config.json';
+	}
+
+	try {
+		if (this._configFile) {
+			require.cache[this._configFile] = null;
+			config = require(this._configFile);
+			this._setConfigWatch(this._configFile);
 		}
+
+		this.config.clear(); //throw out old config
+		this.config.load(config); //load new config
+	} catch (e) {
+		logger.error('Cannot load config! ');
+		error = new Error('Cannot load config! ' + e);
 	}
 
 	//make sure we have important values
-	if (typeof bot.config.bot === 'undefined') {
-		bot.config.bot = {
+	if (typeof this.config.bot === 'undefined') {
+		this.config.bot = {
 			'name': 'Rainbot',
 			'modules': 'modules.json',
 			'debug': false,
 			'autosave': true
 		};
 	} else {
-		if (typeof bot.config.bot.name !== 'string') {
-			bot.config.bot.name = 'Rainbot';
+		if (typeof this.config.bot.name !== 'string') {
+			this.config.bot.name = 'Rainbot';
 		}
-		if (typeof bot.config.bot.modules === 'undefined') {
-			bot.config.bot.modules = 'modules.json';
+		if (typeof this.config.bot.modules === 'undefined') {
+			this.config.bot.modules = 'modules.json';
 		}
-		if (typeof bot.config.bot.debug !== 'boolean') {
-			bot.config.bot.debug = false;
+		if (typeof this.config.bot.debug !== 'boolean') {
+			this.config.bot.debug = false;
 		}
-		if (typeof bot.config.bot.autosave !== 'boolean') {
-			bot.config.bot.autosave = true;
+		if (typeof this.config.bot.autosave !== 'boolean') {
+			this.config.bot.autosave = true;
 		}
 	}
 
-	if (callback) callback(error, bot.config);
+	if (callback) callback(error, this.config);
 	else if (error) throw error;
 
 	logger.info('Config loaded!');
 
 	if (logger) {
-		logger.debugging = bot.config.bot.debug ? true : false;
+		logger.debugging = this.config.bot.debug ? true : false;
 	}
 
-	return bot;
+	return this;
 };
 
 Bot.prototype.saveConfig = function(savefile) {

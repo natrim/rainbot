@@ -40,7 +40,9 @@ suite.addBatch({
 	'When i load config with': {
 		'not existing config': {
 			topic: function() {
-				new BOT().loadConfig('not-exist-config.json', this.callback);
+				var bot = new BOT();
+				bot.loadConfig('not-exist-config.json', this.callback);
+				bot.config.bot.autosave = false; //disable autosaving
 			},
 			'then i get error': function(err, config) {
 				assert.isError(err);
@@ -51,7 +53,9 @@ suite.addBatch({
 		},
 		'default config': {
 			topic: function() {
-				new BOT().loadConfig(this.callback);
+				var bot = new BOT();
+				bot.loadConfig('example-config.json', this.callback);
+				bot.config.bot.autosave = false; //disable autosaving
 			},
 			'then i get config object': function(err, config) {
 				assert.isNull(err);
@@ -68,9 +72,11 @@ suite.addBatch({
 		},
 		'manual custom object': {
 			topic: function() {
-				new BOT().loadConfig({
+				var bot = new BOT();
+				bot.loadConfig({
 					'test': 'ok'
 				}, this.callback);
+				bot.config.bot.autosave = false; //disable autosaving
 			},
 			'then il get custom config': function(err, config) {
 				assert.isObject(config);
@@ -87,12 +93,14 @@ suite.addBatch({
 		},
 		'manual custom object with twist': {
 			topic: function() {
-				new BOT().loadConfig({
+				var bot = new BOT();
+				bot.loadConfig({
 					'bot': {
 						'name': 'Dash',
 						'modules': 'dashing.json'
 					}
 				}, this.callback);
+				bot.config.bot.autosave = false; //disable autosaving
 			},
 			'with custom bot name \'Dash\'': function(error, config) {
 				assert.isObject(config.bot);
