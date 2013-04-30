@@ -2,7 +2,8 @@
 	"bot": {
 		"name": "Rainbot",
 		"modules": "modules.json",
-		"debug": false
+		"debug": false,
+		"autosave": true
 	},
 	"irc": {
 		"autoconnect": true,
@@ -15,7 +16,9 @@
 		"ssl": false,
 		"channel": "#pony",
 		"log": true,
-		"logTimeFormat": "DD.MM.YYYY HH:II:SS"
+		"logTimeFormat": "DD.MM.YYYY HH:II:SS",
+		"heartbeat": 120000,
+		"reconnectRetryDelay": 120000
 	},
 	"irclog": {
 		"logfile": "irc.log"
