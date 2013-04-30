@@ -135,7 +135,7 @@ IRC.prototype.connect = function() {
 		irc.user(config.username, config.realname ? config.realname : config.username, mode);
 	});
 
-	socket.setEncoding('ascii');
+	socket.setEncoding('utf8');
 	socket.setNoDelay(true);
 	socket.setTimeout(0);
 
