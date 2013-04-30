@@ -64,4 +64,5 @@ module.exports.export = function(to, from, list) {
 	list.forEach(function(p) {
 		if (typeof from[p] === 'function') to[p] = from[p].bind(from);
 	});
+	return to;
 };
