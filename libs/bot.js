@@ -130,7 +130,7 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 	}
 
 	if (typeof config === 'string') {
-		this._configFile = BOT_DIR + '/' + config;
+		this._configFile = BOT_DIR + '/' + require('path').basename(config);
 	} else if (config instanceof Object) {
 		this._configFile = '';
 	} else {
@@ -189,9 +189,12 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 Bot.prototype.saveConfig = function(savefile) {
 	var fs = require('fs');
 
+	//get only basename
+	savefile = require('path').basename(savefile);
+
 	//blocking write
 	try {
-		fs.writeFileSync(savefile, JSON.stringify(this.config, null, 4));
+		fs.writeFileSync(BOT_DIR + '/' + savefile, JSON.stringify(this.config, null, 4));
 		logger.info('Config saved to \'' + savefile + '\'.');
 	} catch (err) {
 		logger.error('Failed to save config with error: ' + err);
