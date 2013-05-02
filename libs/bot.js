@@ -52,14 +52,16 @@ function Bot() {
 		moduleManager.protect(m, true);
 	});
 
+	//set to true if running
+	this.__running = false;
 	//set to true if halting the bot
-	this.halting = false;
+	this.__halting = false;
 
 	//bind to exit event of main process
 	var bot = this;
 	process.on('exit', function() {
-		if (!bot.halting) {
-			bot.halting = true;
+		if (!bot.__halting) {
+			bot.__halting = true;
 			bot.emit('halt', bot);
 		}
 		bot.unloadModules();
@@ -101,21 +103,16 @@ Bot.prototype.emit = function() {
 Bot.prototype._setConfigWatch = function(file) {
 	var fs = require('fs');
 
-	if (!fs.existsSync(file)) {
+	if (!fs.existsSync(BOT_DIR + '/' + file)) {
 		return false;
 	}
 
-	if (this._configWatch) { //stop watching config
-		this._configWatch.close();
-		this._configWatch = null;
-	}
-
 	var bot = this;
-	this._configWatch = fs.watch(file, {
+	this._configWatch = fs.watch(BOT_DIR + '/' + file, {
 		persistent: false
-	}, function(event, filename) {
+	}, function(event) {
 		if (event === 'change') {
-			bot.loadConfig(filename);
+			bot.loadConfig(file);
 		}
 	});
 
@@ -130,17 +127,22 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 	}
 
 	if (typeof config === 'string') {
-		this._configFile = BOT_DIR + '/' + require('path').basename(config);
+		this._configFile = require('path').basename(config);
 	} else if (config instanceof Object) {
 		this._configFile = '';
 	} else {
-		this._configFile = BOT_DIR + '/config.json';
+		this._configFile = 'config.json';
+	}
+
+	if (this._configWatch) { //stop watching config
+		this._configWatch.close();
+		this._configWatch = null;
 	}
 
 	try {
 		if (this._configFile) {
-			require.cache[this._configFile] = null;
-			config = require(this._configFile);
+			require.cache[BOT_DIR + '/' + this._configFile] = null;
+			config = require(BOT_DIR + '/' + this._configFile);
 			this._setConfigWatch(this._configFile);
 		}
 
@@ -341,18 +343,27 @@ Bot.prototype.reload = function reload(names, callback) {
 };
 
 Bot.prototype.run = Bot.prototype.start = function run() {
+	if(this.__running) {
+		return this;
+	}
+	
 	logger.info('Bot initialization starting...');
 	this.emit('init', this);
+
+	this.__running = true;
+
 	return this;
 };
 
 Bot.prototype.end = Bot.prototype.stop = function end() {
-	if (!this.halting) {
-		this.halting = true;
+	if (!this.__halting) {
+		this.__halting = true;
 		this.emit('halt', this);
 		logger.info('Exiting ...');
 		setTimeout(process.exit, 1000); //delay it for a sec
 	}
+
+	return this;
 };
 
 module.exports.Bot = Bot;
