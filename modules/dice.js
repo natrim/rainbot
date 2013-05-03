@@ -62,7 +62,7 @@ Dice.prototype.reply = function(source, args) {
 	source.mention('you rolled: ' + this.roll(dice[1], dice[2]));
 };
 
-exports.init = function(bot) {
+exports.init = function() {
 	if (typeof this.config.maxDices !== 'number') this.config.maxDices = 20;
 	if (typeof this.config.minDices !== 'number') this.config.minDices = 1;
 	if (typeof this.config.maxFaces !== 'number') this.config.maxFaces = 100;
