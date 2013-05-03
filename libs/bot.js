@@ -112,7 +112,11 @@ Bot.prototype._setConfigWatch = function(file) {
 		persistent: false
 	}, function(event) {
 		if (event === 'change') {
-			bot.loadConfig(file);
+			try {
+				bot.loadConfig(file);
+			} catch(e) {
+				//none
+			}
 		}
 	});
 
