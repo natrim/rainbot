@@ -139,7 +139,8 @@ Module.prototype.injectConfig = function(config, callback) {
 		configurable: false,
 		enumerable: true,
 		get: function() {
-			return config[this.name] || {};
+			if(typeof config[this.name] !== 'object') config[this.name] = {};
+			return config[this.name];
 		}
 	});
 
