@@ -147,6 +147,7 @@ module.exports.init = function() {
 			}
 		}, controls);
 
+		source.mention('check private message from me for available actions.');
 		source.message('actions that can be triggered by you are: ' + actions.join(', '));
 	}
 
