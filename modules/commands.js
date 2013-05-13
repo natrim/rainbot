@@ -72,14 +72,14 @@ module.exports.init = function() {
 				clearTimeout(timer);
 			};
 
+			irc.join.apply(irc, chans);
+
 			dispatcher.on('irc/405', fail);
 			dispatcher.on('irc/471', fail);
 			dispatcher.on('irc/473', fail);
 			dispatcher.on('irc/474', fail);
 			dispatcher.on('irc/475', fail);
 			dispatcher.on('irc/JOIN', ok);
-
-			irc.join.apply(irc, chans);
 		} else {
 			source.mention('please specify a channel.');
 		}
@@ -124,14 +124,14 @@ module.exports.init = function() {
 				clearTimeout(timer);
 			};
 
+			irc.nick(nick);
+
 			dispatcher.on('irc/430', fail);
 			dispatcher.on('irc/431', fail);
 			dispatcher.on('irc/432', fail);
 			dispatcher.on('irc/433', inuse);
 			dispatcher.on('irc/438', toofast);
 			dispatcher.on('irc/NICK', ok);
-
-			irc.nick(nick);
 		} else {
 			source.respond('Hello, my name is ' + irc.currentNick);
 		}
@@ -283,8 +283,29 @@ module.exports.init = function() {
 
 	//pass the command
 	this.addAction('command', function(source, args) {
+		if (!irc.connected) {
+			source.respond('I\'m not connected to server!');
+			return;
+		}
+
 		if (args[1]) {
+			var wrongcommand = function(s, args) {
+				if (args[0] === irc.currentNick) {
+					source.mention('my pony powers tells me that command \'' + args[1] + '\' is unknown!');
+					clean();
+				}
+			};
+
+			var timer = setTimeout(clean, 5000);
+			var clean = function() {
+				dispatcher.off('irc/421', wrongcommand);
+				clearTimeout(timer);
+			};
+
 			irc.irc.send(args[1]);
+
+			dispatcher.on('irc/421', wrongcommand);
+
 			source.mention('okey');
 		} else {
 			source.mention('tell me what');
