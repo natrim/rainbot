@@ -60,6 +60,7 @@ function Bot() {
 	//bind to exit event of main process
 	var bot = this;
 	process.on('exit', function() {
+		if (bot.__abort) return; //do nothing on abort
 		if (!bot.__halting) {
 			bot.__halting = true;
 			bot.emit('halt', bot);
@@ -114,7 +115,7 @@ Bot.prototype._setConfigWatch = function(file) {
 		if (event === 'change') {
 			try {
 				bot.loadConfig(file);
-			} catch(e) {
+			} catch (e) {
 				//none
 			}
 		}
@@ -125,6 +126,7 @@ Bot.prototype._setConfigWatch = function(file) {
 
 Bot.prototype.loadConfig = function loadConfig(config, callback) {
 	var error = null;
+
 	if (typeof config === 'function' && typeof callback === 'undefined') {
 		callback = config;
 		config = undefined;
@@ -153,7 +155,6 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 		this.config.clear(); //throw out old config
 		this.config.load(config); //load new config
 	} catch (e) {
-		logger.error('Cannot load config! ');
 		error = new Error('Cannot load config! ' + e);
 	}
 
@@ -180,10 +181,14 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 		}
 	}
 
-	if (callback) callback(error, this.config);
-	else if (error) throw error;
+	if (callback) callback.call(this, error, this.config);
 
-	logger.info('Config loaded!');
+	if (error) {
+		logger.error(error);
+		logger.info('Empty config loaded!');
+	} else {
+		logger.info('Config loaded!');
+	}
 
 	if (logger) {
 		logger.debugging = this.config.bot.debug ? true : false;
@@ -208,22 +213,28 @@ Bot.prototype.saveConfig = function(savefile) {
 };
 
 Bot.prototype.loadModules = function loadModules(modules, callback) {
-	var bot = this;
+	var error = null;
+	if (this.__running) {
+		error = new Error('Bot is already running, please load the modules before issuing \'run\'!');
+		if (callback) callback.call(this, error, null);
+		logger.error(error);
+		this.abort(error);
+		return this;
+	}
 
 	if (typeof modules === 'function' && typeof callback === 'undefined') {
 		callback = modules;
 		modules = {};
 	}
 
-	if (typeof bot.config.bot === 'undefined') { //we need atleast empty bot config
-		bot.config.bot = {
+	if (typeof this.config.bot === 'undefined') { //we need atleast empty bot config
+		this.config.bot = {
 			'modules': 'modules.json'
 		};
 	}
 
-	var error = null;
 	if (typeof modules === 'string') {
-		bot.config.bot.modules = modules;
+		this.config.bot.modules = modules;
 		modules = {};
 	} else if (typeof modules === 'object' && modules instanceof Array) {
 		var tmp = modules.slice(0);
@@ -232,125 +243,144 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 			modules[tmp[i]] = true;
 		}
 
-	} else if (typeof modules !== 'object' && typeof bot.config.bot.modules === 'string') {
+	} else if (typeof modules !== 'object' && typeof this.config.bot.modules === 'string') {
 		modules = {};
 	} else if (typeof modules !== 'object') {
-		logger.error('Modules was nor Object nor Array nor String! Trying to load default \'modules.json\'.');
-		error = new Error('Modules was nor Object nor Array nor String! Trying to load default \'modules.json\'.');
-
 		modules = {};
+		error = new Error('Modules was nor Object nor Array nor String! Trying to load default \'modules.json\'.');
 	}
 
-	//first load core modules
-	bot._core_modules.forEach(function(name) {
-		bot.modules.load(name);
-	});
+	if (error) { //abort
+		if (callback) callback.call(this, error, null);
+		logger.error(error);
+		this.abort(error);
+		return this;
+	}
 
-	//then custom modules
+	//load the file
 	if (Object.keys(modules).length <= 0) {
 		try {
-			modules = require(BOT_DIR + '/' + bot.config.bot.modules);
+			modules = require(BOT_DIR + '/' + this.config.bot.modules);
 		} catch (e) {
 			modules = {};
-			logger.error('Cannot load modules file \'' + bot.config.bot.modules + '\'!');
-			error = new Error('Cannot load modules file \'' + bot.config.bot.modules + '\'!');
+			error = new Error('Cannot load modules file \'' + this.config.bot.modules + '\'!');
 		}
 	}
+
+	//start the load of core modules
+	try {
+		this._core_modules.forEach(function(name) {
+			this.modules.load(name);
+		}, this);
+	} catch (e) {
+		error = e;
+	}
+
+	if (error) { //imediate abort on failure
+		if (callback) callback.call(this, error, null);
+		logger.error(error);
+		this.abort(error);
+		return this;
+	}
+
+	//start the load of other modules
+	var catchBack = function(err) {
+		if (err) {
+			logger.error(err);
+			error = new Error('Failed loading some modules!');
+		}
+	};
 
 	var keys = Object.keys(modules);
 	if (keys.length > 0) {
 		keys.forEach(function(name) {
 			if (modules[name] === true) {
-				bot.modules.load(name);
+				this.modules.load(name, catchBack);
 			}
-		});
+		}, this);
 	}
 
-	if (callback) callback(error, bot.modules);
-	else if (error) throw error;
+	if (callback) callback.call(this, error, this.modules);
 
 	logger.info('Modules loaded!');
-	return bot;
+
+	if (error) logger.warn(error);
+
+	return this;
 };
 
 Bot.prototype.unloadModules = function() {
-	var bot = this;
 	//unprotect core modules
-	bot._core_modules.forEach(function(name) {
-		bot.modules.protect(name, false);
-	});
+	this._core_modules.forEach(function(name) {
+		this.modules.protect(name, false);
+	}, this);
 	//unload all modules
-	bot.modules.getModules().reverse().forEach(function(m) {
+	this.modules.getModules().reverse().forEach(function(m) {
 		try {
-			bot.modules.unload(m);
+			this.modules.unload(m);
 		} catch (e) {
 			//ignore all errors
 			//just note them
 			logger.warn('Caught error on module \'' + m + '\' unload: ' + e);
 		}
-	});
+	}, this);
 	logger.info('Modules unloaded!');
+	return this;
 };
 
 Bot.prototype.load = function load(names, callback) {
-	var bot = this;
-
 	if (!(names instanceof Array)) {
 		names = [names];
 	}
 
 	var recallback = callback ? function(err, module, mm) {
-			callback(err, module, mm, bot);
-		} : undefined;
+			callback(err, module, mm, this);
+		}.bind(this) : undefined;
 
 	names.forEach(function(name) {
-		bot.modules.load(name, recallback);
-	});
+		this.modules.load(name, recallback);
+	}, this);
 
-	return bot;
+	return this;
 };
 
 Bot.prototype.unload = function unload(names, callback) {
-	var bot = this;
-
 	if (!(names instanceof Array)) {
 		names = [names];
 	}
 
 	var recallback = callback ? function(err, mm) {
-			callback(err, mm, bot);
-		} : undefined;
+			callback(err, mm, this);
+		}.bind(this) : undefined;
 
 	names.forEach(function(name) {
-		bot.modules.unload(name, recallback);
-	});
+		this.modules.unload(name, recallback);
+	}, this);
 
-	return bot;
+	return this;
 };
 
 Bot.prototype.reload = function reload(names, callback) {
-	var bot = this;
-
 	if (!(names instanceof Array)) {
 		names = [names];
 	}
 
 	var recallback = callback ? function(err, mm) {
-			callback(err, mm, bot);
-		} : undefined;
+			callback(err, mm, this);
+		}.bind(this) : undefined;
 
 	names.forEach(function(name) {
-		bot.modules.reload(name, recallback);
-	});
+		this.modules.reload(name, recallback);
+	}, this);
 
-	return bot;
+	return this;
 };
 
 Bot.prototype.run = Bot.prototype.start = function run() {
-	if(this.__running) {
+	if (this.__running) {
 		return this;
 	}
-	
+
 	logger.info('Bot initialization starting...');
 	this.emit('init', this);
 
@@ -367,6 +397,12 @@ Bot.prototype.end = Bot.prototype.stop = function end() {
 		setTimeout(process.exit, 1000); //delay it for a sec
 	}
 
+	return this;
+};
+
+Bot.prototype.abort = function(error) {
+	this.__abort = true;
+	process.exit(1);
 	return this;
 };
 
