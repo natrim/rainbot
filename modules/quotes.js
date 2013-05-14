@@ -51,5 +51,5 @@ exports.init = function() {
 	}
 
 	this.addCommand('quote', q).addCommand('quotes', q).addCommand('q', q);
-	this.addAction('quote', q, /^(quotes|quote|q)$/i, [])
+	this.addAction('quote', q, /^(quotes|quote|q)$/i, []);
 };
