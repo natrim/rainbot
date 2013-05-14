@@ -28,10 +28,10 @@ function TvCountDownFactory(what, serial, callback) {
             if (countdowndates !== null) {
                 var episode = [];
                 if (episodenames !== null) {
-                    episode = eval(episodenames[0] + ' episode'); //eval in strict mode to get the last variable
+                    episode = require('vm').runInThisContext(episodenames[0] + ' episode');
                 }
 
-                var timestamp = eval(countdowndates[0] + ' timestamp'); //eval in strict mode to get the last variable
+                var timestamp = require('vm').runInThisContext(countdowndates[0] + ' timestamp');
                 var airing, epname = serial,
                     eptext = '';
                 for (var i = 0; i < timestamp.length; i++) {
