@@ -181,7 +181,7 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 		}
 	}
 
-	if (callback) callback.call(this, error, this.config);
+	if (callback) callback(error, this.config, this);
 
 	if (error) {
 		logger.error(error);
@@ -216,7 +216,7 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 	var error = null;
 	if (this.__running) {
 		error = new Error('Bot is already running, please load the modules before issuing \'run\'!');
-		if (callback) callback.call(this, error, null);
+		if (callback) callback(error, null, this);
 		logger.error(error);
 		this.abort(error);
 		return this;
@@ -251,7 +251,7 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 	}
 
 	if (error) { //abort
-		if (callback) callback.call(this, error, null);
+		if (callback) callback(error, null, this);
 		logger.error(error);
 		this.abort(error);
 		return this;
@@ -277,7 +277,7 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 	}
 
 	if (error) { //imediate abort on failure
-		if (callback) callback.call(this, error, null);
+		if (callback) callback(error, null, this);
 		logger.error(error);
 		this.abort(error);
 		return this;
@@ -300,7 +300,7 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 		}, this);
 	}
 
-	if (callback) callback.call(this, error, this.modules);
+	if (callback) callback(error, this.modules, this);
 
 	logger.info('Modules loaded!');
 

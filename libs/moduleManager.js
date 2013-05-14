@@ -186,7 +186,7 @@ ModuleManager.prototype.reload = function(name, callback) {
 
 	logger.debug('Reload of \'' + name + '\' module' + (error ? ' failed' : ' is success') + '.');
 
-	if (callback) callback(error, module, this);
+	if (callback) callback(error, name, this);
 	else if (error) throw error;
 
 	return this;

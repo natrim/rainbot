@@ -54,7 +54,11 @@ Module.prototype.init = function init(callback) {
 
 	if (this.loaded) {
 		//init the context
-		if (typeof this.context.init === 'function') this.context.init.call(this, false);
+		try {
+			if (typeof this.context.init === 'function') this.context.init.call(this, false);
+		} catch (e) {
+			error = new Error('Failed initiating context of \'' + this.name + '\' module! ' + e.message);
+		}
 	}
 
 	logger.debug('Init of \'' + this.name + '\' module' + (error ? ' failed' : ' is success') + '.');
@@ -67,7 +71,11 @@ Module.prototype.init = function init(callback) {
 
 //called on unload
 Module.prototype.halt = function halt(callback) {
-	if (this.loaded && typeof this.context.halt === 'function') this.context.halt.call(this, false);
+	try {
+		if (this.loaded && typeof this.context.halt === 'function') this.context.halt.call(this, false);
+	} catch (e) {
+		logger.warn('Got error at halting context of \'' + this.name + '\' module! ' + e.message);
+	}
 
 	//remove from node require cache
 	if (this.loaded) {
@@ -99,7 +107,11 @@ Module.prototype.reload = function reload(callback, hollaback) {
 	if (this.loaded) {
 		this.reloading = true;
 
-		if (typeof this.context.halt === 'function') this.context.halt.call(this, true);
+		try {
+			if (typeof this.context.halt === 'function') this.context.halt.call(this, true);
+		} catch (e) {
+			logger.warn('Got error at halting context of \'' + this.name + '\' module! ' + e.message);
+		}
 
 		var module = require.cache[this.fullPath];
 		module.children.forEach(function(m) {
@@ -120,7 +132,11 @@ Module.prototype.reload = function reload(callback, hollaback) {
 			error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e.message);
 		}
 		if (this.loaded) {
-			if (typeof this.context.init === 'function') this.context.init.call(this, true);
+			try {
+				if (typeof this.context.init === 'function') this.context.init.call(this, true);
+			} catch (e) {
+				error = new Error('Failed initiating context of \'' + this.name + '\' module! ' + e.message);
+			}
 		}
 
 		this.reloading = false;
@@ -139,7 +155,7 @@ Module.prototype.injectConfig = function(config, callback) {
 		configurable: false,
 		enumerable: true,
 		get: function() {
-			if(typeof config[this.name] !== 'object') config[this.name] = {};
+			if (typeof config[this.name] !== 'object') config[this.name] = {};
 			return config[this.name];
 		}
 	});
