@@ -4,6 +4,7 @@
 	"description": "Simple js IRC pony bot",
 	"scripts": {
 		"start": "node ./app",
+		"posttest": "find . -name '*.js' -print0 | xargs -0 ./node_modules/.bin/jshint",
 		"test": "./run-test.sh"
 	},
 	"dependencies": {
@@ -12,7 +13,8 @@
 		"time": "*"
 	},
 	"devDependencies": {
-		"vows": "*"
+		"vows": "*",
+		"jshint": "*"
 	},
 	"main": "./libs/bot",
 	"author": "Natrim"
