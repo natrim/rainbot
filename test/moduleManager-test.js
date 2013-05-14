@@ -186,7 +186,7 @@ suite.addBatch({
 			topic: function() {
 				makeMM().reload('test', this.callback);
 			},
-			'then i get error': function(err, m, mm) {
+			'then i get error': function(err, mname, mm) {
 				assert.isObject(err);
 				assert.instanceOf(err, Error);
 			}
@@ -195,10 +195,10 @@ suite.addBatch({
 			topic: function() {
 				makeMM().load('test').reload('test', this.callback);
 			},
-			'then i get ok': function(err, m, mm) {
+			'then i get ok': function(err, mname, mm) {
 				assert.isNull(err);
-				assert.equal(m.test_init, 'Reload Many ponies!');
-				assert.equal(m.test_halt, 'Reloading No ponies!');
+				assert.equal(mm.get(mname).test_init, 'Reload Many ponies!');
+				assert.equal(mm.get(mname).test_halt, 'Reloading No ponies!');
 			}
 		}
 	}
