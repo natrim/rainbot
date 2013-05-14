@@ -373,6 +373,7 @@ module.exports.init = function() {
 				source.respond('example-config.json was updated, please use check your configuration');
 			}
 
+			updated_modules = require(LIBS_DIR + '/helpers').unique(updated_modules);
 			if (updated_modules.length > 0) {
 				source.respond('Don\'t forget to reload updated modules: ' + updated_modules.join(', '));
 			}
