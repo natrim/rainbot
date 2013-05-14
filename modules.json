@@ -9,5 +9,6 @@
 	"countdown": true,
 	"calc": true,
 	"dice": true,
-	"coin": true
+	"coin": true,
+	"quotes": true
 }
