@@ -43,6 +43,14 @@ suite.addBatch({
 			assert.deepEqual(wr.call('1-2', '-'), ['1', '2']);
 		}
 	},
+	'When i want unique values from array': {
+		topic: function() {
+			return helpers.unique(['test1', 'test2', 'test2', 'test3', 'pony', 'pony', 1, 2.3, 3, 1]);
+		},
+		'then i get it': function(ret) {
+			assert.deepEqual(ret, ['test1', 'test2', 'test3', 'pony', 1, 2.3, 3]);
+		}
+	},
 	'when i export some functions': {
 		topic: function() {
 			return helpers.export({}, {

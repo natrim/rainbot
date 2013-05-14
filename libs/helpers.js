@@ -54,6 +54,32 @@ module.exports.wrap = function(func, wrapper) {
 };
 
 /**
+ * Produce a duplicate-free version of the array
+ * @param  {[type]}  array    [description]
+ * @param  {Boolean} isSorted [description]
+ * @param  {[type]}  iterator [description]
+ * @param  {[type]}  context  [description]
+ * @return {[type]}           [description]
+ */
+module.exports.uniq = module.exports.unique = function(array, isSorted, iterator, context) {
+	if (typeof isSorted === 'function') {
+		context = iterator;
+		iterator = isSorted;
+		isSorted = false;
+	}
+	var initial = iterator ? array.map(iterator, context) : array;
+	var results = [];
+	var seen = [];
+	initial.forEach(function(value, index) {
+		if (isSorted ? (!index || seen[seen.length - 1] !== value) : seen.indexOf(value) === -1) {
+			seen.push(value);
+			results.push(array[index]);
+		}
+	});
+	return results;
+};
+
+/**
  * Exports functions passed in array
  * @param  {object} to   destinations object
  * @param  {object} from source object
