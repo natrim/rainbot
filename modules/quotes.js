@@ -77,5 +77,5 @@ function quote(source) {
 
 exports.init = function() {
 	this.addCommand('quote', quote).addCommand('quotes', quote).addCommand('q', quote);
-	this.addAction('quote', quote, /^(quotes|quote|q)$/i, []);
+	this.addAction('quote', quote, /^(quotes|quote|q)$/i, false);
 };
