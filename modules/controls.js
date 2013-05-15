@@ -19,11 +19,12 @@ if (!String.prototype.trim) {
 	};
 }
 
-function Controls(irc, actions, commands, config) {
+function Controls(irc, actions, commands, config, dispatcher) {
 	this._irc = irc;
 	this.actions = actions;
 	this.commands = commands;
 	this.config = config;
+	this.dispatcher = dispatcher;
 
 	Object.defineProperty(this, 'commandDelimiter', {
 		enumerable: true,
@@ -40,6 +41,7 @@ Controls.prototype.addCommand = function(name, action, access) {
 		throw new Error('Command \'' + name + '\' already exists!');
 	}
 	this.commands[name] = new Command(name, action, access);
+	this.dispatcher.emit('controls/addCommand', name);
 	return this;
 };
 
@@ -49,6 +51,7 @@ Controls.prototype.addAction = function(name, action, regexp, access) {
 		throw new Error('Action \'' + name + '\' already exists!');
 	}
 	this.actions[name] = new Action(name, action, regexp, access);
+	this.dispatcher.emit('controls/addAction', name, regexp);
 	return this;
 };
 
@@ -56,6 +59,7 @@ Controls.prototype.removeCommand = function(name) {
 	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 	if (typeof this.commands[name] !== 'undefined') {
 		delete this.commands[name];
+		this.dispatcher.emit('controls/removeCommand', name);
 	} else {
 		throw new Error('Command \'' + name + '\' does not exists!');
 	}
@@ -66,6 +70,7 @@ Controls.prototype.removeAction = function(name) {
 	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 	if (typeof this.actions[name] !== 'undefined') {
 		delete this.actions[name];
+		this.dispatcher.emit('controls/removeAction', name);
 	} else {
 		throw new Error('Action \'' + name + '\' does not exists!');
 	}
@@ -121,6 +126,8 @@ Controls.prototype.processCommand = function(source, text) {
 			if (this.checkAccess(source, this.commands[name])) { //run the command only if the user has access
 				logger.debug('Processing Command \'' + name + '\'');
 				this.commands[name].action(source, args, text, command);
+				//notify others about it
+				this.dispatcher.emit('controls/command', name, source, args, text, command);
 			} else {
 				logger.debug('Command \'' + name + '\' access for user \'' + source + '\' denied!');
 				source.notice('Command Access denied! Do i know you?');
@@ -140,6 +147,8 @@ Controls.prototype.processAction = function(source, text) {
 				if (this.checkAccess(source, this.actions[name])) { //run the action only if the user has access
 					logger.debug('Processing Action \'' + name + '\'');
 					this.actions[name].action(source, args, text);
+					//notify others about it
+					this.dispatcher.emit('controls/action', name, source, args, text);
 				} else {
 					logger.debug('Action \'' + name + '\' access for user \'' + source + '\' denied!');
 					source.notice('Action Access denied! Derpy in action!');
@@ -188,7 +197,7 @@ module.exports.init = function(reload) {
 		this.config.commandDelimiter = '.';
 	}
 
-	this.controls = new Controls(this.require('irc'), this.actions, this.commands, this.config);
+	this.controls = new Controls(this.require('irc'), this.actions, this.commands, this.config, this.dispatcher);
 
 	var module = this;
 
