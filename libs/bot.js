@@ -236,18 +236,21 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 	if (typeof modules === 'string') {
 		this.config.bot.modules = modules;
 		modules = {};
-	} else if (typeof modules === 'object' && modules instanceof Array) {
-		var tmp = modules.slice(0);
-		modules = {};
-		for (var i = 0; i < tmp.length; i++) {
-			modules[tmp[i]] = true;
-		}
-
+	} else if (typeof modules !== 'object' && typeof this.config.bot.modules === 'object') {
+		modules = this.config.bot.modules;
 	} else if (typeof modules !== 'object' && typeof this.config.bot.modules === 'string') {
 		modules = {};
 	} else if (typeof modules !== 'object') {
 		modules = {};
 		error = new Error('Modules was nor Object nor Array nor String! Trying to load default \'modules.json\'.');
+	}
+
+	if (modules instanceof Array) {
+		var tmp = modules.slice(0);
+		modules = {};
+		for (var i = 0; i < tmp.length; i++) {
+			modules[tmp[i]] = true;
+		}
 	}
 
 	if (error) { //abort
