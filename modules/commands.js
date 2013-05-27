@@ -176,14 +176,23 @@ module.exports.init = function() {
 		module.bot = bot;
 	});
 
-	this.addAction('save', function(source) {
+	this.addAction('config save', function(source) {
 		if (module.bot._configFile) {
 			module.bot.saveConfig(module.bot._configFile);
 			if (source.toString() !== 'ItzAInternallPonyShell') source.respond('Config saved!');
 		} else {
 			source.respond('Config cannot be saved!');
 		}
-	}, /^save$/i);
+	}, /^config save$/i);
+
+	this.addAction('config load', function(source) {
+		if (module.bot._configFile) {
+			module.bot.loadConfig(module.bot._configFile);
+			if (source.toString() !== 'ItzAInternallPonyShell') source.respond('Config (re)loaded!');
+		} else {
+			source.respond('Config cannot be loaded!');
+		}
+	}, /^config load$/i);
 
 	this.addAction('lsmod', function(source) {
 		source.mention('i have these modules active: ' + module.mm.getModules().join(', '));
