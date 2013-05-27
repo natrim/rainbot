@@ -331,25 +331,24 @@ IRC.prototype.send = function(msg, nolog) {
 		return this;
 	}
 
-	if (!(/\r\n$/.test(msg))) {
-		msg += '\r\n';
-	}
+	//replace newline by space to avoid breaking
+	msg = msg.replace(/\r?\n|\r/g, ' ');
 
 	var callback = function() {
 		if (!nolog) {
-			this.dispatcher.emit('irc/SEND', msg.replace(/\r\n$/, ''), this);
+			this.dispatcher.emit('irc/SEND', msg, this);
 		}
 
 		if (this.config.log) {
 			if (!nolog) {
-				console.log(date(undefined, this.config.logTimeFormat) + ' [SEND]> ' + msg.replace(/\r\n$/, ''));
+				console.log(date(undefined, this.config.logTimeFormat) + ' [SEND]> ' + msg);
 			}
 		} else {
-			logger.debug('[SEND]> ' + msg.replace(/\r\n$/, ''));
+			logger.debug('[SEND]> ' + msg);
 		}
 	};
 
-	this.server.write(msg, callback.bind(this));
+	this.server.write(msg + '\r\n', callback.bind(this));
 
 	return this;
 };
