@@ -7,7 +7,7 @@
 'use strict';
 
 var quotes = [
-	"I could clear the sky in 10 seconds flat!",
+        "I could clear the sky in 10 seconds flat!",
 	"Are you a SPY?",
 	"All the ponies in this town are CRAZY!",
 	"Scarf? Check. Saddle? Check. Boots? Check. 'Spike refusing to get up and go back to sleep'? Check. It's a good thing I'm so organized. I'm ready!",
@@ -69,7 +69,31 @@ var quotes = [
 	"Yay!",
 	"Hmm, nah",
 	"If I can't find a problem I am going to have to make one.",
-	"This may look like fun, but it's NOT."];
+	"This may look like fun, but it's NOT.",
+        "We tried persuasion, charm, whatever it is Pinkie Pie does... ",
+        "Oh, Fluttershy. Would you be a dear and FLY FASTER, PLEASE?",
+        "Twilight Sparkle: \"Pinkie Pie, you're a genius!\" Pinkie Pie: \"No I'm not, I'm a chicken! BAGAWK!\"",
+        "APPLEJACK!!! YOU PINKIE PROMISED!!!!",
+        "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a pony. -- Jane Austen",
+        "Oh, and what are you passionate about? Birthday cake? Party hats? I can't believe that the two most frivolous ponies in Ponyville are trying to tell new Fluttershy how to live her life when they are throwing their own lives away on pointless pursuits that nopony else gives a flying feather about!",
+        "Why do they call it a flea market when they don't sell fleas?",
+        "Applejack: \"It's just that... The map is also upside-down.\" Pinkie Pie: \"I've got news for you cookie, the earth is round. There is no up or down.\"",
+        "Hey Twilight, what's soaking wet and clueless? Your face!",
+        "LEAVE ME ALLLOOOONNNE! I vant to be ALONE! I want to wallow in... WHATEVERITISTHATPONIESARESUPPOSEDTOWALLOWIN! Do ponies wallow in pity? OH, listen to me, I don't even know what I'm supposed to wallow in! I'M SO PATHETIC....!",
+        "Well, well, well. It seems we have some neigh-sayers in the audience. Who is so ignorant as to challenge the magical ability of the Great and Powerful Trixie? Do they not know that they're in the presence of the most magical unicorn in all of Equestria?",
+        "Maybe Gilda isn't a big meanie grumpy mean-meanie-pants. Maybe I'm just a big jealous judgmental jealous-jealousy-pants.",
+        "So, you see this here? This, um, this is um, a big, round room. It's known for its roundness, and bigness, and did I mention that it's round?",
+        "And you want us to shoot you out of a cannon towards a hornet's nest and give Spike a butterfly net so he can catch you mere seconds before you hit the nest and are stung by a thousand angry hornets! [puts on a mustache] I'll wear this mustache.",
+        "Wait! If I'm not here when Rainbow Dash's letter arrives, I won't be able to read it right away, and if I don't read it right away I won't be able to write her back right away, and if I don't write her back right away, she might think I didn't get her letter and then she might worry about loss and then she's worried about her letter, she'll be distracted and if she's distracted then she won't do well in the Academy and if she doesn't do well in the Academy, then she'll get kicked out and if she gets kicked out she'll never get to be a Wonderbolt and if she never gets to be a Wonderbolt all her dreams will be crushed! And it'll be ALL. MY. FAULT!",
+        "Oh, but wait; I just told myself to not talk to myself any more. I should say something to her. Or, would that still be talking to myself? Excuse me, me? Can I have a word with you? Uh, I mean, me? Listen, I can see you're having lots of fun, but- (Pinkie Pie Duplicate): Fun?! Did somebody say fun? Where?",
+        "Yeah, great news. That I just got from a wedding invitation! Not from my brother, but from a piece of paper! Thanks a lot, Shining Armor. I mean, really, he couldn't tell me personally? [sarcastically, using a sandwich as a puppet] Hey, Twilight, just thought you should know I'm making a really big decision that changes everything. Oh, nevermind, you'll hear about it when you get the invitation.",
+        "Well the tastiest treat of all is sure to be the Cakes' Marzipan Mascarpone Meringue Madness. All that rich, creamy goodness of the marzipan combined with the tart and tanginess of the mascarpone, blended perfectly with the smooth silky sweetness of the meringue. That's why I call the Marzipan Mascarpone Meringue Madness the \"MMMM\"!",
+        "I have balls stashed all over Ponyville! In case of ball emergencies...",
+        "Woohoo! This is just fantastic! Ooh, now we can hang out together, and chat, and sing songs, and [gasps] party! Oh, I can throw you guys a big party! It'll be called a \"Welcome to Ponyville, I found my lost love, I'm BFF's with Pinkie Pie Party\" ...Or maybe something less over-the-top and not so super-hyper.",
+        "Yeah! I love reading, and my head isn't even close to the shape of an egg! It's more the shape of an apple, or maybe an orange, but a big orange, more like a grapefruit really...",
+        "I like funny words! One of my favorite funny words is \"kumquat\"! I didn't make that one up. I would work in a kumquat orchard just so I could say kumquat all day! Kumquat, kumquat, kumquat! And \"pickle barrel\"! Isn't that just the funnest thing to say? Pickle barrel! Pickle barrel! Pickle barrel! Say it with me! Pickle-barrel-kumquat! Pickle-barrel-kumquat! Pickle-barrel-kumquat! Chimmy-cherry-changa!",
+        "Well no wonder, because I made it up myself! A Cherrychanga is mashed up cherries in a tortilla that's deep fried! Cherrychanga! Great name, huh? Oh, but maybe I should call it a Chimmycherry! Ooh, that's good too. Which do you think sounds better? Cherrychanga or Chimmycherry? Or what if I combine them? Chimmy-cherry-changa! What sounds the funniest?"  
+];
 
 function quote(source) {
 	source.respond(quotes[Math.floor(Math.random() * quotes.length)]);
