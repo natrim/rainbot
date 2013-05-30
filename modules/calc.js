@@ -50,7 +50,7 @@ WolframAlpha.prototype.search = function(query, callback) {
 exports.init = function(bot, dispatcher, calc) {
 	var wa = new WolframAlpha();
 
-	this.addCommand('calc', function(source, argv) {
+	this.addCommand('calc', function(source, argv, text) {
 		if (!argv[0]) {
 			source.mention('please tell me what to calculate. beep boop.');
 			return;
@@ -58,7 +58,7 @@ exports.init = function(bot, dispatcher, calc) {
 
 		source.action('casts the magic of math and ...');
 
-		wa.search(argv.join(' '), function(result) {
+		wa.search(text.replace('calc ', ''), function(result) {
 			source.mention(result.data ? 'the answer to your equation is: ' + result.data.replace(/\\'/g, '\'') : 'i don\'t know the answer...');
 		});
 	});
