@@ -56,7 +56,7 @@ exports.init = function(bot, dispatcher, calc) {
 			return;
 		}
 
-		source.action('casts the magic of math and ...');
+		source.action('casts The Magic of Asking and ...');
 
 		wa.search(text.replace('calc ', ''), function(result) {
 			source.mention(result.data ? 'the answer to your equation is: ' + result.data.replace(/\\'/g, '\'') : 'i don\'t know the answer...');
