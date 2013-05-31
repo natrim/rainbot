@@ -1,5 +1,10 @@
 /* jslint node: true */
 /* global BOT_DIR, LIBS_DIR, MODULES_DIR */
+
+//mocha globals
+/* global describe, it, before, after, beforeEach, afterEach */
+
+//strict
 'use strict';
 
 //set main entry point path
@@ -7,58 +12,75 @@ global.BOT_DIR = require('path').resolve(__dirname, '..');
 global.LIBS_DIR = require('path').resolve(BOT_DIR, 'libs');
 global.MODULES_DIR = require('path').resolve(BOT_DIR, 'modules');
 
-var vows = require('vows'),
-	assert = require('assert');
-
-var suite = vows.describe('Config class');
-
 //disable logger
 require(LIBS_DIR + '/logger').enabled = false;
 
-//isError assert
+//load assert lib
+var assert = require('assert');
+
+//assert helpers
 assert.isError = function(val) {
 	assert.isObject(val);
 	assert.instanceOf(val, Error);
 };
 
-var Config = require(LIBS_DIR + '/config').Config;
+assert.isObject = function(o) {
+	return typeof o === 'object';
+};
 
-suite.addBatch({
-	'When i construct class': {
-		topic: function() {
-			return new Config();
-		},
-		'then i get Config': function(c) {
-			assert.isObject(c);
-			assert.instanceOf(c, Config);
-		}
-	},
-	'When i load config': {
-		topic: function() {
-			return new Config().load({
+assert.instanceOf = function(real, expected) {
+	return real instanceof expected;
+};
+
+assert.isTrue = function(v) {
+	return v === true;
+};
+
+assert.isFalse = function(v) {
+	return v === false;
+};
+
+assert.isUndefined = function(v) {
+	return typeof v === 'undefined';
+};
+
+//and letz go
+var Config = require(LIBS_DIR + '/config');
+
+describe('Config lib', function() {
+	describe('class construction', function() {
+		it('should return \'Config\' instance', function() {
+			assert.isObject(Config);
+			assert.instanceOf(new Config.Config(), Config.Config);
+			assert.instanceOf(Config.create(), Config.Config);
+		});
+	});
+
+	var config;
+	beforeEach(function() {
+		config = Config.create();
+		config.test2 = 'error';
+		config.test3 = 'derp';
+	});
+
+	describe('config load', function() {
+		it('should load the config', function() {
+			config.load({
 				'test': true,
 				'test2': 'ok'
 			});
-		},
-		'then i get the loaded config loaded': function(c) {
-			assert.isObject(c);
-			assert.isTrue(c.test);
-			assert.equal(c.test2, 'ok');
-		}
-	},
-	'When i clear config': {
-		topic: function() {
-			var cc = new Config();
-			cc.test = true;
-			cc.test2 = false;
-			return cc.clear();
-		},
-		'then i get the config cleared': function(c) {
-			assert.isObject(c);
-			assert.isUndefined(c.test);
-			assert.isUndefined(c.test2);
-		}
-	}
-});
 
-suite.export(module);
+			assert.isTrue(config.test);
+			assert.equal(config.test2, 'ok');
+			assert.equal(config.test3, 'derp');
+		});
+	});
+
+	describe('config clear', function() {
+		it('should clear the config', function() {
+			config.clear();
+			assert.isUndefined(config.test2);
+			assert.isUndefined(config.test3);
+		});
+	});
+});
