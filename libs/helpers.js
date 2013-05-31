@@ -1,5 +1,4 @@
 /* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 /**
