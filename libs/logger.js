@@ -5,6 +5,7 @@
 function Logger() {
 	this.enabled = true;
 	this.debugging = false;
+	this.lastMessage = '';
 }
 
 Logger.prototype.onBeforeLog = function() {};
@@ -39,7 +40,8 @@ Object.keys(colorize).forEach(function(colorName) {
 
 Logger.prototype.log = function(msg, level) {
 	if (!this.enabled) {
-		return;
+		this.lastMessage = '';
+		return false;
 	}
 
 	if (msg instanceof Error) {
@@ -47,42 +49,52 @@ Logger.prototype.log = function(msg, level) {
 		if (typeof level === 'undefined' || level === null) level = 'error';
 	}
 
-	var dontlog = this.onBeforeLog(arguments) || false;
-	if (!dontlog) {
+	var handled = this.onBeforeLog.call(this, msg, level) || false;
+	if (!handled) {
 		switch (level) {
 			case 'error':
-				console.error(colorize.red('[ERROR] ') + msg);
+				this.lastMessage = colorize.red('[ERROR] ') + msg;
+				console.error(this.lastMessage);
 				break;
 			case 'warn':
-				console.warn(colorize.yellow('[WARNING] ') + msg);
+				this.lastMessage = colorize.yellow('[WARNING] ') + msg;
+				console.warn(this.lastMessage);
 				break;
 			case 'info':
-				console.info(colorize.cyan('[INFO] ') + msg);
+				this.lastMessage = colorize.cyan('[INFO] ') + msg;
+				console.info(this.lastMessage);
 				break;
 			case 'debug':
-				if (this.debugging) console.log(colorize.magenta('[DEBUG] ') + msg);
+				if (this.debugging) {
+					this.lastMessage = colorize.magenta('[DEBUG] ') + msg;
+					console.log(this.lastMessage);
+				} else {
+					this.lastMessage = '';
+				}
 				break;
 			default:
-				console.log(msg);
+				this.lastMessage = msg;
+				console.log(this.lastMessage);
 		}
 	}
-	this.onAfterLog(dontlog || false, arguments);
+	this.onAfterLog.call(this, handled || false, msg, level);
+	return true;
 };
 
 Logger.prototype.error = function(msg) {
-	this.log(msg, 'error');
+	return this.log(msg, 'error');
 };
 
-Logger.prototype.warn = function(msg) {
-	this.log(msg, 'warn');
+Logger.prototype.warn = Logger.prototype.warning = function(msg) {
+	return this.log(msg, 'warn');
 };
 
 Logger.prototype.info = function(msg) {
-	this.log(msg, 'info');
+	return this.log(msg, 'info');
 };
 
 Logger.prototype.debug = function(msg) {
-	this.log(msg, 'debug');
+	return this.log(msg, 'debug');
 };
 
 module.exports = new Logger();
