@@ -21,7 +21,7 @@ var assert = require('chai').assert;
 var helpers = require(LIBS_DIR + '/helpers');
 
 describe('Helpers', function() {
-	describe('dateFormat', function() {
+	describe('#dateFormat', function() {
 		it('gets day with DD', function() {
 			assert.equal(helpers.dateFormat(new Date(2222, 0, 13, 13, 14, 15, 0), 'DD'), '13');
 		});
@@ -52,7 +52,7 @@ describe('Helpers', function() {
 		});
 	});
 
-	describe('wrap', function() {
+	describe('#wrap', function() {
 		it('wraps function', function() {
 			var wr = helpers.wrap(String.prototype.split, function(spl, ch) {
 				return spl.call(this, ch);
@@ -63,7 +63,7 @@ describe('Helpers', function() {
 		});
 	});
 
-	describe('unique', function() {
+	describe('#unique', function() {
 		it('returns unique values from Array', function() {
 			var ret = helpers.unique(['test1', 'test2', 'test2', 'test3', 'pony', 'pony', 1, 2.3, 3, 1]);
 			assert.isArray(ret);
@@ -71,7 +71,7 @@ describe('Helpers', function() {
 		});
 	});
 
-	describe('export', function() {
+	describe('#export', function() {
 		it('exports functions from object (source) to object (target)', function() {
 			var ob = {};
 

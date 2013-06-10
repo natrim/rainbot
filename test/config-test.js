@@ -35,7 +35,7 @@ describe('Config lib', function() {
 		config.test3 = 'derp';
 	});
 
-	describe('config load', function() {
+	describe('#load', function() {
 		it('should load the config', function() {
 			config.load({
 				'test': true,
@@ -48,7 +48,7 @@ describe('Config lib', function() {
 		});
 	});
 
-	describe('config clear', function() {
+	describe('#clear', function() {
 		it('should clear the config', function() {
 			config.clear();
 			assert.isUndefined(config.test2);
