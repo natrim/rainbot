@@ -8,8 +8,8 @@ function Logger() {
 	this.lastMessage = '';
 }
 
-Logger.prototype.onBeforeLog = function() {};
-Logger.prototype.onAfterLog = function() {};
+Logger.prototype.onBeforeLog = function onBeforeLog() {};
+Logger.prototype.onAfterLog = function onAfterLog() {};
 
 var colorize = {
 	//styles
@@ -31,14 +31,14 @@ var colorize = {
 	'yellow': ['\x1B[33m', '\x1B[39m']
 };
 
-Object.keys(colorize).forEach(function(colorName) {
+Object.keys(colorize).forEach(function prepareColors(colorName) {
 	var colorColor = colorize[colorName];
 	colorize[colorName] = function(val) {
 		return colorColor[0] + val + colorColor[1];
 	};
 });
 
-Logger.prototype.log = function(msg, level) {
+Logger.prototype.log = function log(msg, level) {
 	if (!this.enabled) {
 		this.lastMessage = '';
 		return false;
@@ -81,19 +81,19 @@ Logger.prototype.log = function(msg, level) {
 	return true;
 };
 
-Logger.prototype.error = function(msg) {
+Logger.prototype.error = function error(msg) {
 	return this.log(msg, 'error');
 };
 
-Logger.prototype.warn = Logger.prototype.warning = function(msg) {
+Logger.prototype.warn = Logger.prototype.warning = function warning(msg) {
 	return this.log(msg, 'warn');
 };
 
-Logger.prototype.info = function(msg) {
+Logger.prototype.info = function info(msg) {
 	return this.log(msg, 'info');
 };
 
-Logger.prototype.debug = function(msg) {
+Logger.prototype.debug = function debug(msg) {
 	return this.log(msg, 'debug');
 };
 
