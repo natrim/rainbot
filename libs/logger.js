@@ -55,30 +55,28 @@ Logger.prototype.log = function log(msg, level) {
 		switch (level) {
 			case 'error':
 				this.lastMessage = colorize.red('[ERROR] ') + msg;
-				console.error(this.lastMessage);
 				break;
 			case 'warn':
 				this.lastMessage = colorize.yellow('[WARNING] ') + msg;
-				console.warn(this.lastMessage);
 				break;
 			case 'info':
 				this.lastMessage = colorize.cyan('[INFO] ') + msg;
-				console.info(this.lastMessage);
 				break;
 			case 'debug':
 				if (this.debugging) {
 					this.lastMessage = colorize.magenta('[DEBUG] ') + msg;
-					console.log(this.lastMessage);
 				} else {
 					this.lastMessage = '';
+					handled = true;
 				}
 				break;
 			default:
 				this.lastMessage = msg;
-				console.log(this.lastMessage);
 		}
+		if (!handled) console.log(this.lastMessage);
+		handled = true;
 	}
-	if (typeof this.onAfterLog === 'function') this.onAfterLog.call(this, handled || false, msg, level);
+	if (typeof this.onAfterLog === 'function') this.onAfterLog.call(this, handled, msg, level);
 	return true;
 };
 
