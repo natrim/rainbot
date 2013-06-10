@@ -49,7 +49,8 @@ Logger.prototype.log = function log(msg, level) {
 		if (typeof level === 'undefined' || level === null) level = 'error';
 	}
 
-	var handled = this.onBeforeLog.call(this, msg, level) || false;
+	var handled = false;
+	if (typeof this.onBeforeLog === 'function') handled = this.onBeforeLog.call(this, msg, level) || false;
 	if (!handled) {
 		switch (level) {
 			case 'error':
@@ -77,7 +78,7 @@ Logger.prototype.log = function log(msg, level) {
 				console.log(this.lastMessage);
 		}
 	}
-	this.onAfterLog.call(this, handled || false, msg, level);
+	if (typeof this.onAfterLog === 'function') this.onAfterLog.call(this, handled || false, msg, level);
 	return true;
 };
 
