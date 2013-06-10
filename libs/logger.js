@@ -33,9 +33,16 @@ var colorize = {
 
 Object.keys(colorize).forEach(function prepareColors(colorName) {
 	var colorColor = colorize[colorName];
-	colorize[colorName] = function(val) {
-		return colorColor[0] + val + colorColor[1];
-	};
+	delete colorize[colorName];
+
+	Object.defineProperty(colorize, colorName, {
+		writable: false,
+		configurable: false,
+		enumerable: true,
+		value: function colorize(val) {
+			return colorColor[0] + val + colorColor[1];
+		}
+	});
 });
 
 Logger.prototype.log = function log(msg, level) {
