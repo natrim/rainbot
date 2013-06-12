@@ -7,11 +7,6 @@
 //strict
 'use strict';
 
-//set main entry point path
-global.BOT_DIR = require('path').resolve(__dirname, '..');
-global.LIBS_DIR = require('path').resolve(BOT_DIR, 'libs');
-global.MODULES_DIR = require('path').resolve(BOT_DIR, 'modules');
-
 //load assert lib
 var assert = require('chai').assert;
 
