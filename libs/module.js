@@ -8,8 +8,9 @@ if (!global.LIBS_DIR) throw new Error('Wrong entry point! No \'LIBS_DIR\' define
 if (!global.MODULES_DIR) throw new Error('Wrong entry point! No \'MODULES_DIR\' defined!');
 
 var logger = require(LIBS_DIR + '/logger');
+var EventEmitter = require('events').EventEmitter;
 
-function Module(name) {
+function Module(name, module_dir) {
 	if (typeof name !== 'string' || name === '') {
 		throw new Error('You need to specifify module name!');
 	}
@@ -22,164 +23,116 @@ function Module(name) {
 	this.reloading = false;
 	this.context = null;
 	try {
-		this.fullPath = this._resolvePath();
+		this.fullPath = require.resolve((module_dir || MODULES_DIR) + '/' + this.fileName);
 	} catch (e) {
-		throw new Error('Module \'' + name + '\' does not exists in MODULE_DIR!');
+		throw new Error('Module \'' + name + '\' does not exists!');
 	}
 }
 
-//internal file path resolving
-Module.prototype._resolvePath = function() {
-	return require.resolve(MODULES_DIR + '/' + this.fileName);
-};
-
 //called on load
-Module.prototype.init = function init(callback) {
+Module.prototype.init = function init() {
 	var error = null;
 
-	if (typeof this.dispatcher !== 'object') error = new Error('No dispatcher given!');
-	if (typeof this.config !== 'object') error = new Error('No config given!');
-
-	if (error) {
-		if (callback) callback(error, this);
-		else throw error;
-	}
-
-	try {
-		this.context = require(this.fullPath);
-		this.loaded = true;
-	} catch (e) {
-		error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e.message);
-	}
-
 	if (this.loaded) {
-		//init the context
+		error = new Error('Module \'' + this.name + '\' is already loaded!');
+	}
+
+	if (!error && typeof this.dispatcher !== 'object' && this.dispatcher !== null) error = new Error('No dispatcher given!');
+	if (!error && typeof this.config !== 'object' && this.config !== null) error = new Error('No config given!');
+
+	if (!error) {
 		try {
+			this.__load(); //load context
 			if (typeof this.context.init === 'function') this.context.init.call(this, false);
 		} catch (e) {
-			error = new Error('Failed initiating context of \'' + this.name + '\' module! ' + e.message);
+			this.__unload(); //unload if needed
+			error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e.message);
 		}
 	}
 
-	logger.debug('Init of \'' + this.name + '\' module' + (error ? ' failed' : ' is success') + '.');
+	logger.debug('Init of \'' + this.name + '\' module' + (error ? ' failed' : ' is success') + '.' + (error ? ' With error: ' + error.message : ''));
 
-	if (callback) callback(error, this);
-	else if (error) throw error;
+	if (error) throw error;
 
 	return this;
 };
 
 //called on unload
-Module.prototype.halt = function halt(callback) {
-	try {
-		if (this.loaded && typeof this.context.halt === 'function') this.context.halt.call(this, false);
-	} catch (e) {
-		logger.warn('Got error at halting context of \'' + this.name + '\' module! ' + e.message);
-	}
+Module.prototype.halt = function halt() {
+	var error = null;
 
-	//remove from node require cache
 	if (this.loaded) {
-		var module = require.cache[this.fullPath];
-
-		module.children.forEach(function(m) {
-			delete require.cache[m.filename];
-		});
-		delete require.cache[this.fullPath];
+		try {
+			if (typeof this.context.halt === 'function') this.context.halt.call(this, false);
+			this.__unload();
+			if (this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
+		} catch (e) {
+			error = new Error('Failed unloading context of \'' + this.name + '\' module! ' + e.message);
+		}
+	} else {
+		error = new Error('Module \'' + this.name + '\' is not loaded!');
 	}
 
-	//reset
-	this.loaded = false;
-	this.context = null;
+	logger.debug('Halt of \'' + this.name + '\' module.' + (error ? ' With error: ' + error.message : ''));
 
-	//and remove all listeners
-	if (this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
-
-	logger.debug('Halt of \'' + this.name + '\' module.');
-
-	//callback
-	if (callback) callback(null, this);
+	if (error) throw error;
 
 	return this;
 };
 
-Module.prototype.reload = function reload(callback, hollaback) {
+Module.prototype.reload = function reload() {
 	var error = null;
 	if (this.loaded) {
 		this.reloading = true;
 
 		try {
 			if (typeof this.context.halt === 'function') this.context.halt.call(this, true);
+			this.__unload();
+			if (this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
+
+			this.__load();
+			if (typeof this.context.init === 'function') this.context.init.call(this, true);
 		} catch (e) {
-			logger.warn('Got error at halting context of \'' + this.name + '\' module! ' + e.message);
-		}
-
-		var module = require.cache[this.fullPath];
-		module.children.forEach(function(m) {
-			delete require.cache[m.filename];
-		});
-		delete require.cache[this.fullPath];
-
-		this.loaded = false;
-
-		if (this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
-
-		if (hollaback) hollaback(error, this);
-
-		try {
-			this.context = require(this.fullPath);
-			this.loaded = true;
-		} catch (e) {
-			error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e.message);
-		}
-		if (this.loaded) {
-			try {
-				if (typeof this.context.init === 'function') this.context.init.call(this, true);
-			} catch (e) {
-				error = new Error('Failed initiating context of \'' + this.name + '\' module! ' + e.message);
-			}
+			error = e;
 		}
 
 		this.reloading = false;
 	} else {
-		error = new Error('Context of module \'' + this.name + '\' is not loaded!');
+		error = new Error('Module \'' + this.name + '\' is not loaded!');
 	}
 
-	if (callback) callback(error, this);
-	else if (error) throw error;
+	logger.debug('Reload of \'' + this.name + '\' module.' + (error ? ' With error: ' + error.message : ''));
+
+	if (error) throw error;
 
 	return this;
 };
 
-Module.prototype.injectConfig = function(config, callback) {
-	Object.defineProperty(this, 'config', {
-		configurable: false,
-		enumerable: true,
-		get: function() {
-			if (typeof config[this.name] !== 'object') config[this.name] = {};
-			return config[this.name];
-		}
-	});
-
-	if (callback) callback(null, this);
-
-	logger.debug('Module \'' + this.name + '\' Config inject.');
-
-	return this;
-};
-
-Module.prototype.injectModuleManager = function(mm, callback) {
-	this.require = mm.require.bind(mm);
-
-	if (callback) callback(null, this);
-
-	logger.debug('Module \'' + this.name + '\' MM inject.');
-
-	return this;
-};
-
-Module.prototype.injectDispatcher = function(dispatchBase, callback) {
+Module.prototype.injectConfig = function injectConfig(config) {
 	var error = null;
-	if (typeof dispatchBase !== 'object' || dispatchBase === null) {
+	if (!(config instanceof Object)) {
+		error = new Error('Config needs to be object!');
+	} else {
+		if (typeof config[this.name] !== 'object') config[this.name] = {};
+
+		Object.defineProperty(this, 'config', {
+			writable: false,
+			configurable: false,
+			enumerable: true,
+			value: config[this.name]
+		});
+	}
+
+	logger.debug('Module \'' + this.name + '\' Config inject.' + (error ? ' With error: ' + error.message : ''));
+
+	if (error) throw error;
+
+	return this;
+};
+
+Module.prototype.injectDispatcher = function injectDispatcher(dispatchBase) {
+	var error = null;
+	if (!(dispatchBase instanceof EventEmitter)) {
 		error = new Error('Wrong dispatcher type for \'' + this.name + '\' module injected!');
 	} else {
 		var events = [];
@@ -201,6 +154,9 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 				dispatchBase.once(event, listener);
 				return this;
 			},
+			off: function(event, listener) {
+				return this.removeListener(event, listener);
+			},
 			addListener: function(event, listener) {
 				events.push({
 					event: event,
@@ -209,20 +165,9 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 				dispatchBase.addListener(event, listener);
 				return this;
 			},
-			off: function(event, listener) {
-				events.some(function(obj, i) {
-					if (obj.event == event && obj.listener == listener) {
-						events.splice(i, 1);
-						return true;
-					}
-					return false;
-				});
-				dispatchBase.removeListener(event, listener);
-				return this;
-			},
 			removeListener: function(event, listener) {
 				events.some(function(obj, i) {
-					if (obj.event == event && obj.listener == listener) {
+					if (obj.event === event && obj.listener === listener) {
 						events.splice(i, 1);
 						return true;
 					}
@@ -241,7 +186,7 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 				try {
 					dispatchBase.emit.apply(dispatchBase, arguments);
 				} catch (e) {
-					dispatchBase.emit.call(dispatchBase, 'dispatchError', event, e, module);
+					dispatchBase.emit.call(dispatchBase, 'dispatchError', e, event, module);
 				}
 				return this;
 			},
@@ -255,19 +200,60 @@ Module.prototype.injectDispatcher = function(dispatchBase, callback) {
 		};
 	}
 
-	logger.debug('Module \'' + this.name + '\' dispatcher inject.');
+	logger.debug('Module \'' + this.name + '\' dispatcher inject.' + (error ? ' With error: ' + error.message : ''));
 
-	if (callback) callback(error, this.dispatcher, this);
-	else if (error) throw error;
+	if (error) throw error;
 
 	return this;
 };
 
-Module.prototype.valueOf = Module.prototype.toString = function() {
+/**
+ * unload helper
+ * @internal
+ * @return void
+ */
+Module.prototype.__unload = function __unload() {
+	if (this.loaded) {
+		//remove from node require cache
+		var module = require.cache[this.fullPath];
+		module.children.forEach(function(m) {
+			delete require.cache[m.filename];
+		});
+		delete require.cache[this.fullPath];
+
+		this.loaded = false;
+		this.context = null;
+	}
+};
+
+/**
+ * load helper
+ * @internal
+ * @throws Error
+ * @return void
+ */
+Module.prototype.__load = function __load() {
+	if (!this.loaded) {
+		try {
+			this.context = require(this.fullPath);
+		} catch (e) {
+			this.context = null;
+			throw e;
+		}
+
+		if (typeof this.context === 'object' && this.context !== null) {
+			this.loaded = true;
+		} else {
+			this.context = null;
+		}
+	}
+};
+
+Module.prototype.valueOf = Module.prototype.toString = function toString() {
 	return this.name;
 };
 
 module.exports.Module = Module;
-module.exports.create = function(name) {
-	return new Module(name);
+module.exports.create = function createModule(name, module_dir) {
+	return new Module(name, module_dir);
 };
