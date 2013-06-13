@@ -33,12 +33,6 @@
 			"operators": []
 		}
 	},
-	"twitter": {
-		"maxTweets": 5,
-		"waitBetweenMessages": 1000,
-		"defaultUser": "MyLittlePony",
-		"dateFormat": "DD.MM.YYYY HH:II:SS"
-	},
 	"countdown": {
 		"checkEvery": 3600000,
 		"defaultSerial": "My Little Pony",
