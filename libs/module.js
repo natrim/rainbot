@@ -15,18 +15,27 @@ function Module(name, module_dir) {
 		throw new Error('You need to specifify module name!');
 	}
 
-	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
+	Object.defineProperty(this, 'name', {
+		writable: false,
+		configurable: false,
+		enumerable: true,
+		value: name.replace(/[^a-zA-Z0-9_\-]+/g, '')
+	});
 
-	this.name = name;
-	this.fileName = name + '.js';
+	try {
+		Object.defineProperty(this, 'filename', {
+			writable: false,
+			configurable: false,
+			enumerable: true,
+			value: require.resolve((module_dir || MODULES_DIR) + '/' + this.name)
+		});
+	} catch (e) {
+		throw new Error('Module \'' + this.name + '\' does not exists!');
+	}
+
 	this.loaded = false;
 	this.reloading = false;
 	this.context = null;
-	try {
-		this.fullPath = require.resolve((module_dir || MODULES_DIR) + '/' + this.fileName);
-	} catch (e) {
-		throw new Error('Module \'' + name + '\' does not exists!');
-	}
 }
 
 //called on load
@@ -215,11 +224,11 @@ Module.prototype.injectDispatcher = function injectDispatcher(dispatchBase) {
 Module.prototype.__unload = function __unload() {
 	if (this.loaded) {
 		//remove from node require cache
-		var module = require.cache[this.fullPath];
+		var module = require.cache[this.filename];
 		module.children.forEach(function(m) {
 			delete require.cache[m.filename];
 		});
-		delete require.cache[this.fullPath];
+		delete require.cache[this.filename];
 
 		this.loaded = false;
 		this.context = null;
@@ -235,7 +244,7 @@ Module.prototype.__unload = function __unload() {
 Module.prototype.__load = function __load() {
 	if (!this.loaded) {
 		try {
-			this.context = require(this.fullPath);
+			this.context = require(this.filename);
 		} catch (e) {
 			this.context = null;
 			throw e;
