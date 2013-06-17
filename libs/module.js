@@ -145,6 +145,7 @@ Module.prototype.injectDispatcher = function injectDispatcher(dispatchBase) {
 		error = new Error('Wrong dispatcher type for \'' + this.name + '\' module injected!');
 	} else {
 		var events = [];
+		var eventTest = new RegExp('^' + this.name + '/');
 		var module = this;
 		this.dispatcher = {
 			on: function(event, listener) {
@@ -186,14 +187,15 @@ Module.prototype.injectDispatcher = function injectDispatcher(dispatchBase) {
 				return this;
 			},
 			emit: function(event) {
-				var args = [];
+				var args;
 				//all emited events needs to be prefixed by module name
-				if (!((new RegExp('^' + module.name + '/')).test(event))) {
+				if (!(eventTest.test(event))) {
 					event = module.name + '/' + event;
-					arguments[0] = event;
+					args = Array.prototype.slice.call(arguments, 1); //convert arguments to Array and remove first argument
+					args.unshift(event); //put new event as first argument
 				}
 				try {
-					dispatchBase.emit.apply(dispatchBase, arguments);
+					dispatchBase.emit.apply(dispatchBase, args || arguments);
 				} catch (e) {
 					dispatchBase.emit.call(dispatchBase, 'dispatchError', e, event, module);
 				}
