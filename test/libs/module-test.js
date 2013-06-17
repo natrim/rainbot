@@ -25,7 +25,10 @@ describe('Module class', function() {
 		});
 
 		it('creates module using new', function() {
-			var m = new MODULE.Module('test', TEST_DIR);
+			var m;
+			assert.doesNotThrow(function() {
+				m = new MODULE.Module('test', TEST_DIR);
+			});
 			assert.isObject(m);
 			assert.instanceOf(m, MODULE.Module);
 			assert.equal(m.name, 'test');
@@ -33,7 +36,10 @@ describe('Module class', function() {
 		});
 
 		it('creates module using #create', function() {
-			var m = MODULE.create('test', TEST_DIR);
+			var m;
+			assert.doesNotThrow(function() {
+				m = MODULE.create('test', TEST_DIR);
+			});
 			assert.isObject(m);
 			assert.instanceOf(m, MODULE.Module);
 			assert.equal(m.name, 'test');
