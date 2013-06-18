@@ -10,7 +10,7 @@ if (!global.MODULES_DIR) throw new Error('Wrong entry point! No \'MODULES_DIR\' 
 var logger = require(LIBS_DIR + '/logger');
 var EventEmitter = require('events').EventEmitter;
 
-function Module(name, module_dir) {
+function Module(name) {
 	if (typeof name !== 'string' || name === '') {
 		throw new Error('You need to specifify module name!');
 	}
@@ -27,7 +27,7 @@ function Module(name, module_dir) {
 			writable: false,
 			configurable: false,
 			enumerable: true,
-			value: require.resolve((module_dir || MODULES_DIR) + '/' + this.name)
+			value: require.resolve(MODULES_DIR + '/' + this.name)
 		});
 	} catch (e) {
 		throw new Error('Module \'' + this.name + '\' does not exists!');

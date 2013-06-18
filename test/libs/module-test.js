@@ -7,8 +7,6 @@
 //strict
 'use strict';
 
-var TEST_DIR = require('path').resolve(BOT_DIR, 'test_modules');
-
 //load assert lib
 var assert = require('chai').assert;
 
@@ -16,6 +14,16 @@ var MODULE = require(LIBS_DIR + '/module');
 var EventEmitter = require('events').EventEmitter;
 
 describe('Module class', function() {
+	var OLD_MODULES_DIR;
+
+	before(function() {
+		OLD_MODULES_DIR = MODULES_DIR;
+		global.MODULES_DIR = require('path').resolve(BOT_DIR, 'test_modules');
+	});
+
+	after(function() {
+		global.MODULES_DIR = OLD_MODULES_DIR;
+	});
 
 	describe('creation', function() {
 		it('throws Error without name', function() {
@@ -27,7 +35,7 @@ describe('Module class', function() {
 		it('creates module using new', function() {
 			var m;
 			assert.doesNotThrow(function() {
-				m = new MODULE.Module('test', TEST_DIR);
+				m = new MODULE.Module('test');
 			});
 			assert.isObject(m);
 			assert.instanceOf(m, MODULE.Module);
@@ -38,7 +46,7 @@ describe('Module class', function() {
 		it('creates module using #create', function() {
 			var m;
 			assert.doesNotThrow(function() {
-				m = MODULE.create('test', TEST_DIR);
+				m = MODULE.create('test');
 			});
 			assert.isObject(m);
 			assert.instanceOf(m, MODULE.Module);
@@ -48,14 +56,14 @@ describe('Module class', function() {
 
 		it('throws error when module does not exists in module dir', function() {
 			assert.throws(function() {
-				return MODULE.create('test2', TEST_DIR);
+				return MODULE.create('test2');
 			}, 'Module \'test2\' does not exists!');
 		});
 
 		it('loads even syntax error module', function() {
 			var m;
 			assert.doesNotThrow(function() {
-				m = MODULE.create('syntaxerror', TEST_DIR);
+				m = MODULE.create('syntaxerror');
 			});
 
 			assert.isObject(m);
@@ -66,7 +74,7 @@ describe('Module class', function() {
 	describe('working module', function() {
 		var module;
 		beforeEach(function() {
-			module = MODULE.create('test', TEST_DIR);
+			module = MODULE.create('test');
 		});
 
 		describe('#injectConfig', function() {
@@ -204,7 +212,7 @@ describe('Module class', function() {
 			});
 
 			it('throws error if syntax error in module', function() {
-				module = MODULE.create('syntaxerror', TEST_DIR);
+				module = MODULE.create('syntaxerror');
 				module.injectConfig({});
 				module.injectDispatcher(new EventEmitter());
 				assert.throws(function() {
@@ -213,7 +221,7 @@ describe('Module class', function() {
 			});
 
 			it('throws error if syntax error in module init', function() {
-				module = MODULE.create('syntaxerrorinit', TEST_DIR);
+				module = MODULE.create('syntaxerrorinit');
 				module.injectConfig({});
 				module.injectDispatcher(new EventEmitter());
 				assert.throws(function() {
@@ -244,7 +252,7 @@ describe('Module class', function() {
 			});
 
 			it('throws error if syntax error in module halt', function() {
-				module = MODULE.create('syntaxerrorhalt', TEST_DIR);
+				module = MODULE.create('syntaxerrorhalt');
 				module.injectConfig({});
 				module.injectDispatcher(new EventEmitter());
 				module.init();
