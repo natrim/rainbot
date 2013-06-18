@@ -36,6 +36,11 @@ function Module(name) {
 	this.loaded = false;
 	this.reloading = false;
 	this.context = null;
+
+	//empty require - MM will inject own method on load
+	this.require = function() {
+		return null;
+	};
 }
 
 //called on load
