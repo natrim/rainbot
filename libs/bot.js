@@ -59,7 +59,7 @@ function Bot() {
 
 	//bind to exit event of main process
 	var bot = this;
-	process.on('exit', function() {
+	process.on('exit', function onExit() {
 		if (bot.__abort) return; //do nothing on abort
 		if (!bot.__halting) {
 			bot.__halting = true;
@@ -76,32 +76,37 @@ function Bot() {
 	process.on('SIGTSTP', function() {});
 }
 
-Bot.prototype.addListener = function() {
+Bot.prototype.addListener = function addListener() {
 	this.dispatcher.addListener.apply(this.dispatcher, arguments);
 	return this;
 };
 
-Bot.prototype.on = function() {
+Bot.prototype.on = function on() {
 	this.dispatcher.on.apply(this.dispatcher, arguments);
 	return this;
 };
 
-Bot.prototype.off = Bot.prototype.removeListener = function() {
+Bot.prototype.off = function off() {
+	this.removeListener.apply(this, arguments);
+	return this;
+};
+
+Bot.prototype.removeListener = function removeListener() {
 	this.dispatcher.removeListener.apply(this.dispatcher, arguments);
 	return this;
 };
 
-Bot.prototype.once = function() {
+Bot.prototype.once = function once() {
 	this.dispatcher.once.apply(this.dispatcher, arguments);
 	return this;
 };
 
-Bot.prototype.emit = function() {
+Bot.prototype.emit = function emit() {
 	this.dispatcher.emit.apply(this.dispatcher, arguments);
 	return this;
 };
 
-Bot.prototype._setConfigWatch = function(file) {
+Bot.prototype._setConfigWatch = function _setConfigWatch(file) {
 	var fs = require('fs');
 
 	if (!fs.existsSync(BOT_DIR + '/' + file)) {
@@ -124,13 +129,8 @@ Bot.prototype._setConfigWatch = function(file) {
 	return true;
 };
 
-Bot.prototype.loadConfig = function loadConfig(config, callback) {
+Bot.prototype.loadConfig = function loadConfig(config) {
 	var error = null;
-
-	if (typeof config === 'function' && typeof callback === 'undefined') {
-		callback = config;
-		config = undefined;
-	}
 
 	if (typeof config === 'string') {
 		this._configFile = require('path').basename(config);
@@ -181,8 +181,6 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 		}
 	}
 
-	if (callback) callback(error, this.config, this);
-
 	if (error) {
 		logger.error(error);
 		logger.info('Empty config loaded!');
@@ -190,41 +188,38 @@ Bot.prototype.loadConfig = function loadConfig(config, callback) {
 		logger.info('Config loaded!');
 	}
 
-	if (logger) {
-		logger.debugging = this.config.bot.debug ? true : false;
-	}
+	//set logger debuging
+	logger.debugging = this.config.bot.debug ? true : false;
 
 	return this;
 };
 
-Bot.prototype.saveConfig = function(savefile) {
-	var fs = require('fs');
+Bot.prototype.saveConfig = function saveConfig(savefile, asString) {
+	if (asString) {
+		return JSON.stringify(this.config, null, 4);
+	}
 
 	//get only basename
 	savefile = require('path').basename(savefile);
 
 	//blocking write
 	try {
-		fs.writeFileSync(BOT_DIR + '/' + savefile, JSON.stringify(this.config, null, 4));
+		require('fs').writeFileSync(BOT_DIR + '/' + savefile, JSON.stringify(this.config, null, 4));
 		logger.info('Config saved to \'' + savefile + '\'.');
 	} catch (err) {
 		logger.error('Failed to save config with error: ' + err);
 	}
+
+	return this;
 };
 
-Bot.prototype.loadModules = function loadModules(modules, callback) {
+Bot.prototype.loadModules = function loadModules(modules) {
 	var error = null;
 	if (this.__running) {
 		error = new Error('Bot is already running, please load the modules before issuing \'run\'!');
-		if (callback) callback(error, null, this);
 		logger.error(error);
 		this.abort(error);
 		return this;
-	}
-
-	if (typeof modules === 'function' && typeof callback === 'undefined') {
-		callback = modules;
-		modules = {};
 	}
 
 	if (typeof this.config.bot === 'undefined') { //we need atleast empty bot config
@@ -248,13 +243,12 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 	if (modules instanceof Array) {
 		var tmp = modules.slice(0);
 		modules = {};
-		for (var i = 0; i < tmp.length; i++) {
-			modules[tmp[i]] = true;
-		}
+		tmp.forEach(function(v) {
+			modules[v] = true;
+		});
 	}
 
 	if (error) { //abort
-		if (callback) callback(error, null, this);
 		logger.error(error);
 		this.abort(error);
 		return this;
@@ -280,43 +274,38 @@ Bot.prototype.loadModules = function loadModules(modules, callback) {
 	}
 
 	if (error) { //imediate abort on failure
-		if (callback) callback(error, null, this);
 		logger.error(error);
 		this.abort(error);
 		return this;
 	}
 
 	//start the load of other modules
-	var catchBack = function(err) {
-		if (err) {
-			logger.error(err);
-			error = new Error('Failed loading some modules!');
-		}
-	};
-
 	var keys = Object.keys(modules);
 	if (keys.length > 0) {
 		keys.forEach(function(name) {
 			if (modules[name] === true) {
-				this.modules.load(name, catchBack);
+				try {
+					this.modules.load(name);
+				} catch (e) {
+					logger.error(e);
+					error = new Error('Failed loading some modules!');
+				}
 			}
 		}, this);
 	}
 
-	if (callback) callback(error, this.modules, this);
-
 	logger.info('Modules loaded!');
 
 	if (error) logger.warn(error);
-
 	return this;
 };
 
-Bot.prototype.unloadModules = function() {
+Bot.prototype.unloadModules = function unloadModules() {
 	//unprotect core modules
 	this._core_modules.forEach(function(name) {
 		this.modules.protect(name, false);
 	}, this);
+
 	//unload all modules
 	this.modules.getModules().reverse().forEach(function(m) {
 		try {
@@ -327,53 +316,42 @@ Bot.prototype.unloadModules = function() {
 			logger.warn('Caught error on module \'' + m + '\' unload: ' + e);
 		}
 	}, this);
+
 	logger.info('Modules unloaded!');
 	return this;
 };
 
-Bot.prototype.load = function load(names, callback) {
+Bot.prototype.load = function load(names) {
 	if (!(names instanceof Array)) {
 		names = [names];
 	}
 
-	var recallback = callback ? function(err, module, mm) {
-			callback(err, module, mm, this);
-		}.bind(this) : undefined;
-
 	names.forEach(function(name) {
-		this.modules.load(name, recallback);
+		this.modules.load(name);
 	}, this);
 
 	return this;
 };
 
-Bot.prototype.unload = function unload(names, callback) {
+Bot.prototype.unload = function unload(names) {
 	if (!(names instanceof Array)) {
 		names = [names];
 	}
 
-	var recallback = callback ? function(err, mm) {
-			callback(err, mm, this);
-		}.bind(this) : undefined;
-
 	names.forEach(function(name) {
-		this.modules.unload(name, recallback);
+		this.modules.unload(name);
 	}, this);
 
 	return this;
 };
 
-Bot.prototype.reload = function reload(names, callback) {
+Bot.prototype.reload = function reload(names) {
 	if (!(names instanceof Array)) {
 		names = [names];
 	}
 
-	var recallback = callback ? function(err, mm) {
-			callback(err, mm, this);
-		}.bind(this) : undefined;
-
 	names.forEach(function(name) {
-		this.modules.reload(name, recallback);
+		this.modules.reload(name);
 	}, this);
 
 	return this;
@@ -403,13 +381,13 @@ Bot.prototype.end = Bot.prototype.stop = function end() {
 	return this;
 };
 
-Bot.prototype.abort = function(error) {
+Bot.prototype.abort = function abort() {
 	this.__abort = true;
 	process.exit(1);
 	return this;
 };
 
 module.exports.Bot = Bot;
-module.exports.create = function() {
+module.exports.create = function createBot() {
 	return new Bot();
 };
