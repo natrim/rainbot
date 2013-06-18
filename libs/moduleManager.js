@@ -9,10 +9,13 @@ if (!global.MODULES_DIR) throw new Error('Wrong entry point! No \'MODULES_DIR\' 
 
 var MODULE = require(LIBS_DIR + '/module').Module;
 var logger = require(LIBS_DIR + '/logger');
+var EventEmitter = require('events').EventEmitter;
 
 function ModuleManager(dispatcher, config) {
-	this._modules = {};
 	if (typeof dispatcher === 'object') {
+		if (!(dispatcher instanceof EventEmitter)) {
+			throw new Error('Wrong dispatcher given!');
+		}
 		this.dispatcher = dispatcher;
 	} else {
 		throw new Error('No dispatcher given!');
@@ -23,14 +26,26 @@ function ModuleManager(dispatcher, config) {
 		throw new Error('No config given!');
 	}
 
-	this._protected_modules = {};
+	Object.defineProperty(this, '_modules', {
+		writable: false,
+		configurable: false,
+		enumerable: false,
+		value: {}
+	});
+
+	Object.defineProperty(this, '_protected_modules', {
+		writable: false,
+		configurable: false,
+		enumerable: false,
+		value: {}
+	});
 }
 
-ModuleManager.prototype.getModules = function() {
+ModuleManager.prototype.getModules = function getModules() {
 	return Object.keys(this._modules); //return loaded module names
 };
 
-ModuleManager.prototype.exists = ModuleManager.prototype.has = ModuleManager.prototype.contains = function(name) {
+ModuleManager.prototype.exists = ModuleManager.prototype.has = ModuleManager.prototype.contains = function has(name) {
 	if (name instanceof MODULE) {
 		name = name.name;
 	} else if (typeof name !== 'string' || name === '') {
@@ -39,7 +54,7 @@ ModuleManager.prototype.exists = ModuleManager.prototype.has = ModuleManager.pro
 	return this._modules[name] !== undefined;
 };
 
-ModuleManager.prototype.get = ModuleManager.prototype.find = function(name) {
+ModuleManager.prototype.get = ModuleManager.prototype.find = function get(name) {
 	if (name instanceof MODULE) {
 		return name;
 	} else if (typeof name !== 'string' || name === '') {
@@ -51,7 +66,7 @@ ModuleManager.prototype.get = ModuleManager.prototype.find = function(name) {
 	return null;
 };
 
-ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, callback) {
+ModuleManager.prototype.load = ModuleManager.prototype.enable = function load(name) {
 	var error = null;
 	var module = null;
 	if (typeof name !== 'string' || name === '') {
@@ -59,56 +74,38 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function(name, c
 	} else if (this.exists(name)) {
 		error = new Error('Module \'' + name + '\' is already loaded!');
 	} else {
-		if (typeof this[name] !== 'undefined') {
-			error = new Error('Reserved module name \'' + name + '\'! Please rename your module!');
-		} else {
+		try {
+			module = new MODULE(name);
+			module.require = this.require.bind(this);
+		} catch (e) {
+			error = new Error('Error happened during module \'' + name + '\' load: ' + e.message);
+			module = null;
+		}
+		if (!error) {
+			if (typeof module.injectConfig === 'function') module.injectConfig(this.config);
+			if (typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
+
 			try {
-				module = new MODULE(name);
+				if (typeof module.init === 'function') module.init();
 			} catch (e) {
-				error = new Error('Error happened during module \'' + name + '\' construction: ' + e.message);
+				error = new Error('Error happened during module \'' + name + '\' init: ' + e.message);
 				module = null;
 			}
-			if (module instanceof MODULE) {
-				if (typeof module.injectModuleManager === 'function') module.injectModuleManager(this);
-				if (typeof module.injectConfig === 'function') module.injectConfig(this.config);
-				if (typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
 
-				try {
-					if (typeof module.init === 'function') module.init();
-				} catch (e) {
-					error = new Error('Error happened during module \'' + name + '\' initialization: ' + e.message);
-					module = null;
-				}
-
-				if (!error) {
-					this._modules[name] = module;
-
-					//add as property for quick access
-					Object.defineProperty(this, name, {
-						configurable: true,
-						enumerable: false,
-						writable: false,
-						value: module
-					});
-
-					//emit this joyfull event for others
-					this.dispatcher.emit('load', name, this, module);
-				}
-			} else {
-				error = new Error('Cannot load \'' + name + '\' module!');
-				module = null;
+			if (!error) {
+				this._modules[name] = module;
+				this.dispatcher.emit('module-load', name, this, module);
 			}
 		}
 	}
 
-	logger.debug('Load of \'' + name + '\' module' + (error ? ' failed' : ' is success') + '.');
+	logger.debug('Load of \'' + name + '\' module' + (error ? ' failed with error: ' + error.message : ' is success') + '.');
 
-	if (callback) callback(error, name, this);
-	else if (error) throw error;
+	if (error) throw error;
 	return this;
 };
 
-ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name, callback) {
+ModuleManager.prototype.unload = ModuleManager.prototype.disable = function unload(name) {
 	var error = null;
 	if (name instanceof MODULE) {
 		name = name.name;
@@ -121,78 +118,62 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function(name
 		} else if (this.exists(name)) {
 			var module = this.get(name);
 
-			//disable event binding on halt with uncatched exception so users gets kicked in face
-			if (typeof module.dispatcher === 'object') {
-				module.dispatcher.on = module.dispatcher.once = module.dispatcher.addListener = function() {
-					throw new Error('You cannot bind events on module \'' + name + '\' halt!');
-				};
-			}
-
 			try {
 				if (typeof module.halt === 'function') module.halt();
 			} catch (e) {
-				//ignore all exceptions in halt
-				//just note it
-				logger.warn('Got error in module \'' + name + '\' halt: ' + e);
+				error = new Error('Error happened during module \'' + name + '\' halt: ' + e.message);
 			}
 
-			//puff it
-			delete this._modules[name];
-			if (this[name] === module) delete this[name];
-
-			//emit this tragic event for others
-			this.dispatcher.emit('unload', name, this, module);
+			if (!error) {
+				delete this._modules[name];
+				this.dispatcher.emit('module-unload', name, this, module);
+			}
 		} else {
 			error = new Error('Module \'' + name + '\' is not loaded!');
 		}
 	}
 
-	logger.debug('Unload of \'' + name + '\' module' + (error ? ' failed' : ' is success') + '.');
+	logger.debug('Unload of \'' + name + '\' module' + (error ? ' failed with error: ' + error.message : ' is success') + '.');
 
-	if (callback) callback(error, name, this);
-	else if (error) throw error;
+	if (error) throw error;
 	return this;
 };
 
 //reload module context
-ModuleManager.prototype.reload = function(name, callback) {
-	var mm = this;
+ModuleManager.prototype.reload = function reload(name) {
 	var error = null;
-
-	var module = this.find(name);
-
-	if (module) {
-		try {
-			if (typeof module.reload === 'function') {
-				module.reload(function(err) {
-					if (err) throw err;
-					mm.dispatcher.emit('reload-load', name, mm, module);
-				}, function(err) {
-					if (err) throw err;
-					mm.dispatcher.emit('reload-unload', name, mm, module);
-				}); //reload with new config
-			}
-		} catch (e) {
-			error = new Error('Error happened during module \'' + name + '\' reload: ' + e.message);
-		}
+	if (name instanceof MODULE) {
+		name = name.name;
+	}
+	if (typeof name !== 'string' || name === '') {
+		error = new Error('Please enter a name!');
 	} else {
-		error = new Error('Module \'' + name + '\' is not loaded!');
+		var module = this.find(name);
+
+		if (module) {
+			try {
+				if (typeof module.reload === 'function') {
+					module.reload();
+				}
+			} catch (e) {
+				error = new Error('Error happened during module \'' + name + '\' reload: ' + e.message);
+			}
+		} else {
+			error = new Error('Module \'' + name + '\' is not loaded!');
+		}
+
+		if (!error) {
+			this.dispatcher.emit('module-reload', name, this, module);
+		}
 	}
 
-	if (!error) {
-		//emit this somewhat sympatic event for others
-		this.dispatcher.emit('reload', name, this, module);
-	}
+	logger.debug('Reload of \'' + name + '\' module' + (error ? ' failed with error: ' + error.message : ' is success') + '.');
 
-	logger.debug('Reload of \'' + name + '\' module' + (error ? ' failed' : ' is success') + '.');
-
-	if (callback) callback(error, name, this);
-	else if (error) throw error;
-
+	if (error) throw error;
 	return this;
 };
 
-ModuleManager.prototype.require = function(name) {
+ModuleManager.prototype.require = function require(name) {
 	if (typeof name !== 'string' || name === '') {
 		throw new Error('Please enter a name!');
 	} else if (!this.exists(name)) {
@@ -202,7 +183,7 @@ ModuleManager.prototype.require = function(name) {
 	return this.get(name);
 };
 
-ModuleManager.prototype.protect = function(name, prot) {
+ModuleManager.prototype.protect = function protect(name, prot) {
 	if (typeof name !== 'string' || name === '') {
 		throw new Error('Please enter a name!');
 	}
@@ -217,6 +198,6 @@ ModuleManager.prototype.protect = function(name, prot) {
 };
 
 module.exports.ModuleManager = ModuleManager;
-module.exports.create = function(dispatcher) {
-	return new ModuleManager(dispatcher);
+module.exports.create = function createModuleManager(dispatcher, config) {
+	return new ModuleManager(dispatcher, config);
 };
