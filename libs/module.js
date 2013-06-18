@@ -115,7 +115,7 @@ Module.prototype.reload = function reload() {
 		error = new Error('Module \'' + this.name + '\' is not loaded!');
 	}
 
-	logger.debug('Reload of \'' + this.name + '\' module.' + (error ? ' With error: ' + error.message : ''));
+	logger.debug('Context reload of \'' + this.name + '\' module.' + (error ? ' With error: ' + error.message : ''));
 
 	if (error) throw error;
 
