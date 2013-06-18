@@ -67,7 +67,6 @@ Module.prototype.init = function init() {
 	logger.debug('Init of \'' + this.name + '\' module' + (error ? ' failed' : ' is success') + '.' + (error ? ' With error: ' + error.message : ''));
 
 	if (error) throw error;
-
 	return this;
 };
 
@@ -90,7 +89,6 @@ Module.prototype.halt = function halt() {
 	logger.debug('Halt of \'' + this.name + '\' module.' + (error ? ' With error: ' + error.message : ''));
 
 	if (error) throw error;
-
 	return this;
 };
 
@@ -118,7 +116,6 @@ Module.prototype.reload = function reload() {
 	logger.debug('Context reload of \'' + this.name + '\' module.' + (error ? ' With error: ' + error.message : ''));
 
 	if (error) throw error;
-
 	return this;
 };
 
@@ -140,7 +137,6 @@ Module.prototype.injectConfig = function injectConfig(config) {
 	logger.debug('Module \'' + this.name + '\' Config inject.' + (error ? ' With error: ' + error.message : ''));
 
 	if (error) throw error;
-
 	return this;
 };
 
@@ -153,7 +149,7 @@ Module.prototype.injectDispatcher = function injectDispatcher(dispatchBase) {
 		var eventTest = new RegExp('^' + this.name + '/');
 		var module = this;
 		this.dispatcher = {
-			on: function(event, listener) {
+			on: function on(event, listener) {
 				events.push({
 					event: event,
 					listener: listener
@@ -161,7 +157,7 @@ Module.prototype.injectDispatcher = function injectDispatcher(dispatchBase) {
 				dispatchBase.on(event, listener);
 				return this;
 			},
-			once: function(event, listener) {
+			once: function once(event, listener) {
 				events.push({
 					event: event,
 					listener: listener
@@ -169,10 +165,10 @@ Module.prototype.injectDispatcher = function injectDispatcher(dispatchBase) {
 				dispatchBase.once(event, listener);
 				return this;
 			},
-			off: function(event, listener) {
+			off: function off(event, listener) {
 				return this.removeListener(event, listener);
 			},
-			addListener: function(event, listener) {
+			addListener: function addListener(event, listener) {
 				events.push({
 					event: event,
 					listener: listener
@@ -180,7 +176,7 @@ Module.prototype.injectDispatcher = function injectDispatcher(dispatchBase) {
 				dispatchBase.addListener(event, listener);
 				return this;
 			},
-			removeListener: function(event, listener) {
+			removeListener: function removeListener(event, listener) {
 				events.some(function(obj, i) {
 					if (obj.event === event && obj.listener === listener) {
 						events.splice(i, 1);
@@ -191,7 +187,7 @@ Module.prototype.injectDispatcher = function injectDispatcher(dispatchBase) {
 				dispatchBase.removeListener(event, listener);
 				return this;
 			},
-			emit: function(event) {
+			emit: function emit(event) {
 				var args;
 				//all emited events needs to be prefixed by module name
 				if (!(eventTest.test(event))) {
@@ -206,7 +202,7 @@ Module.prototype.injectDispatcher = function injectDispatcher(dispatchBase) {
 				}
 				return this;
 			},
-			clearEvents: function() {
+			clearEvents: function clearEvents() {
 				events.forEach(function(event) {
 					dispatchBase.removeListener(event.event, event.listener);
 				});
@@ -219,7 +215,6 @@ Module.prototype.injectDispatcher = function injectDispatcher(dispatchBase) {
 	logger.debug('Module \'' + this.name + '\' dispatcher inject.' + (error ? ' With error: ' + error.message : ''));
 
 	if (error) throw error;
-
 	return this;
 };
 

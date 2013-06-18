@@ -51,7 +51,7 @@ ModuleManager.prototype.exists = ModuleManager.prototype.has = ModuleManager.pro
 	} else if (typeof name !== 'string' || name === '') {
 		return false;
 	}
-	return this._modules[name] !== undefined;
+	return typeof this._modules[name] !== 'undefined';
 };
 
 ModuleManager.prototype.get = ModuleManager.prototype.find = function get(name) {
@@ -60,7 +60,7 @@ ModuleManager.prototype.get = ModuleManager.prototype.find = function get(name) 
 	} else if (typeof name !== 'string' || name === '') {
 		return null;
 	}
-	if (this._modules[name] !== undefined) {
+	if (typeof this._modules[name] !== 'undefined') {
 		return this._modules[name];
 	}
 	return null;
