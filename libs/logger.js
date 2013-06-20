@@ -5,10 +5,11 @@
 function Logger() {
 	this.enabled = true;
 	this.debugging = false;
+	this.lastMessage = '';
 }
 
-Logger.prototype.onBeforeLog = function() {};
-Logger.prototype.onAfterLog = function() {};
+Logger.prototype.onBeforeLog = function onBeforeLog() {};
+Logger.prototype.onAfterLog = function onAfterLog() {};
 
 var colorize = {
 	//styles
@@ -30,16 +31,24 @@ var colorize = {
 	'yellow': ['\x1B[33m', '\x1B[39m']
 };
 
-Object.keys(colorize).forEach(function(colorName) {
+Object.keys(colorize).forEach(function prepareColors(colorName) {
 	var colorColor = colorize[colorName];
-	colorize[colorName] = function(val) {
-		return colorColor[0] + val + colorColor[1];
-	};
+	delete colorize[colorName];
+
+	Object.defineProperty(colorize, colorName, {
+		writable: false,
+		configurable: false,
+		enumerable: true,
+		value: function colorize(val) {
+			return colorColor[0] + val + colorColor[1];
+		}
+	});
 });
 
-Logger.prototype.log = function(msg, level) {
+Logger.prototype.log = function log(msg, level) {
 	if (!this.enabled) {
-		return;
+		this.lastMessage = '';
+		return false;
 	}
 
 	if (msg instanceof Error) {
@@ -47,42 +56,51 @@ Logger.prototype.log = function(msg, level) {
 		if (typeof level === 'undefined' || level === null) level = 'error';
 	}
 
-	var dontlog = this.onBeforeLog(arguments) || false;
-	if (!dontlog) {
+	var handled = false;
+	if (typeof this.onBeforeLog === 'function') handled = this.onBeforeLog.call(this, msg, level) || false;
+	if (!handled) {
 		switch (level) {
 			case 'error':
-				console.error(colorize.red('[ERROR] ') + msg);
+				this.lastMessage = colorize.red('[ERROR] ') + msg;
 				break;
 			case 'warn':
-				console.warn(colorize.yellow('[WARNING] ') + msg);
+				this.lastMessage = colorize.yellow('[WARNING] ') + msg;
 				break;
 			case 'info':
-				console.info(colorize.cyan('[INFO] ') + msg);
+				this.lastMessage = colorize.cyan('[INFO] ') + msg;
 				break;
 			case 'debug':
-				if (this.debugging) console.log(colorize.magenta('[DEBUG] ') + msg);
+				if (this.debugging) {
+					this.lastMessage = colorize.magenta('[DEBUG] ') + msg;
+				} else {
+					this.lastMessage = '';
+					handled = true;
+				}
 				break;
 			default:
-				console.log(msg);
+				this.lastMessage = msg;
 		}
+		if (!handled) console.log(this.lastMessage);
+		handled = true;
 	}
-	this.onAfterLog(dontlog || false, arguments);
+	if (typeof this.onAfterLog === 'function') this.onAfterLog.call(this, handled, msg, level);
+	return true;
 };
 
-Logger.prototype.error = function(msg) {
-	this.log(msg, 'error');
+Logger.prototype.error = function error(msg) {
+	return this.log(msg, 'error');
 };
 
-Logger.prototype.warn = function(msg) {
-	this.log(msg, 'warn');
+Logger.prototype.warn = Logger.prototype.warning = function warning(msg) {
+	return this.log(msg, 'warn');
 };
 
-Logger.prototype.info = function(msg) {
-	this.log(msg, 'info');
+Logger.prototype.info = function info(msg) {
+	return this.log(msg, 'info');
 };
 
-Logger.prototype.debug = function(msg) {
-	this.log(msg, 'debug');
+Logger.prototype.debug = function debug(msg) {
+	return this.log(msg, 'debug');
 };
 
 module.exports = new Logger();

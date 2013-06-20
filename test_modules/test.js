@@ -18,7 +18,7 @@ module.exports.init = function(reloading) {
 
 module.exports.halt = function() {
 	if (this.reloading) {
-		this.test_halt = 'Reloading No ponies!';
+		this.test_halt = 'Reload No ponies!';
 	} else {
 		this.test_halt = 'No ponies!';
 	}

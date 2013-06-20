@@ -1,5 +1,4 @@
 /* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 /**
@@ -8,7 +7,7 @@
  * @param {string} format Format with (YYYY-MM-DD HH:II:SS TZ) placeholders
  * @return {string}   returns date in defined format
  */
-module.exports.dateFormat = module.exports.formatDate = module.exports.formattedDate = function(d, format) {
+module.exports.dateFormat = module.exports.formatDate = module.exports.formattedDate = function helperDateFormat(d, format) {
 	if (typeof d === 'undefined' || !d) {
 		d = new Date();
 	}
@@ -45,8 +44,8 @@ module.exports.dateFormat = module.exports.formatDate = module.exports.formatted
  * @param  {function} wrapper
  * @return {function}
  */
-module.exports.wrap = function(func, wrapper) {
-	return function() {
+module.exports.wrap = function helperWrap(func, wrapper) {
+	return function wrap() {
 		var args = [func];
 		Array.prototype.push.apply(args, arguments);
 		return wrapper.apply(this, args);
@@ -61,7 +60,7 @@ module.exports.wrap = function(func, wrapper) {
  * @param  {[type]}  context  [description]
  * @return {[type]}           [description]
  */
-module.exports.uniq = module.exports.unique = function(array, isSorted, iterator, context) {
+module.exports.uniq = module.exports.unique = function helperUnique(array, isSorted, iterator, context) {
 	if (typeof isSorted === 'function') {
 		context = iterator;
 		iterator = isSorted;
@@ -70,7 +69,7 @@ module.exports.uniq = module.exports.unique = function(array, isSorted, iterator
 	var initial = iterator ? array.map(iterator, context) : array;
 	var results = [];
 	var seen = [];
-	initial.forEach(function(value, index) {
+	initial.forEach(function unique(value, index) {
 		if (isSorted ? (!index || seen[seen.length - 1] !== value) : seen.indexOf(value) === -1) {
 			seen.push(value);
 			results.push(array[index]);
@@ -86,8 +85,8 @@ module.exports.uniq = module.exports.unique = function(array, isSorted, iterator
  * @param  {array} list list of function names to export
  * @return {void} nothing
  */
-module.exports.export = function(to, from, list) {
-	list.forEach(function(p) {
+module.exports.export = function helperExport(to, from, list) {
+	list.forEach(function exportt(p) {
 		if (typeof from[p] === 'function') to[p] = from[p].bind(from);
 	});
 	return to;

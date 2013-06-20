@@ -4,8 +4,8 @@
 	"description": "Simple js IRC pony bot",
 	"scripts": {
 		"start": "node ./app",
-		"posttest": "find . -name '*.js' -print0 | xargs -0 ./node_modules/.bin/jshint",
-		"test": "./run-test.sh"
+		"pretest": "make jshint",
+		"test": "make test"
 	},
 	"dependencies": {
 		"request": "*",
@@ -13,7 +13,8 @@
 		"time": "*"
 	},
 	"devDependencies": {
-		"vows": "*",
+		"chai": "*",
+		"mocha": "*",
 		"jshint": "*"
 	},
 	"main": "./libs/bot",

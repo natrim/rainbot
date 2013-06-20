@@ -200,46 +200,40 @@ module.exports.init = function() {
 
 	this.addAction('reload', function(source, args) {
 		var modules = args[1].match(/\w+/gi);
-		var call = function(err, m) {
-			if (err) {
-				source.respond('module \'' + m + '\' failed to reload! ' + err);
-			} else {
-				source.respond('module \'' + m + '\' reloaded!');
-			}
-		};
-		source.respond('okey, ' + source.nick + '! Gimmie a sec to tune it.');
+		source.respond('okey, ' + source.nick + '! Gimmie a sec to tune my element to it.');
 		modules.forEach(function(name) {
-			module.mm.reload(name, call);
+			try {
+				module.mm.reload(name);
+				source.respond('module \'' + name + '\' reloaded!');
+			} catch (e) {
+				source.respond('module \'' + name + '\' failed to reload! ' + e);
+			}
 		});
 	}, /^reload[ ]+(.*)$/i, ['owner']);
 
 	this.addAction('load', function(source, args) {
 		var modules = args[1].match(/\w+/gi);
-		var call = function(err, m) {
-			if (err) {
-				source.respond('module \'' + m + '\' failed to load! ' + err);
-			} else {
-				source.respond('module \'' + m + '\' loaded!');
-			}
-		};
 		source.respond('okey, ' + source.nick + '! I\'m really eager to learn new things!');
 		modules.forEach(function(name) {
-			module.mm.load(name, call);
+			try {
+				module.mm.load(name);
+				source.respond('module \'' + name + '\' loaded!');
+			} catch (e) {
+				source.respond('module \'' + name + '\' failed to load! ' + e);
+			}
 		});
 	}, /^load[ ]+(.*)$/i, ['owner']);
 
 	this.addAction('unload', function(source, args) {
 		var modules = args[1].match(/\w+/gi);
-		var call = function(err, m) {
-			if (err) {
-				source.respond('module \'' + m + '\' failed to unload! ' + err);
-			} else {
-				source.respond('module \'' + m + '\' unloaded!');
-			}
-		};
 		source.respond('okey, ' + source.nick + '! Let\'s throw it away!');
 		modules.forEach(function(name) {
-			module.mm.unload(name, call);
+			try {
+				module.mm.unload(name);
+				source.respond('module \'' + name + '\' unloaded!');
+			} catch (e) {
+				source.respond('module \'' + name + '\' failed to unload! ' + e);
+			}
 		});
 	}, /^unload[ ]+(.*)$/i, ['owner']);
 
