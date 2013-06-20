@@ -56,8 +56,8 @@ describe('Module class', function() {
 
 		it('throws error when module does not exists in module dir', function() {
 			assert.throws(function() {
-				return MODULE.create('test2');
-			}, 'Module \'test2\' does not exists!');
+				return MODULE.create('test222');
+			}, 'Module \'test222\' does not exists!');
 		});
 
 		it('loads even syntax error module', function() {
