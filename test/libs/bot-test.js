@@ -60,9 +60,88 @@ describe('Bot class', function() {
 	});
 
 	describe('modules', function() {
-		it('loads modules by object or array');
-		it('loads modules from json file');
-		it('loads modules from json file defined in config');
+		var OLD_MODULES_DIR;
+		before(function() {
+			OLD_MODULES_DIR = MODULES_DIR;
+			global.MODULES_DIR = require('path').resolve(BOT_DIR, 'test_modules');
+		});
+
+		after(function() {
+			global.MODULES_DIR = OLD_MODULES_DIR;
+		});
+
+		var bot;
+		beforeEach(function() {
+			bot = new BOT();
+			bot.loadConfig({});
+			bot._core_modules = [];
+		});
+
+		it('loads modules by object', function() {
+			assert.isFalse(bot.modules.has('test'));
+			assert.isFalse(bot.modules.has('test2'));
+			bot.loadModules({
+				'test': true,
+				'test2': false
+			});
+			assert.isTrue(bot.modules.has('test'));
+			assert.isFalse(bot.modules.has('test2'));
+		});
+		it('loads modules by array', function() {
+			assert.isFalse(bot.modules.has('test2'));
+
+			bot.loadModules(['test2']);
+			assert.isTrue(bot.modules.has('test2'));
+		});
+		it('loads modules from json file', function() {
+			assert.isFalse(bot.modules.has('test2'));
+			assert.isFalse(bot.modules.has('test'));
+			bot.loadModules('test_modules/modules.json');
+			assert.isTrue(bot.modules.has('test2'));
+			assert.isFalse(bot.modules.has('test'));
+		});
+		it('loads modules from json file defined in config', function() {
+			bot.loadConfig({
+				'bot': {
+					'modules': 'test_modules/modules.json'
+				}
+			});
+
+			assert.isFalse(bot.modules.has('test2'));
+			assert.isFalse(bot.modules.has('test'));
+			bot.loadModules();
+			assert.isTrue(bot.modules.has('test2'));
+			assert.isFalse(bot.modules.has('test'));
+		});
+
+		it('loads modules from json file defined in config in array', function() {
+			bot.loadConfig({
+				'bot': {
+					'modules': ['test']
+				}
+			});
+
+			assert.isFalse(bot.modules.has('test'));
+			bot.loadModules();
+			assert.isTrue(bot.modules.has('test'));
+		});
+
+		it('loads modules from json file defined in config in object', function() {
+			bot.loadConfig({
+				'bot': {
+					'modules': {
+						'test': true,
+						'test2': true
+					}
+				}
+			});
+
+			assert.isFalse(bot.modules.has('test2'));
+			assert.isFalse(bot.modules.has('test'));
+			bot.loadModules();
+			assert.isTrue(bot.modules.has('test2'));
+			assert.isTrue(bot.modules.has('test'));
+		});
 	});
 
 	describe('others', function() {
