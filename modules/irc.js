@@ -334,6 +334,9 @@ IRC.prototype.send = function(msg, nolog) {
 	//replace newline by space to avoid breaking
 	msg = msg.replace(/\r?\n|\r/g, ' ');
 
+	//ensure utf8
+	msg = msg.toString('utf8');
+
 	var callback = function() {
 		if (!nolog) {
 			this.dispatcher.emit('irc/SEND', msg, this);
