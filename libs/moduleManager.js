@@ -76,7 +76,7 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function load(na
 	} else {
 		try {
 			module = new MODULE(name);
-			module.require = this.require.bind(this);
+			module.require = this.__require.bind(this);
 		} catch (e) {
 			error = new Error('Error happened during module \'' + name + '\' load: ' + e.message);
 			module = null;
@@ -177,10 +177,25 @@ ModuleManager.prototype.require = function require(name) {
 	if (typeof name !== 'string' || name === '') {
 		throw new Error('Please enter a name!');
 	} else if (!this.exists(name)) {
-		this.load(name);
+		this.load(name); //can throw errors
 	}
 
 	return this.get(name);
+};
+
+/**
+ * returns and loads module - used only inside of module
+ * @param  String name name of module to return
+ * @return Object returns module or null
+ */
+ModuleManager.prototype.__require = function __require(name) {
+	try {
+		return this.require(name);
+	} catch (e) {
+		//ignore the error
+	}
+
+	return null;
 };
 
 ModuleManager.prototype.protect = function protect(name, prot) {

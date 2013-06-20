@@ -199,5 +199,11 @@ describe('ModuleManager class', function() {
 
 			ee.emit('test/test');
 		});
+		it('the #require should be able to work from module', function() {
+			assert.isNull(mm.require('test').require('derp'));
+			assert.isNull(mm.require('test').require());
+			var m = mm.require('test');
+			assert.equal(m.require('test'), m);
+		});
 	});
 });
