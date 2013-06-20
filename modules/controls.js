@@ -121,13 +121,16 @@ Controls.prototype.processCommand = function(source, text) {
 	});
 	var command = args.shift();
 	//execute the command
-	Object.keys(this.commands).some(function(name) {
+	return Object.keys(this.commands).some(function(name) {
 		if (this.commands[name] && command == this.commands[name].name) { //use == to not check type
 			if (this.checkAccess(source, this.commands[name])) { //run the command only if the user has access
-				logger.debug('Processing Command \'' + name + '\'');
-				this.commands[name].action(source, args, text, command);
-				//notify others about it
-				this.dispatcher.emit('controls/command', name, source, args, text, command);
+				var execute = this.commands[name].action,
+					dispatcher = this.dispatcher;
+				process.nextTick(function() {
+					logger.debug('Processing Command \'' + name + '\'');
+					execute(source, args, text, command);
+					dispatcher.emit('controls/command', name, source, args, text, command);
+				});
 			} else {
 				logger.debug('Command \'' + name + '\' access for user \'' + source + '\' denied!');
 				source.notice('Command Access denied! Do i know you?');
@@ -140,15 +143,20 @@ Controls.prototype.processCommand = function(source, text) {
 
 Controls.prototype.processAction = function(source, text) {
 	//proces all actions that triggers rule
+	var found = false;
 	Object.keys(this.actions).forEach(function(name) {
 		if (this.actions[name]) {
 			var args = text.match(this.actions[name].rule);
 			if (args !== null) {
 				if (this.checkAccess(source, this.actions[name])) { //run the action only if the user has access
-					logger.debug('Processing Action \'' + name + '\'');
-					this.actions[name].action(source, args, text);
-					//notify others about it
-					this.dispatcher.emit('controls/action', name, source, args, text);
+					var execute = this.actions[name].action,
+						dispatcher = this.dispatcher;
+					process.nextTick(function() {
+						logger.debug('Processing Action \'' + name + '\'');
+						execute(source, args, text);
+						dispatcher.emit('controls/action', name, source, args, text);
+					});
+					found = true;
 				} else {
 					logger.debug('Action \'' + name + '\' access for user \'' + source + '\' denied!');
 					source.notice('Action Access denied! Derpy in action!');
@@ -156,6 +164,7 @@ Controls.prototype.processAction = function(source, text) {
 			}
 		}
 	}, this);
+	return found;
 };
 
 Controls.prototype.checkAccess = function(source, CorA) {
