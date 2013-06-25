@@ -57,7 +57,7 @@ Module.prototype.init = function init() {
 	if (!error) {
 		try {
 			this.__load(); //load context
-			if (typeof this.context.init === 'function') this.context.init.call(this, false);
+			if (this.context !== null && typeof this.context.init === 'function') this.context.init.call(this, false);
 		} catch (e) {
 			this.__unload(); //unload if needed
 			error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e.message);
@@ -76,7 +76,7 @@ Module.prototype.halt = function halt() {
 
 	if (this.loaded) {
 		try {
-			if (typeof this.context.halt === 'function') this.context.halt.call(this, false);
+			if (this.context !== null && typeof this.context.halt === 'function') this.context.halt.call(this, false);
 			this.__unload();
 			if (this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
 		} catch (e) {
@@ -98,12 +98,12 @@ Module.prototype.reload = function reload() {
 		this.reloading = true;
 
 		try {
-			if (typeof this.context.halt === 'function') this.context.halt.call(this, true);
+			if (this.context !== null && typeof this.context.halt === 'function') this.context.halt.call(this, true);
 			this.__unload();
 			if (this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
 
 			this.__load();
-			if (typeof this.context.init === 'function') this.context.init.call(this, true);
+			if (this.context !== null && typeof this.context.init === 'function') this.context.init.call(this, true);
 		} catch (e) {
 			error = e;
 		}
