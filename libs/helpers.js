@@ -1,5 +1,25 @@
-/* jslint node: true */
 'use strict';
+
+module.exports.checkGlobals = function check(resolve) {
+	if (!global.BOT_DIR) {
+		if (!resolve) {
+			throw new Error('Wrong entry point! No \'BOT_DIR\' defined!');
+		}
+		global.BOT_DIR = require('path').resolve(__dirname, '..');
+	}
+	if (!global.LIBS_DIR) {
+		if (!resolve) {
+			throw new Error('Wrong entry point! No \'LIBS_DIR\' defined!');
+		}
+		global.LIBS_DIR = require('path').resolve(global.BOT_DIR, 'libs');
+	}
+	if (!global.MODULES_DIR) {
+		if (!resolve) {
+			throw new Error('Wrong entry point! No \'MODULES_DIR\' defined!');
+		}
+		global.MODULES_DIR = require('path').resolve(global.BOT_DIR, 'modules');
+	}
+};
 
 /**
  * date helper
@@ -11,7 +31,7 @@ module.exports.dateFormat = module.exports.formatDate = module.exports.formatted
 	if (typeof d === 'undefined' || !d) {
 		d = new Date();
 	}
-	if (typeof(format) !== 'string') {
+	if (typeof format !== 'string') {
 		format = 'YYYY-MM-DD HH:II:SS';
 	}
 	if (format.toLowerCase() === 'utc') {
@@ -27,14 +47,28 @@ module.exports.dateFormat = module.exports.formatDate = module.exports.formatted
 		minute = d.getMinutes(),
 		second = d.getSeconds(),
 		tz = -(d.getTimezoneOffset() / 60);
-	if (month < 10) month = '0' + month;
-	if (day < 10) day = '0' + day;
-	if (hour < 10) hour = '0' + hour;
-	if (minute < 10) minute = '0' + minute;
-	if (second < 10) second = '0' + second;
-	if (tz === 0) tz = 'UTC';
-	else if (tz > 0) tz = 'UTC+' + tz;
-	else tz = 'UTC' + tz;
+	if (month < 10) {
+		month = '0' + month;
+	}
+	if (day < 10) {
+		day = '0' + day;
+	}
+	if (hour < 10) {
+		hour = '0' + hour;
+	}
+	if (minute < 10) {
+		minute = '0' + minute;
+	}
+	if (second < 10) {
+		second = '0' + second;
+	}
+	if (tz === 0) {
+		tz = 'UTC';
+	} else if (tz > 0) {
+		tz = 'UTC+' + tz;
+	} else {
+		tz = 'UTC' + tz;
+	}
 	return format.replace('YYYY', year).replace('YY', year.toString().substr(-2)).replace('MM', month).replace('DD', day).replace('HH', hour).replace('II', minute).replace('SS', second).replace('TZ', tz);
 };
 
@@ -87,7 +121,9 @@ module.exports.uniq = module.exports.unique = function helperUnique(array, isSor
  */
 module.exports.export = function helperExport(to, from, list) {
 	list.forEach(function exportt(p) {
-		if (typeof from[p] === 'function') to[p] = from[p].bind(from);
+		if (typeof from[p] === 'function') {
+			to[p] = from[p].bind(from);
+		}
 	});
 	return to;
 };

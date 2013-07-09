@@ -1,5 +1,3 @@
-/* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 function Logger() {
@@ -53,37 +51,45 @@ Logger.prototype.log = function log(msg, level) {
 
 	if (msg instanceof Error) {
 		msg = msg.message;
-		if (typeof level === 'undefined' || level === null) level = 'error';
+		if (typeof level === 'undefined' || level === null) {
+			level = 'error';
+		}
 	}
 
 	var handled = false;
-	if (typeof this.onBeforeLog === 'function') handled = this.onBeforeLog.call(this, msg, level) || false;
+	if (typeof this.onBeforeLog === 'function') {
+		handled = this.onBeforeLog.call(this, msg, level) || false;
+	}
 	if (!handled) {
 		switch (level) {
-			case 'error':
-				this.lastMessage = colorize.red('[ERROR] ') + msg;
-				break;
-			case 'warn':
-				this.lastMessage = colorize.yellow('[WARNING] ') + msg;
-				break;
-			case 'info':
-				this.lastMessage = colorize.cyan('[INFO] ') + msg;
-				break;
-			case 'debug':
-				if (this.debugging) {
-					this.lastMessage = colorize.magenta('[DEBUG] ') + msg;
-				} else {
-					this.lastMessage = '';
-					handled = true;
-				}
-				break;
-			default:
-				this.lastMessage = msg;
+		case 'error':
+			this.lastMessage = colorize.red('[ERROR] ') + msg;
+			break;
+		case 'warn':
+			this.lastMessage = colorize.yellow('[WARNING] ') + msg;
+			break;
+		case 'info':
+			this.lastMessage = colorize.cyan('[INFO] ') + msg;
+			break;
+		case 'debug':
+			if (this.debugging) {
+				this.lastMessage = colorize.magenta('[DEBUG] ') + msg;
+			} else {
+				this.lastMessage = '';
+				handled = true;
+			}
+			break;
+		default:
+			this.lastMessage = msg;
 		}
-		if (!handled) console.log(this.lastMessage);
+		if (!handled) {
+			console.log(this.lastMessage);
+		}
 		handled = true;
 	}
-	if (typeof this.onAfterLog === 'function') this.onAfterLog.call(this, handled, msg, level);
+	if (typeof this.onAfterLog === 'function') {
+		this.onAfterLog.call(this, handled, msg, level);
+	}
 	return true;
 };
 

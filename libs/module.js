@@ -1,11 +1,7 @@
-/* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 //check main entry point path
-if (!global.BOT_DIR) throw new Error('Wrong entry point! No \'BOT_DIR\' defined!');
-if (!global.LIBS_DIR) throw new Error('Wrong entry point! No \'LIBS_DIR\' defined!');
-if (!global.MODULES_DIR) throw new Error('Wrong entry point! No \'MODULES_DIR\' defined!');
+require(LIBS_DIR + '/helpers').checkGlobals();
 
 var logger = require(LIBS_DIR + '/logger');
 var EventEmitter = require('events').EventEmitter;
@@ -36,12 +32,12 @@ function Module(name) {
 	this.loaded = false;
 	this.reloading = false;
 	this.context = null;
-
-	//empty require - MM will inject own method on load
-	this.require = function() {
-		return null;
-	};
 }
+
+//empty require - MM will inject own method on module load
+Module.prototype.require = function require() {
+	return null;
+};
 
 //called on load
 Module.prototype.init = function init() {
@@ -51,13 +47,19 @@ Module.prototype.init = function init() {
 		error = new Error('Module \'' + this.name + '\' is already loaded!');
 	}
 
-	if (!error && typeof this.dispatcher !== 'object' && this.dispatcher !== null) error = new Error('No dispatcher given!');
-	if (!error && typeof this.config !== 'object' && this.config !== null) error = new Error('No config given!');
+	if (!error && typeof this.dispatcher !== 'object' && this.dispatcher !== null) {
+		error = new Error('No dispatcher given!');
+	}
+	if (!error && typeof this.config !== 'object' && this.config !== null) {
+		error = new Error('No config given!');
+	}
 
 	if (!error) {
 		try {
 			this.__load(); //load context
-			if (this.context !== null && typeof this.context.init === 'function') this.context.init.call(this, false);
+			if (this.context !== null && typeof this.context.init === 'function') {
+				this.context.init.call(this, false);
+			}
 		} catch (e) {
 			this.__unload(); //unload if needed
 			error = new Error('Failed loading context of \'' + this.name + '\' module! ' + e.message);
@@ -66,7 +68,9 @@ Module.prototype.init = function init() {
 
 	logger.debug('Init of \'' + this.name + '\' module' + (error ? ' failed' : ' is success') + '.' + (error ? ' With error: ' + error.message : ''));
 
-	if (error) throw error;
+	if (error) {
+		throw error;
+	}
 	return this;
 };
 
@@ -76,9 +80,13 @@ Module.prototype.halt = function halt() {
 
 	if (this.loaded) {
 		try {
-			if (this.context !== null && typeof this.context.halt === 'function') this.context.halt.call(this, false);
+			if (this.context !== null && typeof this.context.halt === 'function') {
+				this.context.halt.call(this, false);
+			}
 			this.__unload();
-			if (this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
+			if (this.dispatcher && this.dispatcher.clearEvents) {
+				this.dispatcher.clearEvents();
+			}
 		} catch (e) {
 			error = new Error('Failed unloading context of \'' + this.name + '\' module! ' + e.message);
 		}
@@ -88,7 +96,9 @@ Module.prototype.halt = function halt() {
 
 	logger.debug('Halt of \'' + this.name + '\' module.' + (error ? ' With error: ' + error.message : ''));
 
-	if (error) throw error;
+	if (error) {
+		throw error;
+	}
 	return this;
 };
 
@@ -98,12 +108,17 @@ Module.prototype.reload = function reload() {
 		this.reloading = true;
 
 		try {
-			if (this.context !== null && typeof this.context.halt === 'function') this.context.halt.call(this, true);
+			if (this.context !== null && typeof this.context.halt === 'function') {
+				this.context.halt.call(this, true);
+			}
 			this.__unload();
-			if (this.dispatcher && this.dispatcher.clearEvents) this.dispatcher.clearEvents();
-
+			if (this.dispatcher && this.dispatcher.clearEvents) {
+				this.dispatcher.clearEvents();
+			}
 			this.__load();
-			if (this.context !== null && typeof this.context.init === 'function') this.context.init.call(this, true);
+			if (this.context !== null && typeof this.context.init === 'function') {
+				this.context.init.call(this, true);
+			}
 		} catch (e) {
 			error = e;
 		}
@@ -115,7 +130,9 @@ Module.prototype.reload = function reload() {
 
 	logger.debug('Context reload of \'' + this.name + '\' module.' + (error ? ' With error: ' + error.message : ''));
 
-	if (error) throw error;
+	if (error) {
+		throw error;
+	}
 	return this;
 };
 
@@ -124,7 +141,9 @@ Module.prototype.injectConfig = function injectConfig(config) {
 	if (!(config instanceof Object)) {
 		error = new Error('Config needs to be object!');
 	} else {
-		if (typeof config[this.name] !== 'object') config[this.name] = {};
+		if (typeof config[this.name] !== 'object') {
+			config[this.name] = {};
+		}
 
 		Object.defineProperty(this, 'config', {
 			writable: false,
@@ -136,7 +155,9 @@ Module.prototype.injectConfig = function injectConfig(config) {
 
 	logger.debug('Module \'' + this.name + '\' Config inject.' + (error ? ' With error: ' + error.message : ''));
 
-	if (error) throw error;
+	if (error) {
+		throw error;
+	}
 	return this;
 };
 
@@ -177,7 +198,7 @@ Module.prototype.injectDispatcher = function injectDispatcher(dispatchBase) {
 				return this;
 			},
 			removeListener: function removeListener(event, listener) {
-				events.some(function(obj, i) {
+				events.some(function (obj, i) {
 					if (obj.event === event && obj.listener === listener) {
 						events.splice(i, 1);
 						return true;
@@ -203,7 +224,7 @@ Module.prototype.injectDispatcher = function injectDispatcher(dispatchBase) {
 				return this;
 			},
 			clearEvents: function clearEvents() {
-				events.forEach(function(event) {
+				events.forEach(function (event) {
 					dispatchBase.removeListener(event.event, event.listener);
 				});
 				events = [];
@@ -214,7 +235,9 @@ Module.prototype.injectDispatcher = function injectDispatcher(dispatchBase) {
 
 	logger.debug('Module \'' + this.name + '\' dispatcher inject.' + (error ? ' With error: ' + error.message : ''));
 
-	if (error) throw error;
+	if (error) {
+		throw error;
+	}
 	return this;
 };
 
@@ -227,7 +250,7 @@ Module.prototype.__unload = function __unload() {
 	if (this.loaded) {
 		//remove from node require cache
 		var module = require.cache[this.filename];
-		module.children.forEach(function(m) {
+		module.children.forEach(function (m) {
 			delete require.cache[m.filename];
 		});
 		delete require.cache[this.filename];
@@ -265,6 +288,6 @@ Module.prototype.valueOf = Module.prototype.toString = function toString() {
 };
 
 module.exports.Module = Module;
-module.exports.create = function createModule(name, module_dir) {
-	return new Module(name, module_dir);
+module.exports.create = function createModule(name) {
+	return new Module(name);
 };

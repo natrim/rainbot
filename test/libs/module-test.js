@@ -1,10 +1,3 @@
-/* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
-
-//mocha globals
-/* global describe, it, before, after, beforeEach, afterEach */
-
-//strict
 'use strict';
 
 //load assert lib
@@ -13,28 +6,28 @@ var assert = require('chai').assert;
 var MODULE = require(LIBS_DIR + '/module');
 var EventEmitter = require('events').EventEmitter;
 
-describe('Module class', function() {
+describe('Module class', function () {
 	var OLD_MODULES_DIR;
 
-	before(function() {
+	before(function () {
 		OLD_MODULES_DIR = MODULES_DIR;
 		global.MODULES_DIR = require('path').resolve(BOT_DIR, 'test_modules');
 	});
 
-	after(function() {
+	after(function () {
 		global.MODULES_DIR = OLD_MODULES_DIR;
 	});
 
-	describe('creation', function() {
-		it('throws Error without name', function() {
-			assert.throws(function() {
+	describe('creation', function () {
+		it('throws Error without name', function () {
+			assert.throws(function () {
 				return new MODULE.Module();
 			}, 'You need to specifify module name!');
 		});
 
-		it('creates module using new', function() {
+		it('creates module using new', function () {
 			var m;
-			assert.doesNotThrow(function() {
+			assert.doesNotThrow(function () {
 				m = new MODULE.Module('test');
 			});
 			assert.isObject(m);
@@ -43,9 +36,9 @@ describe('Module class', function() {
 			assert.equal(m, 'test');
 		});
 
-		it('creates module using #create', function() {
+		it('creates module using #create', function () {
 			var m;
-			assert.doesNotThrow(function() {
+			assert.doesNotThrow(function () {
 				m = MODULE.create('test');
 			});
 			assert.isObject(m);
@@ -54,15 +47,15 @@ describe('Module class', function() {
 			assert.equal(m, 'test');
 		});
 
-		it('throws error when module does not exists in module dir', function() {
-			assert.throws(function() {
+		it('throws error when module does not exists in module dir', function () {
+			assert.throws(function () {
 				return MODULE.create('test222');
 			}, 'Module \'test222\' does not exists!');
 		});
 
-		it('loads even syntax error module', function() {
+		it('loads even syntax error module', function () {
 			var m;
-			assert.doesNotThrow(function() {
+			assert.doesNotThrow(function () {
 				m = MODULE.create('syntaxerror');
 			});
 
@@ -71,22 +64,22 @@ describe('Module class', function() {
 		});
 	});
 
-	describe('working module', function() {
+	describe('working module', function () {
 		var module;
-		beforeEach(function() {
+		beforeEach(function () {
 			module = MODULE.create('test');
 		});
 
-		describe('#injectConfig', function() {
-			it('throws error on empty inject', function() {
+		describe('#injectConfig', function () {
+			it('throws error on empty inject', function () {
 				assert.throws(module.injectConfig.bind(module), 'Config needs to be object!');
 
-				assert.throws(function() {
+				assert.throws(function () {
 					module.injectConfig(undefined);
 				}, 'Config needs to be object!');
 			});
 
-			it('can inject empty object for config', function() {
+			it('can inject empty object for config', function () {
 				var c = {};
 
 				module.injectConfig(c);
@@ -103,7 +96,7 @@ describe('Module class', function() {
 				assert.equal(module.config.pony, 'Dashie');
 			});
 
-			it('can inject predefined config', function() {
+			it('can inject predefined config', function () {
 				module.injectConfig({
 					'test': {
 						'pony': 'RD'
@@ -116,13 +109,13 @@ describe('Module class', function() {
 			});
 		});
 
-		describe('#injectDispatcher', function() {
-			it('throws error on wrong object', function() {
+		describe('#injectDispatcher', function () {
+			it('throws error on wrong object', function () {
 				assert.throws(module.injectDispatcher.bind(module), 'Wrong dispatcher type for \'test\' module injected!');
 				assert.throws(module.injectDispatcher.bind(module, {}), 'Wrong dispatcher type for \'test\' module injected!');
 			});
 
-			it('binds on injected EventEmitter', function() {
+			it('binds on injected EventEmitter', function () {
 				module.injectDispatcher(new EventEmitter());
 
 				assert.property(module, 'dispatcher');
@@ -134,26 +127,26 @@ describe('Module class', function() {
 				assert.property(module.dispatcher, 'clearEvents');
 			});
 
-			describe('emitting', function() {
-				beforeEach(function() {
+			describe('emitting', function () {
+				beforeEach(function () {
 					module.injectDispatcher(new EventEmitter());
 				});
 
-				it('emits on simple emit (without module name)', function(done) {
-					module.dispatcher.on('test/test', function() {
+				it('emits on simple emit (without module name)', function (done) {
+					module.dispatcher.on('test/test', function () {
 						done();
 					}).emit('test');
 				});
 
-				it('emits on absolute emit (with module name)', function(done) {
-					module.dispatcher.on('test/test', function() {
+				it('emits on absolute emit (with module name)', function (done) {
+					module.dispatcher.on('test/test', function () {
 						done();
 					}).emit('test/test');
 				});
 
-				it('removes events on #clearEvents', function(done) {
+				it('removes events on #clearEvents', function (done) {
 					var ran = false;
-					module.dispatcher.on('test/test', function() {
+					module.dispatcher.on('test/test', function () {
 						if (!ran) {
 							ran = true;
 							done();
@@ -166,9 +159,9 @@ describe('Module class', function() {
 					module.dispatcher.emit('test/test');
 				});
 
-				it('removes listener', function(done) {
+				it('removes listener', function (done) {
 					var ran = false;
-					var list = function() {
+					var list = function () {
 						if (!ran) {
 							ran = true;
 							done();
@@ -181,14 +174,14 @@ describe('Module class', function() {
 					module.dispatcher.on('test/test', list).emit('test/test');
 				});
 
-				it('emits dispatchError on error in emit callback', function(done) {
-					module.dispatcher.on('dispatchError', function(err, event) {
+				it('emits dispatchError on error in emit callback', function (done) {
+					module.dispatcher.on('dispatchError', function (err, event) {
 						assert.equal(event, 'test/bad');
 						assert.equal(err, 'Error: Bad pony!');
 						done();
 					});
 
-					module.dispatcher.on('test/bad', function() {
+					module.dispatcher.on('test/bad', function () {
 						throw new Error('Bad pony!');
 					}).emit('test/bad');
 				});
@@ -196,8 +189,8 @@ describe('Module class', function() {
 		});
 
 
-		describe('#init', function() {
-			it('throws error if no config or dispatcher or already loaded', function() {
+		describe('#init', function () {
+			it('throws error if no config or dispatcher or already loaded', function () {
 				assert.throws(module.init.bind(module), 'No dispatcher given!');
 
 				module.injectDispatcher(new EventEmitter());
@@ -211,57 +204,57 @@ describe('Module class', function() {
 				assert.throws(module.init.bind(module), 'Module \'test\' is already loaded!');
 			});
 
-			it('throws error if syntax error in module', function() {
+			it('throws error if syntax error in module', function () {
 				module = MODULE.create('syntaxerror');
 				module.injectConfig({});
 				module.injectDispatcher(new EventEmitter());
-				assert.throws(function() {
+				assert.throws(function () {
 					module.init();
 				}, 'Failed loading context of \'syntaxerror\' module! podule is not defined');
 			});
 
-			it('throws error if syntax error in module init', function() {
+			it('throws error if syntax error in module init', function () {
 				module = MODULE.create('syntaxerrorinit');
 				module.injectConfig({});
 				module.injectDispatcher(new EventEmitter());
-				assert.throws(function() {
+				assert.throws(function () {
 					module.init();
 				}, 'Failed loading context of \'syntaxerrorinit\' module! derp is not defined');
 			});
 
-			it('initializes module (loads context)', function() {
+			it('initializes module (loads context)', function () {
 				module.injectConfig({});
 				module.injectDispatcher(new EventEmitter());
 
 				assert.isNull(module.context);
 
-				assert.doesNotThrow(function() {
+				assert.doesNotThrow(function () {
 					module.init();
 				});
 
 				assert.isTrue(module.loaded);
 				assert.isObject(module.context);
 				assert.equal(module.context.test, 'Pony');
-				assert.equal(module.test_init, 'Many ponies!');
+				assert.equal(module.testInit, 'Many ponies!');
 			});
 		});
 
-		describe('#halt', function() {
-			it('throws error if not loaded', function() {
+		describe('#halt', function () {
+			it('throws error if not loaded', function () {
 				assert.throws(module.halt.bind(module), 'Module \'test\' is not loaded!');
 			});
 
-			it('throws error if syntax error in module halt', function() {
+			it('throws error if syntax error in module halt', function () {
 				module = MODULE.create('syntaxerrorhalt');
 				module.injectConfig({});
 				module.injectDispatcher(new EventEmitter());
 				module.init();
-				assert.throws(function() {
+				assert.throws(function () {
 					module.halt();
 				}, 'Failed unloading context of \'syntaxerrorhalt\' module! derp is not defined');
 			});
 
-			it('halts the module (unloads context)', function() {
+			it('halts the module (unloads context)', function () {
 				module.injectConfig({});
 				module.injectDispatcher(new EventEmitter());
 				module.init();
@@ -269,23 +262,23 @@ describe('Module class', function() {
 				assert.isObject(module.context);
 				assert.isTrue(module.loaded);
 
-				assert.doesNotThrow(function() {
+				assert.doesNotThrow(function () {
 					module.halt();
 				});
 
 				assert.isFalse(module.loaded);
 				assert.isNull(module.context);
 
-				assert.equal(module.test_halt, 'No ponies!');
+				assert.equal(module.testHalt, 'No ponies!');
 			});
 
-			it('cleans the events from emitter', function() {
+			it('cleans the events from emitter', function () {
 				module.injectConfig({});
 				module.injectDispatcher(new EventEmitter());
 				module.init();
 
 				//i tests event cleaning
-				module.dispatcher.on('test/pony', function() {
+				module.dispatcher.on('test/pony', function () {
 					assert.isTrue(false, 'Derp, this one was supposed to not been called!');
 				});
 
@@ -296,23 +289,23 @@ describe('Module class', function() {
 			});
 		});
 
-		describe('#reload', function() {
-			beforeEach(function() {
+		describe('#reload', function () {
+			beforeEach(function () {
 				module.injectConfig({});
 				module.injectDispatcher(new EventEmitter());
 			});
-			it('throws error if module not loaded', function() {
+			it('throws error if module not loaded', function () {
 				assert.throws(module.reload.bind(module), 'Module \'test\' is not loaded!');
 			});
-			it('reloads the module (reloads context)', function() {
+			it('reloads the module (reloads context)', function () {
 				module.init();
 
-				assert.doesNotThrow(function() {
+				assert.doesNotThrow(function () {
 					module.reload();
 				});
 
-				assert.equal(module.test_halt, 'Reload No ponies!');
-				assert.equal(module.test_init, 'Reload Many ponies!');
+				assert.equal(module.testHalt, 'Reload No ponies!');
+				assert.equal(module.testInit, 'Reload Many ponies!');
 			});
 		});
 	});

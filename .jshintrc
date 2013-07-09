@@ -1,0 +1,32 @@
+{
+	"strict": true,
+	"globalstrict": true,
+
+	"bitwise": true,
+	"curly": true,
+	"eqeqeq": true,
+	"forin": true,
+	"immed": true,
+	"latedef": true,
+	"noarg": true,
+	"regexp": true,
+	"undef": true,
+	"unused": true,
+	"camelcase": true,
+
+	"newcap": true,
+	"noempty": true,
+	"nonew": true,
+	"trailing": true,
+	"quotmark": "single",
+
+	"sub": false,
+	"white": false,
+	"evil": false,
+	"regexdash": false,
+
+	"indent": 4,
+
+	"node": true,
+	"globals": { "BOT_DIR": false, "LIBS_DIR": false, "MODULES_DIR": false }
+}

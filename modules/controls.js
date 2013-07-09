@@ -3,8 +3,6 @@
  * other modules cas use it so simplify things
  */
 
-/* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 var logger = require(LIBS_DIR + '/logger');
@@ -14,7 +12,7 @@ var Action = require('./controls/action').Action;
 
 //trim some strings
 if (!String.prototype.trim) {
-	String.prototype.trim = function() {
+	String.prototype.trim = function () {
 		return this.replace(/^\s+|\s+$/g, '');
 	};
 }
@@ -29,13 +27,13 @@ function Controls(irc, actions, commands, config, dispatcher) {
 	Object.defineProperty(this, 'commandDelimiter', {
 		enumerable: true,
 		configurable: false,
-		get: function() {
+		get: function () {
 			return config.commandDelimiter;
 		}
 	});
 }
 
-Controls.prototype.addCommand = function(name, action, access) {
+Controls.prototype.addCommand = function (name, action, access) {
 	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 	if (typeof this.commands[name] !== 'undefined') {
 		throw new Error('Command \'' + name + '\' already exists!');
@@ -45,7 +43,7 @@ Controls.prototype.addCommand = function(name, action, access) {
 	return this;
 };
 
-Controls.prototype.addAction = function(name, action, regexp, access) {
+Controls.prototype.addAction = function (name, action, regexp, access) {
 	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 	if (typeof this.actions[name] !== 'undefined') {
 		throw new Error('Action \'' + name + '\' already exists!');
@@ -55,7 +53,7 @@ Controls.prototype.addAction = function(name, action, regexp, access) {
 	return this;
 };
 
-Controls.prototype.removeCommand = function(name) {
+Controls.prototype.removeCommand = function (name) {
 	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 	if (typeof this.commands[name] !== 'undefined') {
 		delete this.commands[name];
@@ -66,7 +64,7 @@ Controls.prototype.removeCommand = function(name) {
 	return this;
 };
 
-Controls.prototype.removeAction = function(name) {
+Controls.prototype.removeAction = function (name) {
 	name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 	if (typeof this.actions[name] !== 'undefined') {
 		delete this.actions[name];
@@ -77,28 +75,30 @@ Controls.prototype.removeAction = function(name) {
 	return this;
 };
 
-Controls.prototype.removeActions = function(list) {
+Controls.prototype.removeActions = function (list) {
 	if (!(list instanceof Array)) {
 		throw new Error('You need to pass Array as first argument!');
 	}
-	list.forEach(function(name) {
+	list.forEach(function (name) {
 		this.removeAction(name);
 	}, this);
 	return this;
 };
 
-Controls.prototype.removeCommands = function(list) {
+Controls.prototype.removeCommands = function (list) {
 	if (!(list instanceof Array)) {
 		throw new Error('You need to pass Array as first argument!');
 	}
-	list.forEach(function(name) {
+	list.forEach(function (name) {
 		this.removeCommand(name);
 	}, this);
 	return this;
 };
 
-Controls.prototype.parse = function(source, text) {
-	if (typeof text !== 'string' || text.length <= 0) return;
+Controls.prototype.parse = function (source, text) {
+	if (typeof text !== 'string' || text.length <= 0) {
+		return;
+	}
 
 	if (!source.channel) { //itz direct message
 		this.processAction(source, text.trim());
@@ -115,18 +115,18 @@ Controls.prototype.parse = function(source, text) {
 	}
 };
 
-Controls.prototype.processCommand = function(source, text) {
-	var args = text.match(/[^\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'/g).map(function(v) {
+Controls.prototype.processCommand = function (source, text) {
+	var args = text.match(/[^\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'/g).map(function (v) {
 		return v.replace(/\"|\'/g, '');
 	});
 	var command = args.shift();
 	//execute the command
-	return Object.keys(this.commands).some(function(name) {
-		if (this.commands[name] && command == this.commands[name].name) { //use == to not check type
+	return Object.keys(this.commands).some(function (name) {
+		if (this.commands[name] && command === this.commands[name].name) {
 			if (this.checkAccess(source, this.commands[name])) { //run the command only if the user has access
 				var execute = this.commands[name].action,
 					dispatcher = this.dispatcher;
-				process.nextTick(function() {
+				process.nextTick(function () {
 					logger.debug('Processing Command \'' + name + '\'');
 					execute(source, args, text, command);
 					dispatcher.emit('controls/command', name, source, args, text, command);
@@ -141,17 +141,17 @@ Controls.prototype.processCommand = function(source, text) {
 	}, this);
 };
 
-Controls.prototype.processAction = function(source, text) {
+Controls.prototype.processAction = function (source, text) {
 	//proces all actions that triggers rule
 	var found = false;
-	Object.keys(this.actions).forEach(function(name) {
+	Object.keys(this.actions).forEach(function (name) {
 		if (this.actions[name]) {
 			var args = text.match(this.actions[name].rule);
 			if (args !== null) {
 				if (this.checkAccess(source, this.actions[name])) { //run the action only if the user has access
 					var execute = this.actions[name].action,
 						dispatcher = this.dispatcher;
-					process.nextTick(function() {
+					process.nextTick(function () {
 						logger.debug('Processing Action \'' + name + '\'');
 						execute(source, args, text);
 						dispatcher.emit('controls/action', name, source, args, text);
@@ -167,7 +167,7 @@ Controls.prototype.processAction = function(source, text) {
 	return found;
 };
 
-Controls.prototype.checkAccess = function(source, CorA) {
+Controls.prototype.checkAccess = function (source, CorA) {
 	//allow access if no rule
 	if (!CorA.access) {
 		return true;
@@ -180,9 +180,9 @@ Controls.prototype.checkAccess = function(source, CorA) {
 
 	//array means list of allowed groups
 	if (CorA.access instanceof Array) {
-		return CorA.access.some(function(name) {
+		return CorA.access.some(function (name) {
 			if (this.config.groups[name]) {
-				return this.config.groups[name].some(function(user) {
+				return this.config.groups[name].some(function (user) {
 					return source.toString().match(user) !== null;
 				});
 			}
@@ -194,7 +194,7 @@ Controls.prototype.checkAccess = function(source, CorA) {
 	return source.toString().match(CorA.access) !== null;
 };
 
-module.exports.init = function(reload) {
+module.exports.init = function (reload) {
 	if (!reload) {
 		this.actions = {};
 		this.commands = {};
@@ -214,7 +214,7 @@ module.exports.init = function(reload) {
 		Object.defineProperty(this, 'commandDelimiter', {
 			enumerable: true,
 			configurable: false,
-			get: function() {
+			get: function () {
 				return module.config.commandDelimiter;
 			}
 		});
@@ -234,28 +234,32 @@ module.exports.init = function(reload) {
 	}
 
 	var proto = require(LIBS_DIR + '/module').Module.prototype;
-	proto.addCommand = function(name) {
+	proto.addCommand = function (name) {
 		module.controls.addCommand.apply(module.controls, arguments);
-		if (typeof module.moduleCommands[this.name] === 'undefined') module.moduleCommands[this.name] = {};
+		if (typeof module.moduleCommands[this.name] === 'undefined') {
+			module.moduleCommands[this.name] = {};
+		}
 		module.moduleCommands[this.name][name] = name;
 		return this;
 	};
-	proto.addAction = function(name) {
+	proto.addAction = function (name) {
 		module.controls.addAction.apply(module.controls, arguments);
-		if (typeof module.moduleActions[this.name] === 'undefined') module.moduleActions[this.name] = {};
+		if (typeof module.moduleActions[this.name] === 'undefined') {
+			module.moduleActions[this.name] = {};
+		}
 		module.moduleActions[this.name][name] = name;
 		return this;
 	};
-	proto.removeCommand = function() {
+	proto.removeCommand = function () {
 		module.controls.removeCommand.apply(module.controls, arguments);
 		return this;
 	};
-	proto.removeAction = function() {
+	proto.removeAction = function () {
 		module.controls.removeAction.apply(module.controls, arguments);
 		return this;
 	};
 
-	this.addCommand = this.addAction = function() {
+	this.addCommand = this.addAction = function () {
 		throw new Error('Deprecated! Dont use \'controls\' module directly!');
 	};
 
@@ -263,7 +267,7 @@ module.exports.init = function(reload) {
 
 	function clean(name) {
 		if (typeof module.moduleActions[name] !== 'undefined') {
-			Object.keys(module.moduleActions[name]).forEach(function(action) {
+			Object.keys(module.moduleActions[name]).forEach(function (action) {
 				if (typeof module.actions[action] !== 'undefined') {
 					module.controls.removeAction(action);
 				}
@@ -271,7 +275,7 @@ module.exports.init = function(reload) {
 			delete module.moduleActions[name];
 		}
 		if (typeof module.moduleCommands[name] !== 'undefined') {
-			Object.keys(module.moduleCommands[name]).forEach(function(command) {
+			Object.keys(module.moduleCommands[name]).forEach(function (command) {
 				if (typeof module.commands[command] !== 'undefined') {
 					module.controls.removeCommand(command);
 				}
@@ -286,7 +290,7 @@ module.exports.init = function(reload) {
 	this.dispatcher.on('irc/PRIVMSG', this.controls.parse.bind(this.controls)).on('irc/NOTICE', this.controls.parse.bind(this.controls));
 };
 
-module.exports.halt = function() {
+module.exports.halt = function () {
 	var proto = require(LIBS_DIR + '/module').Module.prototype;
 	delete proto.addCommand;
 	delete proto.addAction;

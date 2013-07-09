@@ -2,8 +2,6 @@
  * Dice
  */
 
-/* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 function Dice(config) {
@@ -11,7 +9,7 @@ function Dice(config) {
 	this.config = config;
 }
 
-Dice.prototype.roll = function(dice, faces) {
+Dice.prototype.roll = function (dice, faces) {
 	var sum = 0,
 		results = [];
 	dice = Math.max(dice, this.config.minDices);
@@ -27,7 +25,7 @@ Dice.prototype.roll = function(dice, faces) {
 	return results.join(', ') + (dice > 1 ? ' | SUM = ' + sum : '');
 };
 
-Dice.prototype.reply = function(source, args) {
+Dice.prototype.reply = function (source, args) {
 	var dice = ['1d6', 1, 6]; //default 1d6 dice
 	if (args[0]) {
 		dice = args[0].match(/(\d+)d(\d+)/);
@@ -62,20 +60,36 @@ Dice.prototype.reply = function(source, args) {
 	source.mention('you rolled: ' + this.roll(dice[1], dice[2]));
 };
 
-exports.init = function() {
-	if (typeof this.config.maxDices !== 'number') this.config.maxDices = 20;
-	if (typeof this.config.minDices !== 'number') this.config.minDices = 1;
-	if (typeof this.config.maxFaces !== 'number') this.config.maxFaces = 100;
-	if (typeof this.config.minFaces !== 'number') this.config.minFaces = 1;
+exports.init = function () {
+	if (typeof this.config.maxDices !== 'number') {
+		this.config.maxDices = 20;
+	}
+	if (typeof this.config.minDices !== 'number') {
+		this.config.minDices = 1;
+	}
+	if (typeof this.config.maxFaces !== 'number') {
+		this.config.maxFaces = 100;
+	}
+	if (typeof this.config.minFaces !== 'number') {
+		this.config.minFaces = 1;
+	}
 
 	//the sides will stop between 1-100
-	if (this.config.minFaces < 1) this.config.minFaces = 1;
-	if (this.config.maxFaces > 100) this.config.maxFaces = 100;
+	if (this.config.minFaces < 1) {
+		this.config.minFaces = 1;
+	}
+	if (this.config.maxFaces > 100) {
+		this.config.maxFaces = 100;
+	}
 
 	//throw atleast one!
-	if (this.config.minDices < 1) this.config.minDices = 1;
+	if (this.config.minDices < 1) {
+		this.config.minDices = 1;
+	}
 	//not realy sure if somepony want to throw more than 1k dices
-	if (this.config.maxDices > 1000) this.config.maxDices = 1000;
+	if (this.config.maxDices > 1000) {
+		this.config.maxDices = 1000;
+	}
 
 	this.dice = new Dice(this.config);
 

@@ -1,5 +1,3 @@
-/* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 function Action(name, action, rule, access) {
@@ -15,6 +13,6 @@ function Action(name, action, rule, access) {
 
 module.exports.Action = Action;
 
-module.exports.create = function(name, action, rule, access) {
+module.exports.create = function (name, action, rule, access) {
 	return new Action(name, action, rule, access);
 };

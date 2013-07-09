@@ -2,8 +2,6 @@
  * Yayponies.eu torrent magnet finder
  */
 
-/* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 var cheerio = require('cheerio'),
@@ -72,7 +70,7 @@ var scanPages = [
 	['1st1.php', 1], //1080 hdtv
 	['1st2.php', 2], //1080 hdtv
 	['1st3.php', 3] //1080 hdtv
-	];
+];
 
 var episodes = [];
 
@@ -81,7 +79,7 @@ function scanPage(page, season, callback) {
 		episodes[season - 1] = [];
 	}
 
-	request(yayPoniesMirror + page, function(error, response, body) {
+	request(yayPoniesMirror + page, function (error, response, body) {
 		if (error || response.statusCode !== 200) {
 			callback();
 			return;
@@ -94,7 +92,7 @@ function scanPage(page, season, callback) {
 			table = $(table[0]);
 		}
 
-		table.find('tr').each(function() {
+		table.find('tr').each(function () {
 			var text = $(this).text();
 			var episode = 0;
 			var type = '';
@@ -126,7 +124,7 @@ function scanPage(page, season, callback) {
 				}
 
 				if (episode && type) {
-					$(this).find('a[href*=magnet]').each(function() {
+					$(this).find('a[href*=magnet]').each(function () {
 						var magnet = $(this).attr('href').match(/magnet:\?xt=urn:btih:(.*)/);
 						if (magnet && $(this).text()) {
 							if (typeof episodes[season - 1][episode - 1] === 'undefined') {
@@ -163,9 +161,9 @@ function countEpisodes() {
 
 function refreshEpisodes(source) {
 	var scanCount = scanPages.length;
-	scanPages.forEach(function(page, i) {
-		setTimeout(function() {
-			scanPage(page[0], page[1], function() {
+	scanPages.forEach(function (page, i) {
+		setTimeout(function () {
+			scanPage(page[0], page[1], function () {
 				scanCount--;
 				if (scanCount <= 0 && source) {
 					var count = countEpisodes();
@@ -238,7 +236,7 @@ function getPonies(source, arg) {
 	}
 }
 
-exports.init = function(reload) {
+exports.init = function () {
 	this.addCommand('ponies', getPonies);
 	this.addCommand('pony', getPonies);
 	this.addCommand('yayponies', getPonies);
@@ -246,15 +244,15 @@ exports.init = function(reload) {
 	this.addAction('refresh', refreshEpisodes, /^refresh$/, ['owner', 'operators']);
 
 	//first load eps
-	process.nextTick(function() {
+	process.nextTick(function () {
 		refreshEpisodes(false);
 	});
 	//then refresh every day
-	this._refresh = setInterval(function() {
+	this._refresh = setInterval(function () {
 		refreshEpisodes(false);
 	}, 86400000);
 };
 
-exports.halt = function() {
+exports.halt = function () {
 	clearInterval(this._refresh);
 };

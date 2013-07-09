@@ -2,8 +2,6 @@
  * Countdown airing time of tv series
  */
 
-/* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 var time = require('time');
@@ -14,14 +12,14 @@ function TvCountDownFactory(what, serial, callback) {
     http.get({
         host: 'tvcountdown.com',
         path: '/s/' + what
-    }, function(res) {
+    }, function (res) {
         var data = '';
         res.setEncoding('utf8');
-        res.on('data', function(chunk) {
+        res.on('data', function (chunk) {
             if (chunk) {
                 data += chunk;
             }
-        }).on('end', function() {
+        }).on('end', function () {
             var dnow = new time.Date().getTime();
             var countdowndates = data.match(/var[ ]+timestamp[ ]?=[ ]?\[\'(.*)\'\]\;/);
             var episodenames = data.match(/var[ ]+episode[ ]?=[ ]?\[\'(.*)\'\]\;/);
@@ -52,7 +50,7 @@ function TvCountDownFactory(what, serial, callback) {
 
             callback(new Error('i did not found next episode' + (serial ? ' of \'' + serial + '\'' : '') + '!'), what);
         });
-    }).on('error', function(e) {
+    }).on('error', function () {
         callback(new Error('i got error while counting down!'), what);
     });
 }
@@ -61,14 +59,14 @@ function MLPCountDownFactory(what, serial, callback) {
     http.get({
         host: 'ponycountdown.com',
         path: '/api.js'
-    }, function(res) {
+    }, function (res) {
         var data = '';
         res.setEncoding('utf8');
-        res.on('data', function(chunk) {
+        res.on('data', function (chunk) {
             if (chunk) {
                 data += chunk;
             }
-        }).on('end', function() {
+        }).on('end', function () {
             var dnow = new time.Date().getTime();
             var ponycountdowndates = data.match(new RegExp('([A-Za-z]+)([ \n\r\t]+)([0-9]+)([,]+)([ \n\r\t]+)([0-9]+)([ \n\r\t]+)([0-9]+)([:]+)([0-9]+)([:]+)([0-9]+)([ \n\r\t]?)([A-Z0-9+]*)([ \n\r\t]?)([)(A-Z]*)', 'g'));
             if (ponycountdowndates !== null) {
@@ -90,7 +88,7 @@ function MLPCountDownFactory(what, serial, callback) {
 
             callback(new Error('no next pony episode found!'), what);
         });
-    }).on('error', function(e) {
+    }).on('error', function () {
         callback(new Error('i got error while counting counting my little ponies!'), what);
     });
 }
@@ -104,7 +102,7 @@ function Countdown(config) {
     };
 }
 
-Countdown.prototype.formatCountdown = function(airing, serial, episode, now) {
+Countdown.prototype.formatCountdown = function (airing, serial, episode, now) {
     if (airing === 0) {
         return 'i have no idea when next episode ' + (serial ? 'of \'' + serial + '\' ' : '') + 'airs';
     }
@@ -120,13 +118,13 @@ Countdown.prototype.formatCountdown = function(airing, serial, episode, now) {
 
     var returnstr = 'next episode ' + (serial ? 'of \'' + serial + (episode ? ' - ' + episode : '') + '\' ' : '') + 'airs in ';
     if (days) {
-        returnstr += (days) + ' day' + (days == 1 ? '' : 's') + ', ' + (hours) + ' hour' + (hours == 1 ? '' : 's') + ' and ' + (minutes) + ' minute' + (minutes == 1 ? '' : 's');
+        returnstr += (days) + ' day' + (days === 1 ? '' : 's') + ', ' + (hours) + ' hour' + (hours === 1 ? '' : 's') + ' and ' + (minutes) + ' minute' + (minutes === 1 ? '' : 's');
     } else if (hours) {
-        returnstr += (hours) + ' hour' + (hours == 1 ? '' : 's') + ' and ' + (minutes) + ' minute' + (minutes == 1 ? '' : 's');
+        returnstr += (hours) + ' hour' + (hours === 1 ? '' : 's') + ' and ' + (minutes) + ' minute' + (minutes === 1 ? '' : 's');
     } else if (minutes) {
-        returnstr += (minutes) + ' minute' + (minutes == 1 ? '' : 's') + ' and ' + (seconds) + ' second' + (seconds == 1 ? '' : 's');
+        returnstr += (minutes) + ' minute' + (minutes === 1 ? '' : 's') + ' and ' + (seconds) + ' second' + (seconds === 1 ? '' : 's');
     } else if (seconds) {
-        returnstr += (seconds) + ' second' + (seconds == 1 ? '' : 's');
+        returnstr += (seconds) + ' second' + (seconds === 1 ? '' : 's');
     } else {
         returnstr += 'less than a second';
     }
@@ -136,7 +134,7 @@ Countdown.prototype.formatCountdown = function(airing, serial, episode, now) {
     return returnstr;
 };
 
-Countdown.prototype.getSerial = function(word) {
+Countdown.prototype.getSerial = function (word) {
     if (typeof word !== 'string') {
         return false;
     }
@@ -153,7 +151,7 @@ Countdown.prototype.getSerial = function(word) {
     return alias;
 };
 
-Countdown.prototype.getSlug = function(word) {
+Countdown.prototype.getSlug = function (word) {
     if (typeof word !== 'string') {
         return false;
     }
@@ -161,11 +159,11 @@ Countdown.prototype.getSlug = function(word) {
     return word.toLowerCase().replace(/[^a-z0-9_]+/g, '-').replace(/^-|-$/g, '');
 };
 
-Countdown.prototype.createReplyWithCountdown = function(source, serial) {
+Countdown.prototype.createReplyWithCountdown = function (source, serial) {
     var cd = this;
 
     if (serial instanceof Array) {
-        var broadcast = function() {
+        var broadcast = function () {
             var w = cd.getSerial(serial.pop());
 
             if (w) {
@@ -209,7 +207,7 @@ Countdown.prototype.createReplyWithCountdown = function(source, serial) {
     }
 };
 
-Countdown.prototype.respond = function(source, error, what, airing, name, episode, now) {
+Countdown.prototype.respond = function (source, error, what, airing, name, episode, now) {
     if (error) {
         source.mention(typeof error === 'string' ? error : error instanceof Error ? error.message : 'no next episode found!');
         return;
@@ -229,7 +227,7 @@ Countdown.prototype.respond = function(source, error, what, airing, name, episod
     source.mention(this.formatCountdown(this.cache[what].date, this.cache[what].name, this.cache[what].episode, now));
 };
 
-Countdown.prototype.command = function(source, args, text, command) {
+Countdown.prototype.command = function (source, args, text, command) {
     var word = null;
 
     if (args.length > 0) {
@@ -250,7 +248,7 @@ Countdown.prototype.command = function(source, args, text, command) {
     }
 };
 
-Countdown.prototype.actions = function(source, args) {
+Countdown.prototype.actions = function (source, args) {
     var mode = args[3];
     if (mode === 'alias' || mode === 'default') {
         if (args[5]) {
@@ -280,7 +278,7 @@ Countdown.prototype.actions = function(source, args) {
     }
 };
 
-exports.init = function() {
+exports.init = function () {
     if (typeof this.config.checkEvery !== 'number') {
         this.config.checkEvery = 3600000;
     }

@@ -1,10 +1,8 @@
-/* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 //trim some strings
 if (!String.prototype.trim) {
-	String.prototype.trim = function() {
+	String.prototype.trim = function () {
 		return this.replace(/^\s+|\s+$/g, '');
 	};
 }
@@ -41,11 +39,11 @@ function Server(host, port, ssl) {
 	this.lastMsg = '';
 
 	this.socket = null;
-	this.write = function() {};
-	this.end = function() {};
+	this.write = function () {};
+	this.end = function () {};
 }
 
-Server.prototype.valueOf = Server.prototype.toString = function() {
+Server.prototype.valueOf = Server.prototype.toString = function () {
 	return (this.secured ? 'tls://' : 'tcp://') + this.hostname + ':' + this.port;
 };
 

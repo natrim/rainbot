@@ -1,11 +1,7 @@
-/* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 //check main entry point path
-if (!global.BOT_DIR) throw new Error('Wrong entry point! No \'BOT_DIR\' defined!');
-if (!global.LIBS_DIR) throw new Error('Wrong entry point! No \'LIBS_DIR\' defined!');
-if (!global.MODULES_DIR) throw new Error('Wrong entry point! No \'MODULES_DIR\' defined!');
+require(LIBS_DIR + '/helpers').checkGlobals();
 
 var MODULE = require(LIBS_DIR + '/module').Module;
 var logger = require(LIBS_DIR + '/logger');
@@ -33,7 +29,7 @@ function ModuleManager(dispatcher, config) {
 		value: {}
 	});
 
-	Object.defineProperty(this, '_protected_modules', {
+	Object.defineProperty(this, '_protectedModules', {
 		writable: false,
 		configurable: false,
 		enumerable: false,
@@ -75,18 +71,24 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function load(na
 		error = new Error('Module \'' + name + '\' is already loaded!');
 	} else {
 		try {
+			//this._process = require('child_process').fork(this.filename);
 			module = new MODULE(name);
-			module.require = this.__require.bind(this);
+			module.require = this._require.bind(this);
 		} catch (e) {
 			error = new Error('Error happened during module \'' + name + '\' load: ' + e.message);
 			module = null;
 		}
 		if (!error) {
-			if (typeof module.injectConfig === 'function') module.injectConfig(this.config);
-			if (typeof module.injectDispatcher === 'function') module.injectDispatcher(this.dispatcher);
-
+			if (typeof module.injectConfig === 'function') {
+				module.injectConfig(this.config);
+			}
+			if (typeof module.injectDispatcher === 'function') {
+				module.injectDispatcher(this.dispatcher);
+			}
 			try {
-				if (typeof module.init === 'function') module.init();
+				if (typeof module.init === 'function') {
+					module.init();
+				}
 			} catch (e) {
 				error = new Error('Error happened during module \'' + name + '\' init: ' + e.message);
 				module = null;
@@ -101,7 +103,9 @@ ModuleManager.prototype.load = ModuleManager.prototype.enable = function load(na
 
 	logger.debug('Load of \'' + name + '\' module' + (error ? ' failed with error: ' + error.message : ' is success') + '.');
 
-	if (error) throw error;
+	if (error) {
+		throw error;
+	}
 	return this;
 };
 
@@ -113,13 +117,15 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function unlo
 	if (typeof name !== 'string' || name === '') {
 		error = new Error('Please enter a name!');
 	} else {
-		if (typeof this._protected_modules[name] !== 'undefined' && this._protected_modules[name] === true) {
+		if (typeof this._protectedModules[name] !== 'undefined' && this._protectedModules[name] === true) {
 			error = new Error('Module \'' + name + '\' is protected!');
 		} else if (this.exists(name)) {
 			var module = this.get(name);
 
 			try {
-				if (typeof module.halt === 'function') module.halt();
+				if (typeof module.halt === 'function') {
+					module.halt();
+				}
 			} catch (e) {
 				error = new Error('Error happened during module \'' + name + '\' halt: ' + e.message);
 			}
@@ -135,7 +141,9 @@ ModuleManager.prototype.unload = ModuleManager.prototype.disable = function unlo
 
 	logger.debug('Unload of \'' + name + '\' module' + (error ? ' failed with error: ' + error.message : ' is success') + '.');
 
-	if (error) throw error;
+	if (error) {
+		throw error;
+	}
 	return this;
 };
 
@@ -169,7 +177,9 @@ ModuleManager.prototype.reload = function reload(name) {
 
 	logger.debug('Reload of \'' + name + '\' module' + (error ? ' failed with error: ' + error.message : ' is success') + '.');
 
-	if (error) throw error;
+	if (error) {
+		throw error;
+	}
 	return this;
 };
 
@@ -188,7 +198,7 @@ ModuleManager.prototype.require = function require(name) {
  * @param  String name name of module to return
  * @return Object returns module or null
  */
-ModuleManager.prototype.__require = function __require(name) {
+ModuleManager.prototype._require = function _require(name) {
 	try {
 		return this.require(name);
 	} catch (e) {
@@ -207,7 +217,7 @@ ModuleManager.prototype.protect = function protect(name, prot) {
 		prot = true;
 	}
 
-	this._protected_modules[name] = prot ? true : false;
+	this._protectedModules[name] = prot ? true : false;
 
 	return this;
 };

@@ -1,6 +1,7 @@
 /*
 	BOOTSTRAP FOR TESTS
  */
+
 var path = require('path');
 
 //set main entry point path

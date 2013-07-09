@@ -2,13 +2,11 @@
  * IRC file log
  */
 
-/* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
 var fs = require('fs');
 
-exports.init = function(reload) {
+exports.init = function (reload) {
 	if (typeof this.config.logfile === 'undefined' || this.config.logfile === '') {
 		return;
 	}
@@ -21,15 +19,15 @@ exports.init = function(reload) {
 	}
 
 	var m = this;
-	this.dispatcher.on('irc/RECV', function(msg) {
+	this.dispatcher.on('irc/RECV', function (msg) {
 		m.logfile.write(Math.floor(Date.now() / 1000) + ' ' + msg + '\n');
 	});
-	this.dispatcher.on('irc/SEND', function(msg) {
+	this.dispatcher.on('irc/SEND', function (msg) {
 		m.logfile.write(Math.floor(Date.now() / 1000) + ' ' + msg + '\n');
 	});
 };
 
-exports.halt = function(reload) {
+exports.halt = function (reload) {
 	if (!reload && this.logfile) {
 		this.logfile.end();
 	}

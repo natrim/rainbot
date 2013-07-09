@@ -2,15 +2,13 @@
  * Some basic commands for bot
  */
 
-/* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
-module.exports.init = function() {
+module.exports.init = function () {
 	var dispatcher = this.dispatcher;
 	var irc = this.require('irc');
 
-	this.addAction('quit', function(source, args) {
+	this.addAction('quit', function (source, args) {
 		if (!irc.connected) {
 			source.respond('I\'m not connected to server!');
 			return;
@@ -20,7 +18,7 @@ module.exports.init = function() {
 		irc.quit(args[1]);
 	}, /^quit[ ]?(.*)$/i, ['owner']);
 
-	this.addAction('part', function(source, args) {
+	this.addAction('part', function (source, args) {
 		//dispatcher.on('irc/PART', ok);
 		//is not needed as nothing can stop us from parting
 
@@ -41,7 +39,7 @@ module.exports.init = function() {
 		}
 	}, /^part([ ]+(.*)|)$/i, ['owner', 'operators']);
 
-	this.addAction('join', function(source, args) {
+	this.addAction('join', function (source, args) {
 		if (!irc.connected) {
 			source.respond('I\'m not connected to server!');
 			return;
@@ -50,19 +48,19 @@ module.exports.init = function() {
 		if (chans !== null) {
 			source.respond('okey, ' + source.nick + '! Lemme see what goes in \'' + chans.join('\', \'') + '\'.');
 
-			var fail = function(s, args) {
+			var fail = function (s, args) {
 				source.mention('i cannot go to \'' + args[1] + '\'! Because ' + args[2]);
 				clean();
 			};
-			var ok = function(s, args) {
+			var ok = function (s, args) {
 				if (s.nick === irc.currentNick) {
 					source.respond('*ding*, i am now in \'' + args[0] + '\' too!');
 					clean();
 				}
 			};
 
-			var timer = setTimeout(clean, 5000);
-			var clean = function() {
+			var timer;
+			var clean = function () {
 				dispatcher.off('irc/405', fail);
 				dispatcher.off('irc/471', fail);
 				dispatcher.off('irc/473', fail);
@@ -71,6 +69,7 @@ module.exports.init = function() {
 				dispatcher.off('irc/JOIN', ok);
 				clearTimeout(timer);
 			};
+			timer = setTimeout(clean, 5000);
 
 			irc.join.apply(irc, chans);
 
@@ -85,7 +84,7 @@ module.exports.init = function() {
 		}
 	}, /^join([ ]+(.*)|)$/i, ['owner', 'operators']);
 
-	this.addAction('nick', function(source, args) {
+	this.addAction('nick', function (source, args) {
 		if (!irc.connected) {
 			source.respond('I\'m not connected to server!');
 			return;
@@ -94,27 +93,27 @@ module.exports.init = function() {
 		if (nick) {
 			source.respond('okey, ' + source.nick + '! Lemmy try this new name.');
 
-			var fail = function() {
+			var fail = function () {
 				source.mention('i failed in renaming myself!');
 				clean();
 			};
-			var inuse = function() {
+			var inuse = function () {
 				source.mention('i failed, somepony uses that name already!');
 				clean();
 			};
-			var toofast = function() {
+			var toofast = function () {
 				source.mention('i failed, they told me i need to wait!');
 				clean();
 			};
-			var ok = function(s) {
+			var ok = function (s) {
 				if (s.nick === irc.lastNick) {
 					source.mention('success! Do u like my new name?');
 					clean();
 				}
 			};
 
-			var timer = setTimeout(clean, 5000);
-			var clean = function() {
+			var timer;
+			var clean = function () {
 				dispatcher.off('irc/430', fail);
 				dispatcher.off('irc/431', fail);
 				dispatcher.off('irc/432', fail);
@@ -123,6 +122,7 @@ module.exports.init = function() {
 				dispatcher.off('irc/NICK', ok);
 				clearTimeout(timer);
 			};
+			timer = setTimeout(clean, 5000);
 
 			irc.nick(nick);
 
@@ -141,7 +141,7 @@ module.exports.init = function() {
 
 	function actionList(source) {
 		var actions = [];
-		Object.keys(controls.actions).forEach(function(n) {
+		Object.keys(controls.actions).forEach(function (n) {
 			if (this.controls.checkAccess(source, this.actions[n])) {
 				actions.push(n);
 			}
@@ -158,7 +158,7 @@ module.exports.init = function() {
 		}
 
 		var commands = [];
-		Object.keys(controls.commands).forEach(function(n) {
+		Object.keys(controls.commands).forEach(function (n) {
 			if (this.controls.checkAccess(source, this.commands[n])) {
 				commands.push(n);
 			}
@@ -171,37 +171,41 @@ module.exports.init = function() {
 
 	//get moduleManager and bot and save it for the commands
 	var module = this;
-	this.dispatcher.on('init', function(bot) {
+	this.dispatcher.on('init', function (bot) {
 		module.mm = bot.modules;
 		module.bot = bot;
 	});
 
-	this.addAction('config save', function(source) {
+	this.addAction('config save', function (source) {
 		if (module.bot._configFile) {
 			module.bot.saveConfig(module.bot._configFile);
-			if (source.toString() !== 'ItzAInternallPonyShell') source.respond('Config saved!');
+			if (source.toString() !== 'ItzAInternallPonyShell') {
+				source.respond('Config saved!');
+			}
 		} else {
 			source.respond('Config cannot be saved!');
 		}
 	}, /^config save$/i);
 
-	this.addAction('config load', function(source) {
+	this.addAction('config load', function (source) {
 		if (module.bot._configFile) {
 			module.bot.loadConfig(module.bot._configFile);
-			if (source.toString() !== 'ItzAInternallPonyShell') source.respond('Config (re)loaded!');
+			if (source.toString() !== 'ItzAInternallPonyShell') {
+				source.respond('Config (re)loaded!');
+			}
 		} else {
 			source.respond('Config cannot be loaded!');
 		}
 	}, /^config load$/i);
 
-	this.addAction('lsmod', function(source) {
+	this.addAction('lsmod', function (source) {
 		source.mention('i have these modules active: ' + module.mm.getModules().join(', '));
 	}, /^lsmod|modules$/i, ['owner']);
 
-	this.addAction('reload', function(source, args) {
+	this.addAction('reload', function (source, args) {
 		var modules = args[1].match(/\w+/gi);
 		source.respond('okey, ' + source.nick + '! Gimmie a sec to tune my element to it.');
-		modules.forEach(function(name) {
+		modules.forEach(function (name) {
 			try {
 				module.mm.reload(name);
 				source.respond('module \'' + name + '\' reloaded!');
@@ -211,10 +215,10 @@ module.exports.init = function() {
 		});
 	}, /^reload[ ]+(.*)$/i, ['owner']);
 
-	this.addAction('load', function(source, args) {
+	this.addAction('load', function (source, args) {
 		var modules = args[1].match(/\w+/gi);
 		source.respond('okey, ' + source.nick + '! I\'m really eager to learn new things!');
-		modules.forEach(function(name) {
+		modules.forEach(function (name) {
 			try {
 				module.mm.load(name);
 				source.respond('module \'' + name + '\' loaded!');
@@ -224,10 +228,10 @@ module.exports.init = function() {
 		});
 	}, /^load[ ]+(.*)$/i, ['owner']);
 
-	this.addAction('unload', function(source, args) {
+	this.addAction('unload', function (source, args) {
 		var modules = args[1].match(/\w+/gi);
 		source.respond('okey, ' + source.nick + '! Let\'s throw it away!');
-		modules.forEach(function(name) {
+		modules.forEach(function (name) {
 			try {
 				module.mm.unload(name);
 				source.respond('module \'' + name + '\' unloaded!');
@@ -238,7 +242,7 @@ module.exports.init = function() {
 	}, /^unload[ ]+(.*)$/i, ['owner']);
 
 
-	this.addAction('say', function(source, args) {
+	this.addAction('say', function (source, args) {
 		if (!irc.connected) {
 			source.respond('I\'m not connected to server!');
 			return;
@@ -248,29 +252,30 @@ module.exports.init = function() {
 		if (msg.trim() === '') {
 			source.respond('you probadly should tell me what i should tell to \'' + target + '\'');
 		} else {
-			var resendreply = function(s, text) {
+			var resendreply = function (s, text) {
 				if (target === s.nick) {
 					source.respond(target + ' REPLY: ' + text);
 					clean();
 				}
 			};
-			var wrongnick = function(s, argv) {
+			var wrongnick = function (s, argv) {
 				source.respond('Nick or channel with name \'' + argv[1] + '\' was not found.');
 				clean();
 			};
-			var noExternal = function(s, argv) {
+			var noExternal = function (s, argv) {
 				source.respond('Channel \'' + argv[1] + '\' has blocked external messages.');
 				clean();
 			};
 
-			var timer = setTimeout(clean, 5000);
-			var clean = function() {
+			var timer;
+			var clean = function () {
 				dispatcher.off('irc/PRIVMSG', resendreply);
 				dispatcher.off('irc/NOTICE', resendreply);
 				dispatcher.off('irc/401', wrongnick);
 				dispatcher.off('irc/404', noExternal);
 				clearTimeout(timer);
 			};
+			timer = setTimeout(clean, 5000);
 
 			//say it
 			if (irc.privMsg(target, msg)) {
@@ -285,25 +290,26 @@ module.exports.init = function() {
 	}, /^(say|tell)[ ]+(#?[\w\_\-\\\[\]\{\}\^\`\|]+)[ ]*(.*)$/i, ['owner', 'operators']);
 
 	//pass the command
-	this.addAction('command', function(source, args) {
+	this.addAction('command', function (source, args) {
 		if (!irc.connected) {
 			source.respond('I\'m not connected to server!');
 			return;
 		}
 
 		if (args[1]) {
-			var wrongcommand = function(s, args) {
+			var wrongcommand = function (s, args) {
 				if (args[0] === irc.currentNick) {
 					source.mention('my pony powers tells me that command \'' + args[1] + '\' is unknown!');
 					clean();
 				}
 			};
 
-			var timer = setTimeout(clean, 5000);
-			var clean = function() {
+			var timer;
+			var clean = function () {
 				dispatcher.off('irc/421', wrongcommand);
 				clearTimeout(timer);
 			};
+			timer = setTimeout(clean, 5000);
 
 			irc.irc.send(args[1]);
 
@@ -315,10 +321,10 @@ module.exports.init = function() {
 		}
 	}, /^command[ ]+(.*)/i, ['owner']);
 
-	this.addAction('update', function(source) {
+	this.addAction('update', function (source) {
 		source.action('is fetching updates...');
 
-		require('child_process').exec('cd ' + BOT_DIR + ' && git pull', function(error, stdout, stderr) {
+		require('child_process').exec('cd ' + BOT_DIR + ' && git pull', function (error, stdout) {
 			if (error) {
 				source.respond('Update failed!');
 				return;
@@ -326,14 +332,16 @@ module.exports.init = function() {
 
 			var stdouts = stdout.replace(/\n$/, '').split('\n');
 			var message = stdouts.shift();
-			var updated_modules = [];
-			var updated_core = false;
+			var updatedModules = [];
+			var updatedCore = false;
 			var npm = false;
 			var config = false;
 			var uptodate = false;
 
 			if (message) {
-				if (message.match(/up\-to\-date/)) uptodate = true;
+				if (message.match(/up\-to\-date/)) {
+					uptodate = true;
+				}
 				source.respond(message);
 			} else {
 				source.respond('Update failed!');
@@ -341,14 +349,14 @@ module.exports.init = function() {
 			}
 
 			if (stdouts.length > 0) {
-				stdouts.forEach(function(value) {
+				stdouts.forEach(function (value) {
 					var tmp = value.match(/modules\/(.+)\.js/);
 					if (tmp) {
-						updated_modules.push(tmp[1]);
+						updatedModules.push(tmp[1]);
 					} else {
 						tmp = value.match(/app\.js|libs\//);
 						if (tmp) {
-							updated_core = true;
+							updatedCore = true;
 						} else {
 							tmp = value.match(/package\.json/);
 							if (tmp) {
@@ -364,7 +372,7 @@ module.exports.init = function() {
 				});
 			}
 
-			if (updated_core) {
+			if (updatedCore) {
 				source.respond('CORE was updated, please restart the bot! ... Eh, i mean\'t: release the pony!');
 			}
 
@@ -376,12 +384,12 @@ module.exports.init = function() {
 				source.respond('example-config.json was updated, please use check your configuration');
 			}
 
-			updated_modules = require(LIBS_DIR + '/helpers').unique(updated_modules);
-			if (updated_modules.length > 0) {
-				source.respond('Don\'t forget to reload updated modules: ' + updated_modules.join(', '));
+			updatedModules = require(LIBS_DIR + '/helpers').unique(updatedModules);
+			if (updatedModules.length > 0) {
+				source.respond('Don\'t forget to reload updated modules: ' + updatedModules.join(', '));
 			}
 
-			if (!updated_core && updated_modules.length <= 0 && !uptodate) {
+			if (!updatedCore && updatedModules.length <= 0 && !uptodate) {
 				source.respond('Nothing important has been updated.');
 			}
 		});

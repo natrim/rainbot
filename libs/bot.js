@@ -2,17 +2,14 @@
  * Rainbot main file
  */
 
-/* jslint node: true */
-/* global BOT_DIR, LIBS_DIR, MODULES_DIR */
 'use strict';
 
-//check main entry point path
-if (!global.BOT_DIR) global.BOT_DIR = require('path').resolve(__dirname, '..');
-if (!global.LIBS_DIR) global.LIBS_DIR = require('path').resolve(BOT_DIR, 'libs');
-if (!global.MODULES_DIR) global.MODULES_DIR = require('path').resolve(BOT_DIR, 'modules');
+var helpers = require(LIBS_DIR + '/helpers');
+
+//check main entry point path and resolve it
+helpers.checkGlobals(true);
 
 var logger = require(LIBS_DIR + '/logger');
-var helpers = require(LIBS_DIR + '/helpers');
 
 function Bot() {
 	//events
@@ -24,7 +21,7 @@ function Bot() {
 	var moduleManager = new(require(LIBS_DIR + '/moduleManager').ModuleManager)(dispatcher, config);
 
 	//load module on new listener
-	dispatcher.on('newListener', function(event, listener) {
+	dispatcher.on('newListener', function (event) {
 		var i, name;
 		if (((i = event.indexOf('/')) + 1) && (name = event.substr(0, i))) {
 			if (!moduleManager.exists(name)) {
@@ -45,10 +42,10 @@ function Bot() {
 	this.dispatcher = dispatcher;
 
 	//list of core modules
-	this._core_modules = ['irc', 'controls'];
+	this._coreModules = ['irc', 'controls'];
 
 	//protect the core modules from unload
-	this._core_modules.forEach(function(m) {
+	this._coreModules.forEach(function (m) {
 		moduleManager.protect(m, true);
 	});
 
@@ -60,20 +57,24 @@ function Bot() {
 	//bind to exit event of main process
 	var bot = this;
 	process.on('exit', function onExit() {
-		if (bot.__abort) return; //do nothing on abort
+		if (bot.__abort) {
+			return; //do nothing on abort
+		}
 		if (!bot.__halting) {
 			bot.__halting = true;
 			bot.emit('halt', bot);
 		}
 		bot.unloadModules();
-		if (bot.config.bot && bot.config.bot.autosave && bot._configFile) bot.saveConfig(bot._configFile);
+		if (bot.config.bot && bot.config.bot.autosave && bot._configFile) {
+			bot.saveConfig(bot._configFile);
+		}
 	});
 
 	//shutdown on ctrl+c gracefully
 	process.on('SIGINT', this.end.bind(this));
 
 	// This will override SIGTSTP and prevent the program from going to the background.
-	process.on('SIGTSTP', function() {});
+	process.on('SIGTSTP', function () {});
 }
 
 Bot.prototype.addListener = function addListener() {
@@ -116,7 +117,7 @@ Bot.prototype._setConfigWatch = function _setConfigWatch(file) {
 	var bot = this;
 	this._configWatch = fs.watch(BOT_DIR + '/' + file, {
 		persistent: false
-	}, function(event) {
+	}, function (event) {
 		if (event === 'change') {
 			try {
 				bot.loadConfig(file);
@@ -243,7 +244,7 @@ Bot.prototype.loadModules = function loadModules(modules) {
 	if (modules instanceof Array) {
 		var tmp = modules.slice(0);
 		modules = {};
-		tmp.forEach(function(v) {
+		tmp.forEach(function (v) {
 			modules[v] = true;
 		});
 	}
@@ -266,7 +267,7 @@ Bot.prototype.loadModules = function loadModules(modules) {
 
 	//start the load of core modules
 	try {
-		this._core_modules.forEach(function(name) {
+		this._coreModules.forEach(function (name) {
 			this.modules.load(name);
 		}, this);
 	} catch (e) {
@@ -282,7 +283,7 @@ Bot.prototype.loadModules = function loadModules(modules) {
 	//start the load of other modules
 	var keys = Object.keys(modules);
 	if (keys.length > 0) {
-		keys.forEach(function(name) {
+		keys.forEach(function (name) {
 			if (modules[name] === true) {
 				try {
 					this.modules.load(name);
@@ -296,18 +297,20 @@ Bot.prototype.loadModules = function loadModules(modules) {
 
 	logger.info('Modules loaded!');
 
-	if (error) logger.warn(error);
+	if (error) {
+		logger.warn(error);
+	}
 	return this;
 };
 
 Bot.prototype.unloadModules = function unloadModules() {
 	//unprotect core modules
-	this._core_modules.forEach(function(name) {
+	this._coreModules.forEach(function (name) {
 		this.modules.protect(name, false);
 	}, this);
 
 	//unload all modules
-	this.modules.getModules().reverse().forEach(function(m) {
+	this.modules.getModules().reverse().forEach(function (m) {
 		try {
 			this.modules.unload(m);
 		} catch (e) {
@@ -326,7 +329,7 @@ Bot.prototype.load = function load(names) {
 		names = [names];
 	}
 
-	names.forEach(function(name) {
+	names.forEach(function (name) {
 		this.modules.load(name);
 	}, this);
 
@@ -338,7 +341,7 @@ Bot.prototype.unload = function unload(names) {
 		names = [names];
 	}
 
-	names.forEach(function(name) {
+	names.forEach(function (name) {
 		this.modules.unload(name);
 	}, this);
 
@@ -350,7 +353,7 @@ Bot.prototype.reload = function reload(names) {
 		names = [names];
 	}
 
-	names.forEach(function(name) {
+	names.forEach(function (name) {
 		this.modules.reload(name);
 	}, this);
 
