@@ -1,7 +1,7 @@
 'use strict';
 
 //check main entry point path
-require(LIBS_DIR + '/helpers').checkGlobals();
+require('./helpers').checkGlobals();
 
 var MODULE = require(LIBS_DIR + '/module').Module;
 var logger = require(LIBS_DIR + '/logger');

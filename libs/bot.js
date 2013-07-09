@@ -4,7 +4,7 @@
 
 'use strict';
 
-var helpers = require(LIBS_DIR + '/helpers');
+var helpers = require('./helpers');
 
 //check main entry point path and resolve it
 helpers.checkGlobals(true);
