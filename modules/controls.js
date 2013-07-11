@@ -235,27 +235,43 @@ module.exports.init = function (reload) {
 
 	var proto = require(LIBS_DIR + '/module').Module.prototype;
 	proto.addCommand = function (name) {
-		module.controls.addCommand.apply(module.controls, arguments);
-		if (typeof module.moduleCommands[this.name] === 'undefined') {
-			module.moduleCommands[this.name] = {};
-		}
-		module.moduleCommands[this.name][name] = name;
+		name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
+		var args = arguments;
+		var that = this;
+		process.nextTick(function () {
+			module.controls.addCommand.apply(module.controls, args);
+			if (typeof module.moduleCommands[that.name] === 'undefined') {
+				module.moduleCommands[that.name] = {};
+			}
+			module.moduleCommands[that.name][name] = name;
+		});
 		return this;
 	};
 	proto.addAction = function (name) {
-		module.controls.addAction.apply(module.controls, arguments);
-		if (typeof module.moduleActions[this.name] === 'undefined') {
-			module.moduleActions[this.name] = {};
-		}
-		module.moduleActions[this.name][name] = name;
+		name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
+		var args = arguments;
+		var that = this;
+		process.nextTick(function () {
+			module.controls.addAction.apply(module.controls, args);
+			if (typeof module.moduleActions[that.name] === 'undefined') {
+				module.moduleActions[that.name] = {};
+			}
+			module.moduleActions[that.name][name] = name;
+		});
 		return this;
 	};
 	proto.removeCommand = function () {
-		module.controls.removeCommand.apply(module.controls, arguments);
+		var args = arguments;
+		process.nextTick(function () {
+			module.controls.removeCommand.apply(module.controls, args);
+		});
 		return this;
 	};
 	proto.removeAction = function () {
-		module.controls.removeAction.apply(module.controls, arguments);
+		var args = arguments;
+		process.nextTick(function () {
+			module.controls.removeAction.apply(module.controls, args);
+		});
 		return this;
 	};
 
@@ -284,7 +300,7 @@ module.exports.init = function (reload) {
 		}
 	}
 
-	this.dispatcher.on('unload', clean).on('reload-unload', clean);
+	this.dispatcher.on('module-unload', clean).on('module-reload', clean);
 
 	//bind
 	this.dispatcher.on('irc/PRIVMSG', this.controls.parse.bind(this.controls)).on('irc/NOTICE', this.controls.parse.bind(this.controls));
