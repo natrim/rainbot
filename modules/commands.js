@@ -398,6 +398,6 @@ module.exports.init = function () {
 	}, /^update$/i, ['owner']);
 
 	this.addAction('memory', function (source) {
-		source.respond('I currently pony with ' + helpers.formatSizeUnits(process.memoryUsage().rss));
+		source.mention('i currently pony with ' + helpers.formatSizeUnits(process.memoryUsage().rss));
 	}, /^mem(ory)?$/i, ['owner']);
 };
