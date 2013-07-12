@@ -261,17 +261,11 @@ module.exports.init = function (reload) {
 		return this;
 	};
 	proto.removeCommand = function () {
-		var args = arguments;
-		process.nextTick(function () {
-			module.controls.removeCommand.apply(module.controls, args);
-		});
+		module.controls.removeCommand.apply(module.controls, arguments);
 		return this;
 	};
 	proto.removeAction = function () {
-		var args = arguments;
-		process.nextTick(function () {
-			module.controls.removeAction.apply(module.controls, args);
-		});
+		module.controls.removeAction.apply(module.controls, arguments);
 		return this;
 	};
 
