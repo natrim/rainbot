@@ -280,7 +280,18 @@ module.exports.init = function () {
 			timer = setTimeout(clean, 5000);
 
 			//say it
-			if (irc.privMsg(target, msg)) {
+			var ret;
+			if (args[1] === 'note') {
+				ret = irc.notice(target, msg);
+			} else if (args[1] === 'me') {
+				ret = irc.action(target, msg);
+			} else if (args[1] === 'tell') {
+				ret = irc.privMsg(target, 'hey ' + target + ', ' + msg);
+			} else {
+				ret = irc.privMsg(target, msg);
+			}
+
+			if (ret) {
 				dispatcher.on('irc/PRIVMSG', resendreply);
 				dispatcher.on('irc/NOTICE', resendreply);
 				dispatcher.on('irc/401', wrongnick);
@@ -289,7 +300,7 @@ module.exports.init = function () {
 				source.mention('wait a little while...');
 			}
 		}
-	}, /^(say|tell)[ ]+(#?[\w\_\-\\\[\]\{\}\^\`\|]+)[ ]*(.*)$/i, ['owner', 'operators']);
+	}, /^(say|tell|note|me)[ ]+(#?[\w\_\-\\\[\]\{\}\^\`\|]+)[ ]*(.*)$/i, ['owner', 'operators']);
 
 	//pass the command
 	this.addAction('command', function (source, args) {
