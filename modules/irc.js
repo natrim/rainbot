@@ -32,6 +32,13 @@ function IRC(server, dispatcher, config) {
 				return server.connected;
 			}
 		},
+		'connectedOn': {
+			enumerable: true,
+			configurable: false,
+			get: function () {
+				return server.connectedOn.getTime() / 1000;
+			}
+		},
 		'lastNick': {
 			enumerable: true,
 			configurable: false,
@@ -505,6 +512,13 @@ exports.init = function (reload) {
 				configurable: false,
 				get: function () {
 					return module.server.connected;
+				}
+			},
+			'connectedOn': {
+				enumerable: true,
+				configurable: false,
+				get: function () {
+					return module.server.connectedOn.getTime() / 1000;
 				}
 			},
 			'lastNick': {
