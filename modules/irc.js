@@ -108,6 +108,7 @@ IRC.prototype.connect = function () {
 
 	var socket = (this.server.secured ? require('tls') : require('net')).connect(options, function () {
 		irc.server.connected = true;
+		irc.server.connectedOn = new Date();
 
 		logger.info('CONNECTED');
 
@@ -156,6 +157,7 @@ IRC.prototype.connect = function () {
 		}
 		irc.connecting = false;
 		irc.server.connected = false;
+		irc.server.connectedOn = null;
 		if (irc._reconnectServer()) {
 			return;
 		}

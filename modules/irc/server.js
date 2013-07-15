@@ -31,6 +31,7 @@ function Server(host, port, ssl) {
 	}
 
 	this.connected = false;
+	this.connectedOn = null;
 	this.lastNick = '';
 	this.currentNick = '';
 
