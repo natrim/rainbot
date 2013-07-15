@@ -405,8 +405,21 @@ module.exports.init = function () {
 		});
 	}, /^update$/i, ['owner']);
 
-	this.addAction('memory', function (source) {
+	this.addAction('stats', function (source, args) {
 		var helpers = require(LIBS_DIR + '/helpers');
-		source.mention('i currently pony with ' + helpers.formatSizeUnits(process.memoryUsage().rss) + ' for ' + helpers.formatTime(process.uptime()));
-	}, /^mem(ory)?|uptime$/i, ['owner']);
+
+		if (args[0] === 'uptime') {
+			source.mention('i\'m running already ' + helpers.formatTime(process.uptime()));
+		} else if (args[0] === 'mem' || args[0] === 'memory') {
+			source.mention('i currently pony with ' + helpers.formatSizeUnits(process.memoryUsage().rss));
+		} else if (args[0] === 'connected') {
+			if (irc.connected) {
+				source.mention('i connected to server \'' + irc.server + '\' at ' + helpers.formatDate(new Date(irc.connectedOn * 1000), module.config.dateFormat));
+			} else {
+				source.mention('i\'m not currently connected to server');
+			}
+		} else {
+			source.mention('i currently pony with ' + helpers.formatSizeUnits(process.memoryUsage().rss) + ' for ' + helpers.formatTime(process.uptime()) + (irc.connected ? ' and i connected to server \'' + irc.server + '\' at ' + helpers.formatDate(new Date(irc.connectedOn * 1000), module.config.dateFormat) : ' and i am not connected to server'));
+		}
+	}, /^stats|mem(ory)?|uptime|connected$/i, ['owner']);
 };
