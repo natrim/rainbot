@@ -7,6 +7,14 @@
 module.exports.init = function () {
 	var dispatcher = this.dispatcher;
 	var irc = this.require('irc');
+	var controls = this.require('controls');
+	var module = this;
+
+	//get moduleManager and bot and save it for the commands
+	this.dispatcher.on('init', function (bot) {
+		module.mm = bot.modules;
+		module.bot = bot;
+	});
 
 	this.addAction('quit', function (source, args) {
 		if (!irc.connected) {
@@ -137,8 +145,6 @@ module.exports.init = function () {
 		}
 	}, /^nick([ ]+(.*)|)$/i, ['owner', 'operators']);
 
-	var controls = this.require('controls');
-
 	function actionList(source) {
 		var actions = [];
 		Object.keys(controls.actions).forEach(function (n) {
@@ -168,13 +174,6 @@ module.exports.init = function () {
 	}
 
 	this.addCommand('help', commandList).addAction('help', commandList, /^help( actions)?$/);
-
-	//get moduleManager and bot and save it for the commands
-	var module = this;
-	this.dispatcher.on('init', function (bot) {
-		module.mm = bot.modules;
-		module.bot = bot;
-	});
 
 	this.addAction('config save', function (source) {
 		if (module.bot._configFile) {
