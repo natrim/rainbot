@@ -95,6 +95,37 @@ module.exports.formatSizeUnits = function formatSizeUnits(bytes) {
 };
 
 /**
+ * formats timestamp tu human readable format
+ * @param  {number} timestamp
+ * @return {string}
+ */
+module.exports.formatTime = function formatTime(timestamp) {
+	if (timestamp instanceof Date) {
+		timestamp = Date.getTime() / 1000;
+	} else if (typeof timestamp !== 'number') {
+		return 'no idea';
+	}
+	var days = Math.floor(timestamp / 86400);
+	var hours = Math.floor(timestamp / 3600 - days * 24);
+	var minutes = Math.floor(timestamp / 60 - days * 1440 - hours * 60);
+	var seconds = Math.floor(timestamp - days * 86400 - hours * 3600 - minutes * 60);
+
+	var returnstr = '';
+	if (days) {
+		returnstr += (days) + ' day' + (days === 1 ? '' : 's') + ', ' + (hours) + ' hour' + (hours === 1 ? '' : 's') + ' and ' + (minutes) + ' minute' + (minutes === 1 ? '' : 's');
+	} else if (hours) {
+		returnstr += (hours) + ' hour' + (hours === 1 ? '' : 's') + ' and ' + (minutes) + ' minute' + (minutes === 1 ? '' : 's');
+	} else if (minutes) {
+		returnstr += (minutes) + ' minute' + (minutes === 1 ? '' : 's') + ' and ' + (seconds) + ' second' + (seconds === 1 ? '' : 's');
+	} else if (seconds) {
+		returnstr += (seconds) + ' second' + (seconds === 1 ? '' : 's');
+	} else {
+		returnstr += 'less than a second';
+	}
+	return returnstr;
+};
+
+/**
  * Wraps function in another function
  * @param  {function} func
  * @param  {function} wrapper
