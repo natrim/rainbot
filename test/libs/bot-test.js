@@ -50,6 +50,33 @@ describe('Bot class', function () {
 			assert.isObject(bot.config.bot);
 			assert.isString(bot.config.bot.modules);
 		});
+		it('merges configs if passed true as 2nd param', function () {
+			var bot = new BOT();
+			bot.loadConfig({
+				'bot': {
+					'name': 'Dash',
+					'modules': 'dashing.json'
+				},
+				'pony': {
+					name: 'Trixie'
+				}
+			});
+			bot.config.bot.autosave = false; //disable autosaving
+
+			assert.property(bot.config, 'pony');
+
+			bot.loadConfig({
+				'bot': {
+					'name': 'Dash',
+					'modules': 'dashing.json'
+				},
+				'superpony': {
+					name: 'Trixie'
+				}
+			}, true);
+
+			assert.property(bot.config, 'pony');
+		});
 	});
 
 	describe('modules', function () {

@@ -128,7 +128,8 @@ Bot.prototype._setConfigWatch = function _setConfigWatch(file) {
 	return true;
 };
 
-Bot.prototype.loadConfig = function loadConfig(config) {
+Bot.prototype.loadConfig = function loadConfig(config, merge) {
+	merge = merge ? true : false;
 	var error = null;
 
 	if (typeof config === 'string') {
@@ -150,8 +151,9 @@ Bot.prototype.loadConfig = function loadConfig(config) {
 			config = require(BOT_DIR + '/' + this._configFile);
 			this._setConfigWatch(this._configFile);
 		}
-
-		this.config.clear(); //throw out old config
+		if (!merge) {
+			this.config.clear(); //throw out old config
+		}
 		this.config.load(config); //load new config
 	} catch (e) {
 		error = new Error('Cannot load config! ' + e);
