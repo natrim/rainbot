@@ -11,3 +11,5 @@ I Am A Real Pony!
 - Then u can use `npm start` to start the bot
 
 ####### Inspired by rossy's [reinbot](https://github.com/rossy2401/reinbot)
+
+[![Build Status](https://travis-ci.org/natrim/rainbot.png)](https://travis-ci.org/natrim/rainbot)
