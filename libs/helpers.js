@@ -95,20 +95,20 @@ module.exports.formatSizeUnits = function formatSizeUnits(bytes) {
 };
 
 /**
- * formats timestamp tu human readable format
- * @param  {number} timestamp
+ * formats number of seconds tu human readable format
+ * @param  {number} sec number of seconds
  * @return {string}
  */
-module.exports.formatTime = function formatTime(timestamp) {
-	if (timestamp instanceof Date) {
-		timestamp = Date.getTime() / 1000;
-	} else if (typeof timestamp !== 'number') {
+module.exports.formatTime = function formatTime(sec) {
+	if (sec instanceof Date) {
+		sec = Date.getTime() / 1000;
+	} else if (typeof sec !== 'number') {
 		return 'no idea';
 	}
-	var days = Math.floor(timestamp / 86400);
-	var hours = Math.floor(timestamp / 3600 - days * 24);
-	var minutes = Math.floor(timestamp / 60 - days * 1440 - hours * 60);
-	var seconds = Math.floor(timestamp - days * 86400 - hours * 3600 - minutes * 60);
+	var days = Math.floor(sec / 86400);
+	var hours = Math.floor(sec / 3600 - days * 24);
+	var minutes = Math.floor(sec / 60 - days * 1440 - hours * 60);
+	var seconds = Math.floor(sec - days * 86400 - hours * 3600 - minutes * 60);
 
 	var returnstr = '';
 	if (days) {

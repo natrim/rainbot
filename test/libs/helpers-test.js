@@ -37,6 +37,49 @@ describe('Helpers', function () {
 		});
 	});
 
+	describe('#formatSizeUnits', function () {
+		describe('formats bytes to human readable format', function () {
+			it('handles zero or derp', function () {
+				assert.equal(helpers.formatSizeUnits(0), '0 bytes');
+				assert.equal(helpers.formatSizeUnits(-1), '0 bytes');
+				assert.equal(helpers.formatSizeUnits(NaN), '0 bytes');
+				assert.equal(helpers.formatSizeUnits('derp'), '0 bytes');
+				assert.equal(helpers.formatSizeUnits(undefined), '0 bytes');
+				assert.equal(helpers.formatSizeUnits(null), '0 bytes');
+				assert.equal(helpers.formatSizeUnits({}), '0 bytes');
+				assert.equal(helpers.formatSizeUnits([]), '0 bytes');
+			});
+			it('handles B', function () {
+				assert.equal(helpers.formatSizeUnits(13), '13 bytes');
+			});
+			it('handles KB', function () {
+				assert.equal(helpers.formatSizeUnits(13435), '13.12 KB');
+			});
+			it('handles MB', function () {
+				assert.equal(helpers.formatSizeUnits(135125151), '128.87 MB');
+			});
+			it('handles GB', function () {
+				assert.equal(helpers.formatSizeUnits(135125243453), '125.85 GB');
+			});
+		});
+	});
+
+	describe('#formatTime', function () {
+		it('formats number of seconds to human readable string', function () {
+			assert.equal(helpers.formatTime('derp'), 'no idea');
+
+			assert.equal(helpers.formatTime(0), 'less than a second');
+			assert.equal(helpers.formatTime(1), '1 second');
+			assert.equal(helpers.formatTime(13), '13 seconds');
+			assert.equal(helpers.formatTime(73), '1 minute and 13 seconds');
+			assert.equal(helpers.formatTime(133), '2 minutes and 13 seconds');
+			assert.equal(helpers.formatTime(6133), '1 hour and 42 minutes');
+			assert.equal(helpers.formatTime(18133), '5 hours and 2 minutes');
+			assert.equal(helpers.formatTime(118133), '1 day, 8 hours and 48 minutes');
+			assert.equal(helpers.formatTime(4818133), '55 days, 18 hours and 22 minutes');
+		});
+	});
+
 	describe('#wrap', function () {
 		it('wraps function', function () {
 			var wr = helpers.wrap(String.prototype.split, function (spl, ch) {
