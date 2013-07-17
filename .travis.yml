@@ -3,3 +3,11 @@ node_js:
         - "0.11"
         - "0.10"
         - "0.8"
+notifications:
+    email: false
+    irc:
+        channels:
+            - "irc.deltaanime.net#czechro"
+        on_success: change
+        on_failure: always
+        use_notice: true
