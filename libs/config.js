@@ -9,8 +9,8 @@ Object.defineProperty(Config.prototype, 'clear', {
 	configurable: false,
 	enumerable: false,
 	value: function clear() {
-		Object.keys(this).forEach(function (val) {
-			delete this[val];
+		Object.keys(this).forEach(function (key) {
+			delete this[key];
 		}, this);
 		return this;
 	}
@@ -21,11 +21,9 @@ Object.defineProperty(Config.prototype, 'load', {
 	configurable: false,
 	enumerable: false,
 	value: function load(config) {
-		for (var p in config) {
-			if (config.hasOwnProperty(p)) {
-				this[p] = config[p];
-			}
-		}
+		Object.keys(config).forEach(function (key) {
+			this[key] = config[key];
+		}, this);
 		return this;
 	}
 });
