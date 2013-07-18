@@ -228,8 +228,45 @@ describe('Bot class', function () {
 				}
 			};
 			bot.loadConfig(config, true);
+			bot.config.bot.autosave = false;
 
 			assert.equal(t.config.ponies.bestpony, 'Derpy Hooves');
+		});
+		it('should reload the config if file changes', function () {
+			var config = {
+				'bot': {
+					'name': 'Dash',
+					'modules': ['test']
+				},
+				'test': {
+					pony: 'Rainbow Dash'
+				}
+			};
+
+			require('fs').writeFileSync(BOT_DIR + '/test-config.json', JSON.stringify(config, null, 4));
+
+			after(function () {
+				var fs = require('fs');
+				if (fs.existsSync(BOT_DIR + '/test-config.json')) {
+					fs.unlinkSync(BOT_DIR + '/test-config.json');
+				}
+			});
+
+			var bot = new BOT();
+			bot.loadConfig('test/test-config.json');
+			bot.config.bot.autosave = false;
+
+			assert.equal(bot.config.bot.name, 'Dash');
+
+			var c = bot.modules.require('test').config;
+			assert.equal(c.pony, 'Rainbow Dash');
+
+			config.test.pony = 'Fluttershy';
+			config.bot.name = 'Flutter';
+			require('fs').writeFileSync(BOT_DIR + '/test-config.json', JSON.stringify(config, null, 4));
+
+			assert.equal(c.pony, 'Fluttershy');
+			assert.equal(bot.config.bot.name, 'Flutter');
 		});
 	});
 });
