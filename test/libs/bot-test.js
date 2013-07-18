@@ -77,6 +77,47 @@ describe('Bot class', function () {
 
 			assert.property(bot.config, 'pony');
 		});
+		it('can return config as json string', function () {
+			var bot = new BOT();
+			var config = {
+				'bot': {
+					'name': 'Dash',
+					'modules': 'dashing.json'
+				},
+				'superpony': {
+					name: 'Trixie'
+				}
+			};
+			bot.loadConfig(config);
+			bot.config.bot.autosave = false; //disable autosaving
+
+			assert.equal(bot.saveConfig(null, true), JSON.stringify(config, null, 4));
+		});
+		it('can save config to json file', function () {
+			after(function () {
+				var fs = require('fs');
+				if (fs.existsSync(BOT_DIR + '/test-config.json')) {
+					fs.unlinkSync(BOT_DIR + '/test-config.json');
+				}
+			});
+
+			var bot = new BOT();
+			var config = {
+				'bot': {
+					'name': 'Dash',
+					'modules': 'dashing.json'
+				},
+				'superpony': {
+					name: 'Trixie'
+				}
+			};
+			bot.loadConfig(config);
+			bot.config.bot.autosave = false; //disable autosaving
+
+			bot.saveConfig('test-config.json');
+
+			assert.equal(require('fs').readFileSync(BOT_DIR + '/test-config.json'), JSON.stringify(config, null, 4));
+		});
 	});
 
 	describe('modules', function () {
