@@ -82,14 +82,15 @@ describe('Bot class', function () {
 			var config = {
 				'bot': {
 					'name': 'Dash',
-					'modules': 'dashing.json'
+					'modules': 'dashing.json',
+					'autosave': false,
+					'debug': false
 				},
 				'superpony': {
 					name: 'Trixie'
 				}
 			};
 			bot.loadConfig(config);
-			bot.config.bot.autosave = false; //disable autosaving
 
 			assert.equal(bot.saveConfig(null, true), JSON.stringify(config, null, 4));
 		});
@@ -105,14 +106,15 @@ describe('Bot class', function () {
 			var config = {
 				'bot': {
 					'name': 'Dash',
-					'modules': 'dashing.json'
+					'modules': 'dashing.json',
+					'autosave': false,
+					'debug': false
 				},
 				'superpony': {
 					name: 'Trixie'
 				}
 			};
 			bot.loadConfig(config);
-			bot.config.bot.autosave = false; //disable autosaving
 
 			bot.saveConfig('test-config.json');
 

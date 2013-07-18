@@ -117,15 +117,60 @@ Bot.prototype._setConfigWatch = function _setConfigWatch(file) {
 		persistent: false
 	}, function (event) {
 		if (event === 'change') {
-			try {
-				bot.loadConfig(file);
-			} catch (e) {
-				//none
-			}
+			bot._reloadConfig();
 		}
 	});
 
 	return true;
+};
+
+Bot.prototype._reloadConfig = function reloadConfig() {
+	if (!this._configFile) {
+		logger.error('Cannot reload empty config file!');
+		return this;
+	}
+	try {
+		require.cache[BOT_DIR + '/' + this._configFile] = null; //empty cache
+		var config = require(BOT_DIR + '/' + this._configFile); //parse json
+
+		this.config.clear(); //throw out old config
+		this.config.load(config); //load new config
+		this._checkSaneBotDefaults(); //check for defaults
+
+		logger.info('Config reloaded!');
+	} catch (e) {
+		logger.error('Cannot load config! ' + e);
+		logger.info('Config reload failed!');
+	}
+	return this;
+};
+
+Bot.prototype._checkSaneBotDefaults = function () {
+	//make sure we have important values
+	if (typeof this.config.bot === 'undefined') {
+		this.config.bot = {
+			'name': 'Rainbot',
+			'modules': 'modules.json',
+			'debug': false,
+			'autosave': true
+		};
+	} else {
+		if (typeof this.config.bot.name !== 'string') {
+			this.config.bot.name = 'Rainbot';
+		}
+		if (typeof this.config.bot.modules === 'undefined') {
+			this.config.bot.modules = 'modules.json';
+		}
+		if (typeof this.config.bot.debug !== 'boolean') {
+			this.config.bot.debug = false;
+		}
+		if (typeof this.config.bot.autosave !== 'boolean') {
+			this.config.bot.autosave = true;
+		}
+	}
+
+	//set logger debuging
+	logger.debugging = this.config.bot.debug ? true : false;
 };
 
 Bot.prototype.loadConfig = function loadConfig(config, merge) {
@@ -155,42 +200,17 @@ Bot.prototype.loadConfig = function loadConfig(config, merge) {
 			this.config.clear(); //throw out old config
 		}
 		this.config.load(config); //load new config
+		this._checkSaneBotDefaults(); //check for defaults
 	} catch (e) {
 		error = new Error('Cannot load config! ' + e);
 	}
 
-	//make sure we have important values
-	if (typeof this.config.bot === 'undefined') {
-		this.config.bot = {
-			'name': 'Rainbot',
-			'modules': 'modules.json',
-			'debug': false,
-			'autosave': true
-		};
-	} else {
-		if (typeof this.config.bot.name !== 'string') {
-			this.config.bot.name = 'Rainbot';
-		}
-		if (typeof this.config.bot.modules === 'undefined') {
-			this.config.bot.modules = 'modules.json';
-		}
-		if (typeof this.config.bot.debug !== 'boolean') {
-			this.config.bot.debug = false;
-		}
-		if (typeof this.config.bot.autosave !== 'boolean') {
-			this.config.bot.autosave = true;
-		}
-	}
-
 	if (error) {
 		logger.error(error);
-		logger.info('Empty config loaded!');
+		logger.info('Failed to load config!');
 	} else {
 		logger.info('Config loaded!');
 	}
-
-	//set logger debuging
-	logger.debugging = this.config.bot.debug ? true : false;
 
 	return this;
 };
