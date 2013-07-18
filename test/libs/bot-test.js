@@ -197,5 +197,39 @@ describe('Bot class', function () {
 			assert.property(config.test, 'nextup');
 			assert.equal(config.test.nextup, 'Twilight Sparkle');
 		});
+		it('the config should be passed to module and back even AFTER config file reload', function () {
+			var bot = new BOT();
+			var config = {
+				'bot': {
+					'name': 'Dash',
+					'modules': ['test']
+				},
+				'test': {
+					ponies: {
+						'bestpony': 'Rainbow Dash'
+					}
+				}
+			};
+			bot.loadConfig(config);
+			bot.config.bot.autosave = false; //disable autosaving
+
+			var t = bot.modules.require('test');
+			assert.equal(t.config.ponies.bestpony, 'Rainbow Dash');
+
+			config = {
+				'bot': {
+					'name': 'Dash',
+					'modules': ['test']
+				},
+				'test': {
+					ponies: {
+						'bestpony': 'Derpy Hooves'
+					}
+				}
+			};
+			bot.loadConfig(config, true);
+
+			assert.equal(t.config.ponies.bestpony, 'Derpy Hooves');
+		});
 	});
 });

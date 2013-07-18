@@ -185,6 +185,11 @@ describe('ModuleManager class', function () {
 			assert.property(cc.test, 'pony');
 			assert.equal(cc.test.pony, 'Twilight Sparkle');
 		});
+		it('should have config propagation from module to MM.config after reload', function () {
+			mm.require('test').config.pony = 'Twilight Sparkle';
+			mm.reload('test');
+			assert.equal(cc.test.pony, 'Twilight Sparkle');
+		});
 		it('should put module events on MM.dispatcher', function (done) {
 			mm.require('test').dispatcher.on('test/test', function () {
 				done();
