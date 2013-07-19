@@ -240,7 +240,7 @@ describe('Bot class', function () {
 			assert.property(config.test, 'nextup');
 			assert.equal(config.test.nextup, 'Twilight Sparkle');
 		});
-		it('the config should be passed to module and back even AFTER config file reload', function () {
+		it.skip('the config should be passed to module and back even AFTER config file reload', function () {
 			var bot = new BOT();
 			var config = {
 				'bot': {
@@ -275,7 +275,7 @@ describe('Bot class', function () {
 
 			assert.equal(t.config.ponies.bestpony, 'Derpy Hooves');
 		});
-		it('should reload the config if file changes', function () {
+		it.skip('should reload the config if file changes', function () {
 			var config = {
 				'bot': {
 					'name': 'Dash',
