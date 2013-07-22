@@ -127,6 +127,7 @@ Bot.prototype._setConfigWatch = function _setConfigWatch(file) {
 Bot.prototype._reloadConfig = function reloadConfig() {
 	if (!this._configFile) {
 		logger.error('Cannot reload empty config file!');
+		this.dispatcher.emit('config-reload', this, false);
 		return this;
 	}
 	try {
@@ -138,9 +139,11 @@ Bot.prototype._reloadConfig = function reloadConfig() {
 		this._checkSaneBotDefaults(); //check for defaults
 
 		logger.info('Config reloaded!');
+		this.dispatcher.emit('config-reload', this, true);
 	} catch (e) {
 		logger.error('Cannot load config! ' + e);
 		logger.info('Config reload failed!');
+		this.dispatcher.emit('config-reload', this, false);
 	}
 	return this;
 };
@@ -208,8 +211,10 @@ Bot.prototype.loadConfig = function loadConfig(config, merge) {
 	if (error) {
 		logger.error(error);
 		logger.info('Failed to load config!');
+		this.dispatcher.emit('config-load', this, false);
 	} else {
 		logger.info('Config loaded!');
+		this.dispatcher.emit('config-load', this, true);
 	}
 
 	return this;
@@ -227,8 +232,10 @@ Bot.prototype.saveConfig = function saveConfig(savefile, asString) {
 	try {
 		require('fs').writeFileSync(BOT_DIR + '/' + savefile, JSON.stringify(this.config, null, 4));
 		logger.info('Config saved to \'' + savefile + '\'.');
+		this.dispatcher.emit('config-save', this, true);
 	} catch (err) {
 		logger.error('Failed to save config with error: ' + err);
+		this.dispatcher.emit('config-save', this, false);
 	}
 
 	return this;
