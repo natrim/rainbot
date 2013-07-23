@@ -125,26 +125,29 @@ Bot.prototype._setConfigWatch = function _setConfigWatch(file) {
 };
 
 Bot.prototype._reloadConfig = function reloadConfig() {
+	var error = null;
 	if (!this._configFile) {
-		logger.error('Cannot reload empty config file!');
-		this.dispatcher.emit('config-reload', this, false);
-		return this;
-	}
-	try {
-		require.cache[BOT_DIR + '/' + this._configFile] = null; //empty cache
-		var config = require(BOT_DIR + '/' + this._configFile); //parse json
+		error = new Error('Cannot reload empty config file!');
+		logger.error(error);
+	} else {
+		try {
+			require.cache[BOT_DIR + '/' + this._configFile] = null; //empty cache
+			var config = require(BOT_DIR + '/' + this._configFile); //parse json
 
-		this.config.clear(); //throw out old config
-		this.config.load(config); //load new config
-		this._checkSaneBotDefaults(); //check for defaults
+			this.config.clear(); //throw out old config
+			this.config.load(config); //load new config
+			this._checkSaneBotDefaults(); //check for defaults
 
-		logger.info('Config reloaded!');
-		this.dispatcher.emit('config-reload', this, true);
-	} catch (e) {
-		logger.error('Cannot load config! ' + e);
-		logger.info('Config reload failed!');
-		this.dispatcher.emit('config-reload', this, false);
+			logger.info('Config reloaded!');
+		} catch (e) {
+			error = new Error('Cannot load config! ' + e);
+			logger.error(error);
+			logger.info('Config reload failed!');
+		}
 	}
+
+	this.dispatcher.emit('config-reload', error, this);
+
 	return this;
 };
 
@@ -211,11 +214,11 @@ Bot.prototype.loadConfig = function loadConfig(config, merge) {
 	if (error) {
 		logger.error(error);
 		logger.info('Failed to load config!');
-		this.dispatcher.emit('config-load', this, false);
 	} else {
 		logger.info('Config loaded!');
-		this.dispatcher.emit('config-load', this, true);
 	}
+
+	this.dispatcher.emit('config-load', error, this);
 
 	return this;
 };
@@ -228,15 +231,18 @@ Bot.prototype.saveConfig = function saveConfig(savefile, asString) {
 	//get only basename
 	savefile = require('path').basename(savefile);
 
+	var error = null;
+
 	//blocking write
 	try {
 		require('fs').writeFileSync(BOT_DIR + '/' + savefile, JSON.stringify(this.config, null, 4));
 		logger.info('Config saved to \'' + savefile + '\'.');
-		this.dispatcher.emit('config-save', this, true);
 	} catch (err) {
-		logger.error('Failed to save config with error: ' + err);
-		this.dispatcher.emit('config-save', this, false);
+		error = new Error('Failed to save config with error: ' + err);
+		logger.error(error);
 	}
+
+	this.dispatcher.emit('config-save', error, this);
 
 	return this;
 };
