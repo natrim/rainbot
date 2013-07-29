@@ -146,10 +146,11 @@ Module.prototype.injectConfig = function injectConfig(config) {
 		}
 
 		Object.defineProperty(this, 'config', {
-			writable: false,
 			configurable: false,
 			enumerable: true,
-			value: config[this.name]
+			get: function () {
+				return config[this.name];
+			}
 		});
 	}
 

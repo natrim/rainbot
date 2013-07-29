@@ -33,6 +33,7 @@ function Bot() {
 	//bot config
 	this.config = config;
 	this._configWatch = null;
+	this._configMtime = 0;
 	this._configFile = '';
 	//bot MM
 	this.modules = moduleManager;
@@ -113,15 +114,34 @@ Bot.prototype._setConfigWatch = function _setConfigWatch(file) {
 	}
 
 	var bot = this;
+
+	function watchCallback(event) {
+		if (event === 'rename') {
+			bot._configWatch.close();
+			bot._configWatch = fs.watch(BOT_DIR + '/' + file, watchCallback);
+		}
+		fs.stat(BOT_DIR + '/' + file, function (err, stat) {
+			if (!err && stat.mtime.getTime() > bot._configMtime) {
+				bot._reloadConfig();
+				bot._configMtime = stat.mtime.getTime();
+			}
+		});
+	}
+
+	this._configMtime = fs.statSync(BOT_DIR + '/' + file).mtime.getTime();
+
 	this._configWatch = fs.watch(BOT_DIR + '/' + file, {
 		persistent: false
-	}, function (event) {
-		if (event === 'change') {
-			bot._reloadConfig();
-		}
-	});
+	}, watchCallback);
 
 	return true;
+};
+
+Bot.prototype._removeWatch = function _removeWatch() {
+	if (this._configWatch) {
+		this._configWatch.close();
+		this._configWatch = null;
+	}
 };
 
 Bot.prototype._reloadConfig = function reloadConfig() {
@@ -143,6 +163,14 @@ Bot.prototype._reloadConfig = function reloadConfig() {
 			error = new Error('Cannot load config! ' + e);
 			logger.error(error);
 			logger.info('Config reload failed!');
+		}
+
+		if (!error) {
+			try {
+				this.modules.reloadConfig(this.config); //apply new config to modules
+			} catch (e) {
+				logger.error(new Error('Failed to (re)apply config to modules: ' + e));
+			}
 		}
 	}
 
@@ -191,10 +219,7 @@ Bot.prototype.loadConfig = function loadConfig(config, merge) {
 		this._configFile = 'config.json';
 	}
 
-	if (this._configWatch) { //stop watching config
-		this._configWatch.close();
-		this._configWatch = null;
-	}
+	this._removeWatch();
 
 	try {
 		if (this._configFile) {
@@ -216,6 +241,14 @@ Bot.prototype.loadConfig = function loadConfig(config, merge) {
 		logger.info('Failed to load config!');
 	} else {
 		logger.info('Config loaded!');
+	}
+
+	if (!error) {
+		try {
+			this.modules.reloadConfig(this.config); //apply new config to modules
+		} catch (e) {
+			logger.error(new Error('Failed to (re)apply config to modules: ' + e));
+		}
 	}
 
 	this.dispatcher.emit('config-load', error, this);

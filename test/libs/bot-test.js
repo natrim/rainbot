@@ -240,12 +240,13 @@ describe('Bot class', function () {
 			assert.property(config.test, 'nextup');
 			assert.equal(config.test.nextup, 'Twilight Sparkle');
 		});
-		it.skip('the config should be passed to module and back even AFTER config file reload', function () {
+		it('the config should be passed to module and back even AFTER config file reload', function () {
 			var bot = new BOT();
 			var config = {
 				'bot': {
 					'name': 'Dash',
-					'modules': ['test']
+					'modules': ['test'],
+					'autosave': false
 				},
 				'test': {
 					ponies: {
@@ -254,7 +255,6 @@ describe('Bot class', function () {
 				}
 			};
 			bot.loadConfig(config);
-			bot.config.bot.autosave = false; //disable autosaving
 
 			var t = bot.modules.require('test');
 			assert.equal(t.config.ponies.bestpony, 'Rainbow Dash');
@@ -262,7 +262,8 @@ describe('Bot class', function () {
 			config = {
 				'bot': {
 					'name': 'Dash',
-					'modules': ['test']
+					'modules': ['test'],
+					'autosave': false
 				},
 				'test': {
 					ponies: {
@@ -271,45 +272,56 @@ describe('Bot class', function () {
 				}
 			};
 			bot.loadConfig(config, true);
-			bot.config.bot.autosave = false;
 
 			assert.equal(t.config.ponies.bestpony, 'Derpy Hooves');
 		});
-		it.skip('should reload the config if file changes', function () {
+		it('should reload the config if file changes', function (done) {
 			var config = {
 				'bot': {
 					'name': 'Dash',
-					'modules': ['test']
+					'modules': ['test'],
+					'autosave': false
 				},
 				'test': {
 					pony: 'Rainbow Dash'
 				}
 			};
 
-			require('fs').writeFileSync(BOT_DIR + '/test-config.json', JSON.stringify(config, null, 4));
+			var fs = require('fs');
 
 			after(function () {
-				var fs = require('fs');
-				if (fs.existsSync(BOT_DIR + '/test-config.json')) {
-					fs.unlinkSync(BOT_DIR + '/test-config.json');
+				if (fs.existsSync(BOT_DIR + '/test-config-autoreload.json')) {
+					fs.unlinkSync(BOT_DIR + '/test-config-autoreload.json');
 				}
 			});
 
+			fs.writeFileSync(BOT_DIR + '/test-config-autoreload.json', JSON.stringify(config, null, 4));
+
 			var bot = new BOT();
-			bot.loadConfig('test/test-config.json');
-			bot.config.bot.autosave = false;
+			bot.loadConfig('test/test-config-autoreload.json');
 
 			assert.equal(bot.config.bot.name, 'Dash');
 
-			var c = bot.modules.require('test').config;
-			assert.equal(c.pony, 'Rainbow Dash');
+			var module = bot.modules.require('test');
+			assert.equal(module.config.pony, 'Rainbow Dash');
 
 			config.test.pony = 'Fluttershy';
 			config.bot.name = 'Flutter';
-			require('fs').writeFileSync(BOT_DIR + '/test-config.json', JSON.stringify(config, null, 4));
 
-			assert.equal(c.pony, 'Fluttershy');
-			assert.equal(bot.config.bot.name, 'Flutter');
+			bot.once('config-reload', function (err, bot) {
+				assert.ifError(err);
+				assert.equal(bot.config.bot.name, 'Flutter');
+				assert.equal(bot.config.test.pony, 'Fluttershy');
+
+				assert.deepEqual(module.config, bot.config.test);
+				assert.equal(module.config.pony, 'Fluttershy');
+
+				done(err ? new Error('Config reload failed!') : null);
+			});
+
+			setTimeout(function () {
+				fs.writeFile(BOT_DIR + '/test-config-autoreload.json', JSON.stringify(config, null, 4));
+			}, 1000);
 		});
 	});
 });

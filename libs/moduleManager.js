@@ -37,6 +37,13 @@ function ModuleManager(dispatcher, config) {
 	});
 }
 
+ModuleManager.prototype.reloadConfig = function reloadConfig(config) {
+	this.config = config;
+	Object.keys(this._modules).forEach(function (module) {
+		this._modules[module].injectConfig(this.config);
+	}, this);
+};
+
 ModuleManager.prototype.getModules = function getModules() {
 	return Object.keys(this._modules); //return loaded module names
 };
