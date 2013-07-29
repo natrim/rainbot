@@ -414,12 +414,12 @@ module.exports.init = function () {
 			source.mention('i currently pony with ' + helpers.formatSizeUnits(process.memoryUsage().rss));
 		} else if (args[0] === 'connected') {
 			if (irc.connected) {
-				source.mention('i connected to server \'' + irc.server + '\' at ' + helpers.formatDate(new Date(irc.connectedOn * 1000), module.config.dateFormat));
+				source.mention('i connected to server \'' + irc.server + '\' on ' + helpers.formatDate(new Date(irc.connectedOn * 1000), module.config.dateFormat));
 			} else {
 				source.mention('i\'m not currently connected to server');
 			}
 		} else {
-			source.mention('i currently pony with ' + helpers.formatSizeUnits(process.memoryUsage().rss) + ' for ' + helpers.formatTime(process.uptime()) + (irc.connected ? ' and i connected to server \'' + irc.server + '\' at ' + helpers.formatDate(new Date(irc.connectedOn * 1000), module.config.dateFormat) : ' and i am not connected to server'));
+			source.mention('i currently pony with ' + helpers.formatSizeUnits(process.memoryUsage().rss) + ' for ' + helpers.formatTime(process.uptime()) + (irc.connected ? ' and i connected to server \'' + irc.server + '\' on ' + helpers.formatDate(new Date(irc.connectedOn * 1000), module.config.dateFormat) : ' and i am not connected to server'));
 		}
 	}, /^stats|mem(ory)?|uptime|connected$/i, ['owner']);
 };
