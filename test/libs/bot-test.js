@@ -21,13 +21,13 @@ describe('Bot class', function () {
 			bot.loadConfig({
 				'bot': {
 					'name': 'Dash',
-					'modules': 'dashing.json'
+					'modules': 'dashing.json',
+					'autosave': false
 				},
 				'pony': {
-					name: 'Trixie'
+					'name': 'Trixie'
 				}
 			});
-			bot.config.bot.autosave = false; //disable autosaving
 
 			assert.isObject(bot.config.bot);
 			assert.equal(bot.config.bot.name, 'Dash');
@@ -55,13 +55,13 @@ describe('Bot class', function () {
 			bot.loadConfig({
 				'bot': {
 					'name': 'Dash',
-					'modules': 'dashing.json'
+					'modules': 'dashing.json',
+					'autosave': false
 				},
 				'pony': {
-					name: 'Trixie'
+					'name': 'Trixie'
 				}
 			});
-			bot.config.bot.autosave = false; //disable autosaving
 
 			assert.property(bot.config, 'pony');
 
@@ -71,7 +71,7 @@ describe('Bot class', function () {
 					'modules': 'dashing.json'
 				},
 				'superpony': {
-					name: 'Trixie'
+					'name': 'Trixie'
 				}
 			}, true);
 
@@ -87,7 +87,7 @@ describe('Bot class', function () {
 					'debug': false
 				},
 				'superpony': {
-					name: 'Trixie'
+					'name': 'Trixie'
 				}
 			};
 			bot.loadConfig(config);
@@ -111,7 +111,7 @@ describe('Bot class', function () {
 					'debug': false
 				},
 				'superpony': {
-					name: 'Trixie'
+					'name': 'Trixie'
 				}
 			};
 			bot.loadConfig(config);
@@ -166,7 +166,8 @@ describe('Bot class', function () {
 		it('loads modules from json file defined in config', function () {
 			bot.loadConfig({
 				'bot': {
-					'modules': 'test_modules/modules.json'
+					'modules': 'test_modules/modules.json',
+					'autosave': false
 				}
 			});
 
@@ -180,7 +181,8 @@ describe('Bot class', function () {
 		it('loads modules from json file defined in config in array', function () {
 			bot.loadConfig({
 				'bot': {
-					'modules': ['test']
+					'modules': ['test'],
+					'autosave': false
 				}
 			});
 
@@ -195,7 +197,8 @@ describe('Bot class', function () {
 					'modules': {
 						'test': true,
 						'test2': true
-					}
+					},
+					'autosave': false
 				}
 			});
 
@@ -223,14 +226,15 @@ describe('Bot class', function () {
 			var config = {
 				'bot': {
 					'name': 'Dash',
-					'modules': ['test']
+					'modules': ['test'],
+					'autosave': false
 				},
 				'test': {
-					pony: 'Rainbow Dash'
+					'pony': 'Rainbow Dash'
 				}
 			};
 			bot.loadConfig(config);
-			bot.config.bot.autosave = false; //disable autosaving
+
 			var c = bot.modules.require('test').config;
 			assert.property(c, 'pony');
 			assert.equal(c.pony, 'Rainbow Dash');
@@ -249,7 +253,7 @@ describe('Bot class', function () {
 					'autosave': false
 				},
 				'test': {
-					ponies: {
+					'ponies': {
 						'bestpony': 'Rainbow Dash'
 					}
 				}
@@ -266,7 +270,7 @@ describe('Bot class', function () {
 					'autosave': false
 				},
 				'test': {
-					ponies: {
+					'ponies': {
 						'bestpony': 'Derpy Hooves'
 					}
 				}
@@ -274,6 +278,7 @@ describe('Bot class', function () {
 			bot.loadConfig(config, true);
 
 			assert.equal(t.config.ponies.bestpony, 'Derpy Hooves');
+			assert.equal(bot.modules.require('test').config.ponies.bestpony, 'Derpy Hooves');
 		});
 		it('should reload the config if file changes', function (done) {
 			var config = {
@@ -283,7 +288,7 @@ describe('Bot class', function () {
 					'autosave': false
 				},
 				'test': {
-					pony: 'Rainbow Dash'
+					'pony': 'Rainbow Dash'
 				}
 			};
 
