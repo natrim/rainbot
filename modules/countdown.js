@@ -77,7 +77,7 @@ function MLPCountDownFactory(what, serial, callback) {
                     if (pt > dnow) {
                         if (typeof episodesnames[i] === 'string') {
                             var tep = episodesnames[i].split(',');
-                            eptext = 'S' + (tep[1] < 10 ? '0' + tep[1] : tep[1]) + 'E' + (tep[2] < 10 ? '0' + tep[2] : tep[2]) + ' (' + tep[3].replace(/"/g, '') + ')';
+                            eptext = 'S' + (tep[1] < 10 ? '0' + tep[1] : tep[1]) + 'E' + (tep[2] < 10 ? '0' + tep[2] : tep[2]) + (tep[3] ? ' (' + tep[3].replace(/"/g, '') + ')' : '');
                         }
 
                         callback(null, what, pt, 'MLP:FiM', eptext, dnow);
