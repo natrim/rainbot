@@ -10,4 +10,3 @@ notifications:
             - "irc.deltaanime.net#czechro"
         on_success: change
         on_failure: always
-        use_notice: true
