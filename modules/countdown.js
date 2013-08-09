@@ -8,6 +8,13 @@ var time = require('time');
 var http = require('http');
 var formattedDate = require(LIBS_DIR + '/helpers').dateFormat;
 
+//trim some strings
+if (!String.prototype.trim) {
+    String.prototype.trim = function () {
+        return this.replace(/^\s+|\s+$/g, '');
+    };
+}
+
 function TvCountDownFactory(what, serial, callback) {
     http.get({
         host: 'tvcountdown.com',
@@ -37,10 +44,10 @@ function TvCountDownFactory(what, serial, callback) {
                     if (airing > dnow) {
                         var name = data.match(/<h2 id="show-title">(.*)<\/h2>/);
                         if (name !== null) {
-                            epname = name[1];
+                            epname = name[1].trim();
                         }
                         if (typeof episode[i] === 'string') {
-                            eptext = episode[i].split('_').pop();
+                            eptext = episode[i].split('_').pop().trim();
                         }
                         callback(null, what, airing, epname, eptext, dnow);
                         return;
@@ -77,7 +84,12 @@ function MLPCountDownFactory(what, serial, callback) {
                     if (pt > dnow) {
                         if (typeof episodesnames[i] === 'string') {
                             var tep = episodesnames[i].split(',');
-                            eptext = 'S' + (tep[1] < 10 ? '0' + tep[1] : tep[1]) + 'E' + (tep[2] < 10 ? '0' + tep[2] : tep[2]) + (tep[3] ? ' (' + tep[3].replace(/"/g, '') + ')' : '');
+                            if (typeof tep[3] === 'string') {
+                                tep[3] = tep[3].replace(/"/g, '').trim();
+                            } else {
+                                tep[3] = '';
+                            }
+                            eptext = 'S' + (tep[1] < 10 ? '0' + tep[1] : tep[1]) + 'E' + (tep[2] < 10 ? '0' + tep[2] : tep[2]) + (tep[3] !== '' ? ' (' + tep[3] + ')' : '');
                         }
 
                         callback(null, what, pt, 'MLP:FiM', eptext, dnow);
