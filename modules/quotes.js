@@ -8,15 +8,28 @@ var quotes;
 
 function loadQuotes() {
 	quotes = [];
-	require('fs').readdir(MODULES_DIR + '/quotes', function (err, list) {
+	var fs = require('fs');
+	fs.readdir(MODULES_DIR + '/quotes', function (err, list) {
 		if (err) {
 			return;
 		}
 		list.forEach(function (file) {
-			if (file.substr(-4) === 'json') {
+			var ext = file.split('.').pop();
+			if (ext === 'json') {
 				quotes = quotes.concat(require(MODULES_DIR + '/quotes/' + file));
+			} else if (!isNaN(parseInt(ext, 10))) {
+				fs.readFile(MODULES_DIR + '/quotes/' + file, {
+					encoding: 'UTF8'
+				}, function (err, data) {
+					if (err) {
+						return;
+					}
+					quotes.push(data.replace(/\r?\n|\r/g, ' '));
+				});
 			}
 		});
+
+		quotes = require(LIBS_DIR + '/helpers').unique(quotes);
 	});
 }
 
