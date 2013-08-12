@@ -5,6 +5,7 @@
 'use strict';
 
 var quotes;
+var lastQuote = '';
 
 function loadQuotes() {
 	quotes = [];
@@ -33,8 +34,20 @@ function loadQuotes() {
 	});
 }
 
+function getRandomQuote() {
+	if (quotes.length <= 0) {
+		return 'Quotes have been not loaded!';
+	}
+	return quotes[Math.floor(Math.random() * quotes.length)];
+}
+
 function quote(source) {
-	source.respond(quotes[Math.floor(Math.random() * quotes.length)]);
+	var q = getRandomQuote();
+	if (q === lastQuote) {
+		q = getRandomQuote();
+	}
+	source.respond(q);
+	lastQuote = q;
 }
 
 exports.init = function () {
