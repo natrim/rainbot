@@ -10,32 +10,25 @@ var lastQuote = '';
 function loadQuotes() {
 	quotes = [];
 	var fs = require('fs');
+	var forEachAsync = require(LIBS_DIR + '/helpers').forEachAsync;
 	fs.readdir(MODULES_DIR + '/quotes', function (err, list) {
 		if (err) {
 			return;
 		}
-		list.forEach(function (file) {
+		forEachAsync(list, function (file) {
 			var ext = file.split('.').pop();
 			if (ext === 'json') {
-				quotes = quotes.concat(require(MODULES_DIR + '/quotes/' + file));
-			} else if (!isNaN(parseInt(ext, 10))) {
-				fs.readFile(MODULES_DIR + '/quotes/' + file, {
-					encoding: 'UTF8'
-				}, function (err, data) {
-					if (err) {
-						return;
-					}
-					quotes.push(data.replace(/\r?\n|\r/g, ' '));
-				});
+				var data = require(MODULES_DIR + '/quotes/' + file);
+				if (typeof data === 'object' && data instanceof Array) {
+					quotes = quotes.concat(data);
+				}
 			}
 		});
-
-		quotes = require(LIBS_DIR + '/helpers').unique(quotes);
 	});
 }
 
 function getRandomQuote() {
-	if (quotes.length <= 0) {
+	if (!(quotes instanceof Array) || quotes.length <= 0) {
 		return 'Quotes have been not loaded!';
 	}
 	return quotes[Math.floor(Math.random() * quotes.length)];
