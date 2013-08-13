@@ -166,6 +166,25 @@ module.exports.uniq = module.exports.unique = function helperUnique(array, isSor
 };
 
 /**
+ * Calls the function on all items in array asychronously
+ * @param  {array} items
+ * @param  {function} callback
+ * @return {undefined}
+ */
+module.exports.forEachAsync = function forEachAsync(items, callback) {
+	var todo = items.concat();
+
+	function doit() {
+		callback(todo.shift());
+		if (todo.length > 0) {
+			process.nextTick(doit);
+		}
+	}
+
+	process.nextTick(doit);
+};
+
+/**
  * Exports functions passed in array
  * @param  {object} to   destinations object
  * @param  {object} from source object
