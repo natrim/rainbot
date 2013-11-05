@@ -30,19 +30,41 @@ function TvCountDownFactory(what, serial, callback) {
             var dnow = new time.Date().getTime();
             var countdowndates = data.match(/var[ ]+timestamp[ ]?=[ ]?\[\'(.*)\'\]\;/);
             var episodenames = data.match(/var[ ]+episode[ ]?=[ ]?\[\'(.*)\'\]\;/);
+
+            if (countdowndates === null) {
+                countdowndates = data.match(/timestamp[ ]*\[[0-9]+\][ ]*=[ ]*'([A-Za-z0-9,: ]+)';/g);
+                episodenames =  data.match(/episode[ ]*\[[0-9]+\][ ]*=[ ]*'([A-Za-z0-9_]+)';/g);
+
+                if (countdowndates !== null) {
+                    countdowndates = countdowndates.join('');
+                }
+                if (episodenames !== null) {
+                    episodenames = episodenames.join('');
+                }
+            } else {
+                countdowndates = countdowndates[0];
+                if (episodenames !== null) {
+                    episodenames = episodenames[0];
+                }
+            }
+
             if (countdowndates !== null) {
                 var episode = [];
                 if (episodenames !== null) {
-                    episode = require('vm').runInThisContext(episodenames[0] + ' episode');
+                    episode = require('vm').runInThisContext('var episode = [];' + episodenames + ' episode');
                 }
 
-                var timestamp = require('vm').runInThisContext(countdowndates[0] + ' timestamp');
+                var timestamp = require('vm').runInThisContext('var timestamp = [];' + countdowndates + ' timestamp');
                 var airing, epname = serial,
                     eptext = '';
                 for (var i = 0; i < timestamp.length; i++) {
+                    if(!timestamp[i]) continue;
                     airing = new time.Date(timestamp[i], 'America/New_York').getTime();
                     if (airing > dnow) {
                         var name = data.match(/<h2 id="show-title">(.*)<\/h2>/);
+                        if(name === null) {
+                            name = data.match(/<h2>(.*)<\/h2>/);
+                        }
                         if (name !== null) {
                             epname = name[1].trim();
                         }
@@ -80,6 +102,7 @@ function MLPCountDownFactory(what, serial, callback) {
                 var episodesnames = data.match(new RegExp('[,]{1}[0-9]+[,]{1}[0-9]+[,]{1}"{1}([^"]*)"{1}', 'g'));
                 var pt, eptext = '';
                 for (var i = 0; i < ponycountdowndates.length; i++) {
+                    if(!ponycountdowndates[i]) continue;
                     pt = new time.Date(ponycountdowndates[i], 'UTC').getTime();
                     if (pt > dnow) {
                         if (typeof episodesnames[i] === 'string') {
