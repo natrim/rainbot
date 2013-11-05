@@ -58,7 +58,9 @@ function TvCountDownFactory(what, serial, callback) {
                 var airing, epname = serial,
                     eptext = '';
                 for (var i = 0; i < timestamp.length; i++) {
-                    if(!timestamp[i]) continue;
+                    if(!timestamp[i]) {
+                        continue;
+                    }
                     airing = new time.Date(timestamp[i], 'America/New_York').getTime();
                     if (airing > dnow) {
                         var name = data.match(/<h2 id="show-title">(.*)<\/h2>/);
@@ -102,7 +104,9 @@ function MLPCountDownFactory(what, serial, callback) {
                 var episodesnames = data.match(new RegExp('[,]{1}[0-9]+[,]{1}[0-9]+[,]{1}"{1}([^"]*)"{1}', 'g'));
                 var pt, eptext = '';
                 for (var i = 0; i < ponycountdowndates.length; i++) {
-                    if(!ponycountdowndates[i]) continue;
+                    if(!ponycountdowndates[i]) {
+                        continue;
+                    }
                     pt = new time.Date(ponycountdowndates[i], 'UTC').getTime();
                     if (pt > dnow) {
                         if (typeof episodesnames[i] === 'string') {
