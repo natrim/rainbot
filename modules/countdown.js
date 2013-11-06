@@ -289,25 +289,25 @@ Countdown.prototype.command = function (source, args, text, command) {
 
 Countdown.prototype.actions = function (source, args) {
     var mode = args[3];
-    if (mode === 'alias' || mode === 'default') {
+    if (mode === 'alias' || mode === 'default' || mode === 'defaults') {
         if (args[5]) {
             var tmp = args[5].split(' ');
             var nick = tmp.shift();
             var alias = tmp.join(' ');
             if (alias === 'null' || alias === 'false') {
-                delete this.config.aliases[((mode === 'default' ? 'personalized-' : '') + nick).toLowerCase()];
-                source.respond(mode === 'default' ? 'ok, personalized default removed' : 'ok, alias removed');
+                delete this.config.aliases[((mode === 'default' || mode === 'defaults' ? 'personalized-' : '') + nick).toLowerCase()];
+                source.respond(mode === 'default' || mode === 'defaults' ? 'ok, personalized default removed' : 'ok, alias removed');
             } else {
                 tmp = alias.match(/^\[(.*)\]$/);
 
                 if (tmp !== null) {
                     //no need for this.getSerial as itz array and will be done just in time
-                    this.config.aliases[((mode === 'default' ? 'personalized-' : '') + nick).toLowerCase()] = tmp[1].replace(/"|'/g, '').split(',');
+                    this.config.aliases[((mode === 'default' || mode === 'defaults' ? 'personalized-' : '') + nick).toLowerCase()] = tmp[1].replace(/"|'/g, '').split(',');
                 } else {
-                    this.config.aliases[((mode === 'default' ? 'personalized-' : '') + nick).toLowerCase()] = this.getSerial(alias);
+                    this.config.aliases[((mode === 'default' || mode === 'defaults' ? 'personalized-' : '') + nick).toLowerCase()] = this.getSerial(alias);
                 }
 
-                source.respond(mode === 'default' ? 'ok, personalized default changed' : 'ok, alias changed');
+                source.respond(mode === 'default' || mode === 'defaults' ? 'ok, personalized default changed' : 'ok, alias changed');
             }
         } else {
             source.mention('i have no idea what do u mean with that, give me more...');
