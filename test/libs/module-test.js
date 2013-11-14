@@ -162,15 +162,15 @@ describe('Module class', function () {
 				it('removes listener', function (done) {
 					var ran = false;
 					var list = function () {
-						if (!ran) {
-							ran = true;
-							done();
-							module.dispatcher.off('test/test', list);
-							module.dispatcher.emit('test/test');
-						} else {
-							done(new Error('Failed to remove listener!'));
-						}
-					};
+							if (!ran) {
+								ran = true;
+								done();
+								module.dispatcher.off('test/test', list);
+								module.dispatcher.emit('test/test');
+							} else {
+								done(new Error('Failed to remove listener!'));
+							}
+						};
 					module.dispatcher.on('test/test', list).emit('test/test');
 				});
 

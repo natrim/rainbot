@@ -41,7 +41,6 @@ describe('Bot class', function () {
 			var bot = new BOT();
 			bot.loadConfig('example-config.json');
 			bot.config.bot.autosave = false; //disable autosaving
-
 			assert.isObject(bot.config);
 
 			assert.isObject(bot.config.bot);

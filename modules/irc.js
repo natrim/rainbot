@@ -358,18 +358,18 @@ IRC.prototype.send = function (msg, nolog) {
 	msg = msg.toString('utf8');
 
 	var callback = function () {
-		if (!nolog) {
-			this.dispatcher.emit('irc/SEND', msg, this);
-		}
-
-		if (this.config.log) {
 			if (!nolog) {
-				console.log(date(undefined, this.config.logTimeFormat) + ' [SEND]> ' + msg);
+				this.dispatcher.emit('irc/SEND', msg, this);
 			}
-		} else {
-			logger.debug('[SEND]> ' + msg);
-		}
-	};
+
+			if (this.config.log) {
+				if (!nolog) {
+					console.log(date(undefined, this.config.logTimeFormat) + ' [SEND]> ' + msg);
+				}
+			} else {
+				logger.debug('[SEND]> ' + msg);
+			}
+		};
 
 	this.server.write(msg + '\r\n', callback.bind(this));
 

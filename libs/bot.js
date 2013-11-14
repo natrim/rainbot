@@ -153,11 +153,9 @@ Bot.prototype._reloadConfig = function reloadConfig() {
 		try {
 			require.cache[BOT_DIR + '/' + this._configFile] = null; //empty cache
 			var config = require(BOT_DIR + '/' + this._configFile); //parse json
-
 			this.config.clear(); //throw out old config
 			this.config.load(config); //load new config
 			this._checkSaneBotDefaults(); //check for defaults
-
 			logger.info('Config reloaded!');
 		} catch (e) {
 			error = new Error('Cannot load config! ' + e);
