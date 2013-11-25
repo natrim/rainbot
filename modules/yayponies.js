@@ -49,27 +49,35 @@ var scanPages = [
 	['7it1.php', 1], //720 raw
 	['7it2.php', 2], //720 raw
 	['7it3.php', 3], //720 raw
+	['7it4.php', 4], //720 raw
 	['7at1.php', 1], //720 AU raw
 	['7at2.php', 2], //720 AU raw
 	['7at3.php', 3], //720 AU raw
+	['7at4.php', 4], //720 AU raw	
 	['1it1.php', 1], //1080 raw
 	['1it2.php', 2], //1080 raw
 	['1it3.php', 3], //1080 raw
+	['1it4.php', 4], //1080 raw
 	['1at1.php', 1], //1080 AU raw
 	['1at2.php', 2], //1080 AU raw
 	['1at3.php', 3], //1080 AU raw
+	['1at4.php', 4], //1080 AU raw	
 	['7zt1.php', 1], //720 cc
 	['7zt2.php', 2], //720 cc
 	['7zt3.php', 3], //720 cc
+	['7zt4.php', 4], //720 cc	
 	['1zt1.php', 1], //1080 cc
 	['1zt2.php', 2], //1080 cc
 	['1zt3.php', 3], //1080 cc
+	['1zt4.php', 4], //1080 cc	
 	['4st1.php', 1], //SD
 	['4st2.php', 2], //SD
 	['4st3.php', 3], //SD
+	['4st4.php', 4], //SD	
 	['1st1.php', 1], //1080 hdtv
 	['1st2.php', 2], //1080 hdtv
-	['1st3.php', 3] //1080 hdtv
+	['1st3.php', 3], //1080 hdtv
+	['1st4.php', 4] //1080 hdtv	
 ];
 
 var episodes = [];
