@@ -104,7 +104,7 @@ function MLPCountDownFactory(what, serial, callback) {
 				var episodesnames = data.match(new RegExp('[,]{1}[0-9]+[,]{1}[0-9]+[,]{1}"{1}([^"]*)"{1}', 'g'));
 				var pt, eptext = '';
 				for (var i = 0; i < ponycountdowndates.length; i++) {
-					if (!ponycountdowndates[i]) {
+					if (typeof ponycountdowndates[i] === 'undefined' || !ponycountdowndates[i]) {
 						continue;
 					}
 					pt = new time.Date(ponycountdowndates[i], 'UTC').getTime();
