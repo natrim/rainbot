@@ -31,6 +31,14 @@ function loadQuotes() {
 	});
 }
 
+function slug(word) {
+	if (typeof word !== 'string') {
+		return false;
+	}
+
+	return word.toLowerCase().replace(/[^a-z0-9_]+/g, '');
+}
+
 function getRandomQuote(pony) {
 	pony = slug(pony) || null;
 	if (!(quotes instanceof Array) || quotes.length <= 0) {
@@ -58,14 +66,6 @@ function quote(source, args) {
 	}
 	source.respond(q);
 	lastQuote = q;
-}
-
-function slug(word) {
-	if (typeof word !== 'string') {
-		return false;
-	}
-
-	return word.toLowerCase().replace(/[^a-z0-9_]+/g, '');
 }
 
 exports.init = function () {
