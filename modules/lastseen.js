@@ -12,13 +12,13 @@ var lasthash = {};
 function calcDiff(when) {
 	var now = new time.Date().getTime();
 	var diff = (now - when);
-	var day = int(diff / 86400);
+	var day = Math.floor(diff / 86400);
 	diff -= (day * 86400);
-	var hrs = int(diff / 3600);
+	var hrs = Math.floor(diff / 3600);
 	diff -= (hrs * 3600);
-	var min = int(diff / 60);
+	var min = Math.floor(diff / 60);
 	diff -= (min * 60);
-	var sec = diff;
+	var sec = Math.floor(diff);
 
 	return day + 'd ' + hrs + 'h ' + min + 'm ' + sec + 's ' + 'ago';
 }
