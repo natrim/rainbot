@@ -2,6 +2,8 @@
 	BOOTSTRAP FOR TESTS
  */
 
+'use strict';
+
 var path = require('path');
 
 //set main entry point path

@@ -13,7 +13,9 @@ function calcDiff(when) {
 	var now = new time.Date().getTime();
 	var diff = (now - when);
 
-	if (diff < 1) return 'just now';
+	if (diff < 1) {
+		return 'just now';
+	}
 
 	var day = Math.floor(diff / 86400);
 	diff -= (day * 86400);
@@ -115,4 +117,4 @@ function replyWithResult(source, args) {
 exports.init = function () {
 	this.addCommand('lastseen', replyWithResult).addCommand('seen', replyWithResult).addCommand('last', replyWithResult);
 	this.dispatcher.on('irc/QUIT', onQuit).on('irc/PART', onPart).on('irc/JOIN', onJoin).on('irc/NICK', onNick).on('irc/PRIVMSG', onMessage).on('irc/NOTICE', onMessage);
-}
+};
