@@ -93,7 +93,7 @@ function onPart(source, args) {
 function onMessage(source, text) {
 	lasthash[source.nick] = {
 		'last': new time.Date().getTime(),
-		'words': '"' + source.nick + '" last said "' + text + '" on "' + args[0] + '"'
+		'words': '"' + source.nick + '" last said "' + text + '" on "' + source.channel + '"'
 	};
 }
 
