@@ -106,7 +106,7 @@ function replyWithResult(source, args) {
 		return;
 	}
 	if (typeof lasthash[args[0]] !== 'undefined') {
-		source.mention(lasthash[args[0]].words + ' ' + calcDiff(lasthash[args[0]].last) + '.');
+		source.reply(lasthash[args[0]].words + ' ' + calcDiff(lasthash[args[0]].last) + '.');
 	} else {
 		source.mention('i don\'t know anything about "' + args[0] + '"');
 	}
