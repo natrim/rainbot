@@ -12,6 +12,9 @@ var lasthash = {};
 function calcDiff(when) {
 	var now = new time.Date().getTime();
 	var diff = (now - when);
+
+	if (diff < 1) return 'just now';
+
 	var day = Math.floor(diff / 86400);
 	diff -= (day * 86400);
 	var hrs = Math.floor(diff / 3600);
@@ -20,7 +23,7 @@ function calcDiff(when) {
 	diff -= (min * 60);
 	var sec = Math.floor(diff);
 
-	return day + 'd ' + hrs + 'h ' + min + 'm ' + sec + 's ' + 'ago';
+	return (day > 0 ? day + 'd ' : '') + (hrs > 0 ? hrs + 'h ' : '') + (min > 0 ? min + 'm ' : '') + sec + 's ' + 'ago';
 }
 
 //hook for nick changes
