@@ -279,7 +279,7 @@ describe('Bot class', function () {
 			assert.equal(t.config.ponies.bestpony, 'Derpy Hooves');
 			assert.equal(bot.modules.require('test').config.ponies.bestpony, 'Derpy Hooves');
 		});
-		it('should reload the config if file changes', function (done) {
+		it.skip('should reload the config if file changes', function (done) {
 			var config = {
 				'bot': {
 					'name': 'Dash',
