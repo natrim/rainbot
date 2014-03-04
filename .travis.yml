@@ -5,6 +5,6 @@ notifications:
     email: false
     irc:
         channels:
-            - "irc.deltaanime.net#czechro"
+            - "walter.ecstasy.cz#czechro"
         on_success: change
         on_failure: always
