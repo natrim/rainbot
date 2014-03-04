@@ -10,7 +10,7 @@ var lasthash = {};
  a string like '15d 23h 42m 15s ago'
 */
 function calcDiff(when) {
-	var now = new time.Date().getTime();
+	var now = (new time.Date().getTime() / 1000);
 	var diff = (now - when);
 
 	if (diff < 1) {
@@ -32,11 +32,11 @@ function calcDiff(when) {
 function onNick(source, args) {
 	if (args[0]) {
 		lasthash[source.nick] = {
-			'last': new time.Date().getTime(),
+			'last': (new time.Date().getTime() / 1000),
 			'words': '"' + source.nick + '" changed nick to "' + args[0] + '"'
 		};
 		lasthash[source.nick] = {
-			'last': new time.Date().getTime(),
+			'last': (new time.Date().getTime() / 1000),
 			'words': '"' + args[0] + '" changed nick from "' + source.nick + '"'
 		};
 	}
@@ -46,12 +46,12 @@ function onNick(source, args) {
 function onQuit(source, args) {
 	if (args[0]) {
 		lasthash[source.nick] = {
-			'last': new time.Date().getTime(),
+			'last': (new time.Date().getTime() / 1000),
 			'words': '"' + source.nick + '" quit IRC stating "' + args[0] + '"'
 		};
 	} else {
 		lasthash[source.nick] = {
-			'last': new time.Date().getTime(),
+			'last': (new time.Date().getTime() / 1000),
 			'words': '"' + source.nick + '" quit IRC with no reason'
 		};
 	}
@@ -61,12 +61,12 @@ function onQuit(source, args) {
 function onJoin(source, args) {
 	if (args[0]) {
 		lasthash[source.nick] = {
-			'last': new time.Date().getTime(),
+			'last': (new time.Date().getTime() / 1000),
 			'words': '"' + source.nick + '" joined channel "' + args[0] + '"'
 		};
 	} else {
 		lasthash[source.nick] = {
-			'last': new time.Date().getTime(),
+			'last': (new time.Date().getTime() / 1000),
 			'words': '"' + source.nick + '" joined'
 		};
 	}
@@ -77,18 +77,18 @@ function onPart(source, args) {
 	if (args[0]) {
 		if (args[1]) {
 			lasthash[source.nick] = {
-				'last': new time.Date().getTime(),
+				'last': (new time.Date().getTime() / 1000),
 				'words': '"' + source.nick + '" left channel "' + args[0] + '" stating "' + args[1] + '"'
 			};
 		} else {
 			lasthash[source.nick] = {
-				'last': new time.Date().getTime(),
+				'last': (new time.Date().getTime() / 1000),
 				'words': '"' + source.nick + '" left channel "' + args[0] + '"'
 			};
 		}
 	} else {
 		lasthash[source.nick] = {
-			'last': new time.Date().getTime(),
+			'last': (new time.Date().getTime() / 1000),
 			'words': '"' + source.nick + '" left'
 		};
 	}
@@ -97,7 +97,7 @@ function onPart(source, args) {
 //hook for speaking
 function onMessage(source, text) {
 	lasthash[source.nick] = {
-		'last': new time.Date().getTime(),
+		'last': (new time.Date().getTime() / 1000),
 		'words': '"' + source.nick + '" last said "' + text + '" on "' + source.channel + '"'
 	};
 }
