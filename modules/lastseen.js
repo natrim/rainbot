@@ -115,6 +115,6 @@ function replyWithResult(source, args) {
 }
 
 exports.init = function () {
-	this.addCommand('lastseen', replyWithResult).addCommand('seen', replyWithResult).addCommand('last', replyWithResult);
+	this.addCommand('lastseen', replyWithResult).addCommand('seen', replyWithResult);
 	this.dispatcher.on('irc/QUIT', onQuit).on('irc/PART', onPart).on('irc/JOIN', onJoin).on('irc/NICK', onNick).on('irc/PRIVMSG', onMessage).on('irc/NOTICE', onMessage);
 };
