@@ -214,7 +214,7 @@ function getPonies(source, arg) {
 		ep[1] = parseInt(ep[1], 10);
 		ep[2] = parseInt(ep[2], 10);
 
-		var format = formats[typeof arg[2] !== 'undefined' ? arg[1].toLowerCase() : 'itunes1080p'];
+		var format = formats[typeof arg[1] !== 'undefined' ? arg[1].toLowerCase() : 'itunes1080p'];
 
 		if (!format) {
 			source.mention('wrong format! you can use: cc1080p, itunes1080p, itunes1080au, hdtv1080p, cc720p, itunes720p, itunes720au, sd');
