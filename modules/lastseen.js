@@ -31,11 +31,11 @@ function calcDiff(when) {
 //hook for nick changes
 function onNick(source, args) {
 	if (args[0]) {
-		lasthash[source.nick] = {
+		lasthash[source.nick.toLowerCase()] = {
 			'last': (new time.Date().getTime() / 1000),
 			'words': '"' + source.nick + '" changed nick to "' + args[0] + '"'
 		};
-		lasthash[source.nick] = {
+		lasthash[args[0].toLowerCase()] = {
 			'last': (new time.Date().getTime() / 1000),
 			'words': '"' + args[0] + '" changed nick from "' + source.nick + '"'
 		};
@@ -45,12 +45,12 @@ function onNick(source, args) {
 //hook for people quitting
 function onQuit(source, args) {
 	if (args[0]) {
-		lasthash[source.nick] = {
+		lasthash[source.nick.toLowerCase()] = {
 			'last': (new time.Date().getTime() / 1000),
 			'words': '"' + source.nick + '" quit IRC stating "' + args[0] + '"'
 		};
 	} else {
-		lasthash[source.nick] = {
+		lasthash[source.nick.toLowerCase()] = {
 			'last': (new time.Date().getTime() / 1000),
 			'words': '"' + source.nick + '" quit IRC with no reason'
 		};
@@ -60,12 +60,12 @@ function onQuit(source, args) {
 //hook for people joining
 function onJoin(source, args) {
 	if (args[0]) {
-		lasthash[source.nick] = {
+		lasthash[source.nick.toLowerCase()] = {
 			'last': (new time.Date().getTime() / 1000),
 			'words': '"' + source.nick + '" joined channel "' + args[0] + '"'
 		};
 	} else {
-		lasthash[source.nick] = {
+		lasthash[source.nick.toLowerCase()] = {
 			'last': (new time.Date().getTime() / 1000),
 			'words': '"' + source.nick + '" joined'
 		};
@@ -76,18 +76,18 @@ function onJoin(source, args) {
 function onPart(source, args) {
 	if (args[0]) {
 		if (args[1]) {
-			lasthash[source.nick] = {
+			lasthash[source.nick.toLowerCase()] = {
 				'last': (new time.Date().getTime() / 1000),
 				'words': '"' + source.nick + '" left channel "' + args[0] + '" stating "' + args[1] + '"'
 			};
 		} else {
-			lasthash[source.nick] = {
+			lasthash[source.nick.toLowerCase()] = {
 				'last': (new time.Date().getTime() / 1000),
 				'words': '"' + source.nick + '" left channel "' + args[0] + '"'
 			};
 		}
 	} else {
-		lasthash[source.nick] = {
+		lasthash[source.nick.toLowerCase()] = {
 			'last': (new time.Date().getTime() / 1000),
 			'words': '"' + source.nick + '" left'
 		};
@@ -96,7 +96,7 @@ function onPart(source, args) {
 
 //hook for speaking
 function onMessage(source, text) {
-	lasthash[source.nick] = {
+	lasthash[source.nick.toLowerCase()] = {
 		'last': (new time.Date().getTime() / 1000),
 		'words': '"' + source.nick + '" last said "' + text + '" on "' + source.channel + '"'
 	};
@@ -107,8 +107,11 @@ function replyWithResult(source, args) {
 		source.mention('you need to specify <nick>');
 		return;
 	}
-	if (typeof lasthash[args[0]] !== 'undefined') {
-		source.reply(lasthash[args[0]].words + ' ' + calcDiff(lasthash[args[0]].last) + '.');
+	var wantedNick = args[0].toLowerCase();
+	if (wantedNick === source.nick.toLowerCase()) {
+		source.mention('i see u right now...');
+	} else if (typeof lasthash[wantedNick] !== 'undefined') {
+		source.reply(lasthash[wantedNick].words + ' ' + calcDiff(lasthash[wantedNick].last) + '.');
 	} else {
 		source.mention('i don\'t know anything about "' + args[0] + '"');
 	}
