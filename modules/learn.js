@@ -42,5 +42,5 @@ exports.init = function () {
 	this.addCommand('learn', this.learning.learnCommand.bind(this.learning), ['owner', 'operators'])
 		.addAction('learn', this.learning.learnAction.bind(this.learning), /^learn (\w+){1} (.*)$/, ['owner', 'operators'])
 		.addAction('learnreply', this.learning.replyAction.bind(this.learning), /^\? (\w+){1}$/);
-	this.dispatcher.on('PRIVMSG', this.learning.reply.bind(this.learning));
+	this.dispatcher.on('irc/PRIVMSG', this.learning.reply.bind(this.learning));
 };
