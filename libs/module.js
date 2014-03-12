@@ -145,13 +145,15 @@ Module.prototype.injectConfig = function injectConfig(config) {
 			config[this.name] = {};
 		}
 
-		Object.defineProperty(this, 'config', {
-			configurable: false,
-			enumerable: true,
-			get: function () {
-				return config[this.name];
-			}
-		});
+		if (typeof this.config === 'undefined') {
+			Object.defineProperty(this, 'config', {
+				configurable: false,
+				enumerable: true,
+				get: function () {
+					return config[this.name];
+				}
+			});
+		}
 	}
 
 	logger.debug('Module \'' + this.name + '\' Config inject.' + (error ? ' With error: ' + error.message : ''));
