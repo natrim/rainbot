@@ -9,5 +9,7 @@
 	"calc": true,
 	"dice": true,
 	"coin": true,
-	"quotes": true
+	"quotes": true,
+	"lastseen": true,
+	"learn": true
 }
