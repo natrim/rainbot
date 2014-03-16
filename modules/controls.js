@@ -17,20 +17,11 @@ if (!String.prototype.trim) {
 	};
 }
 
-function Controls(irc, actions, commands, config, dispatcher) {
+function Controls(irc, actions, commands, dispatcher) {
 	this._irc = irc;
 	this.actions = actions;
 	this.commands = commands;
-	this.config = config;
 	this.dispatcher = dispatcher;
-
-	Object.defineProperty(this, 'commandDelimiter', {
-		enumerable: true,
-		configurable: false,
-		get: function () {
-			return config.commandDelimiter;
-		}
-	});
 }
 
 Controls.prototype.addCommand = function (name, action, access) {
@@ -206,9 +197,25 @@ module.exports.init = function (reload) {
 		this.config.commandDelimiter = '.';
 	}
 
-	this.controls = new Controls(this.require('irc'), this.actions, this.commands, this.config, this.dispatcher);
+	this.controls = new Controls(this.require('irc'), this.actions, this.commands, this.dispatcher);
 
 	var module = this;
+
+	Object.defineProperty(this.controls, 'config', {
+		enumerable: true,
+		configurable: false,
+		get: function () {
+			return module.config;
+		}
+	});
+
+	Object.defineProperty(this.controls, 'commandDelimiter', {
+		enumerable: true,
+		configurable: false,
+		get: function () {
+			return module.config.commandDelimiter;
+		}
+	});
 
 	if (!reload) {
 		Object.defineProperty(this, 'commandDelimiter', {
