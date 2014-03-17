@@ -1,6 +1,6 @@
 'use strict';
 
-var time = require('time');
+var time = require('time'), logger = require(LIBS_DIR + '/logger');
 
 //main data storage
 var lasthash = {};
@@ -118,6 +118,21 @@ function replyWithResult(source, args) {
 }
 
 exports.init = function () {
+    var savedhash = null;
+    try {
+        savedhash = JSON.parse(require('fs').readFileSync(BOT_DIR + '/lastseen.json'));
+    } catch(e) {
+        logger.warn('Lastseen file load failed, using empty file.');
+    }
+    lasthash = savedhash || {};
 	this.addCommand('lastseen', replyWithResult).addCommand('seen', replyWithResult);
 	this.dispatcher.on('irc/QUIT', onQuit).on('irc/PART', onPart).on('irc/JOIN', onJoin).on('irc/NICK', onNick).on('irc/PRIVMSG', onMessage).on('irc/NOTICE', onMessage);
+};
+
+exports.halt = function () {
+    try {
+        require('fs').writeFileSync(BOT_DIR + '/lastseen.json', JSON.stringify(lasthash, null, 4));
+    } catch(e) {
+        //just ignore it
+    }
 };
