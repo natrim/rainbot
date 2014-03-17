@@ -279,57 +279,5 @@ describe('Bot class', function () {
 			assert.equal(t.config.ponies.bestpony, 'Derpy Hooves');
 			assert.equal(bot.modules.require('test').config.ponies.bestpony, 'Derpy Hooves');
 		});
-		it('should reload the config if file changes', function () {
-			var config = {
-				'bot': {
-					'name': 'Dash',
-					'modules': ['test'],
-					'autosave': false
-				},
-				'test': {
-					'pony': 'Rainbow Dash'
-				}
-			};
-
-			var fs = require('fs');
-
-			after(function () {
-				if (fs.existsSync(BOT_DIR + '/test-config-autoreload.json')) {
-					fs.unlinkSync(BOT_DIR + '/test-config-autoreload.json');
-				}
-			});
-
-			fs.writeFileSync(BOT_DIR + '/test-config-autoreload.json', JSON.stringify(config, null, 4));
-
-			var bot = new BOT();
-			bot.loadConfig('test/test-config-autoreload.json');
-
-			assert.equal(bot.config.bot.name, 'Dash');
-
-			var module = bot.modules.require('test');
-			assert.equal(module.config.pony, 'Rainbow Dash');
-
-
-			var config2 = {
-				'bot': {
-					'name': 'Flutter',
-					'modules': ['test'],
-					'autosave': false
-				},
-				'test': {
-					'pony': 'Fluttershy'
-				}
-			};
-
-			fs.writeFileSync(BOT_DIR + '/test-config-autoreload.json', JSON.stringify(config2, null, 4));
-
-			bot._reloadConfig(); //trigger change manualy to not wait for filesystem
-
-			assert.equal(bot.config.bot.name, 'Flutter');
-			assert.equal(bot.config.test.pony, 'Fluttershy');
-
-			assert.deepEqual(module.config, bot.config.test);
-			assert.equal(module.config.pony, 'Fluttershy');
-		});
 	});
 });

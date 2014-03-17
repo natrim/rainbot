@@ -181,20 +181,20 @@ module.exports.init = function () {
 				source.respond('Config saved!');
 			}
 		} else {
-			source.respond('Config cannot be saved!');
+			source.respond('Config cannot be saved if not started with file!');
 		}
 	}, /^config save$/i);
 
-	this.addAction('config load', function (source) {
+	this.addAction('config load', function (source, args) {
 		if (module.bot._configFile) {
-			module.bot.loadConfig(module.bot._configFile);
+			module.bot.loadConfig(module.bot._configFile, typeof args[1] !== 'undefined' && args[1] === 'merge' ? true : false);
 			if (source.toString() !== 'ItzAInternallPonyShell') {
 				source.respond('Config (re)loaded!');
 			}
 		} else {
-			source.respond('Config cannot be loaded!');
+			source.respond('Config cannot be loaded if not file!');
 		}
-	}, /^config load$/i);
+	}, /^config load[ ]?(\w+)?$/i);
 
 	this.addAction('lsmod', function (source) {
 		source.mention('i have these modules active: ' + module.mm.getModules().join(', '));

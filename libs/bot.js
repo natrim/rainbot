@@ -32,8 +32,6 @@ function Bot() {
 
 	//bot config
 	this.config = config;
-	this._configWatch = null;
-	this._configMtime = 0;
 	this._configFile = '';
 	//bot MM
 	this.modules = moduleManager;
@@ -106,77 +104,6 @@ Bot.prototype.emit = function emit() {
 	return this;
 };
 
-Bot.prototype._setConfigWatch = function _setConfigWatch(file) {
-	var fs = require('fs');
-
-	if (!fs.existsSync(BOT_DIR + '/' + file)) {
-		return false;
-	}
-
-	var bot = this;
-
-	function watchCallback(event) {
-		if (event === 'rename') {
-			bot._configWatch.close();
-			bot._configWatch = fs.watch(BOT_DIR + '/' + file, watchCallback);
-		}
-		fs.stat(BOT_DIR + '/' + file, function (err, stat) {
-			if (!err && stat.mtime.getTime() > bot._configMtime) {
-				bot._reloadConfig();
-				bot._configMtime = stat.mtime.getTime();
-			}
-		});
-	}
-
-	this._configMtime = fs.statSync(BOT_DIR + '/' + file).mtime.getTime();
-
-	this._configWatch = fs.watch(BOT_DIR + '/' + file, {
-		persistent: false
-	}, watchCallback);
-
-	return true;
-};
-
-Bot.prototype._removeWatch = function _removeWatch() {
-	if (this._configWatch) {
-		this._configWatch.close();
-		this._configWatch = null;
-	}
-};
-
-Bot.prototype._reloadConfig = function reloadConfig() {
-	var error = null;
-	if (!this._configFile) {
-		error = new Error('Cannot reload empty config file!');
-		logger.error(error);
-	} else {
-		try {
-			require.cache[BOT_DIR + '/' + this._configFile] = null; //empty cache
-			var config = require(BOT_DIR + '/' + this._configFile); //parse json
-			this.config.clear(); //throw out old config
-			this.config.load(config); //load new config
-			this._checkSaneBotDefaults(); //check for defaults
-			logger.info('Config reloaded!');
-		} catch (e) {
-			error = new Error('Cannot load config! ' + e);
-			logger.error(error);
-			logger.info('Config reload failed!');
-		}
-
-		if (!error) {
-			try {
-				this.modules.reloadConfig(this.config); //apply new config to modules
-			} catch (e) {
-				logger.error(new Error('Failed to (re)apply config to modules: ' + e));
-			}
-		}
-	}
-
-	this.dispatcher.emit('config-reload', error, this);
-
-	return this;
-};
-
 Bot.prototype._checkSaneBotDefaults = function () {
 	//make sure we have important values
 	if (typeof this.config.bot === 'undefined') {
@@ -217,13 +144,10 @@ Bot.prototype.loadConfig = function loadConfig(config, merge) {
 		this._configFile = 'config.json';
 	}
 
-	this._removeWatch();
-
 	try {
 		if (this._configFile) {
 			require.cache[BOT_DIR + '/' + this._configFile] = null;
 			config = require(BOT_DIR + '/' + this._configFile);
-			this._setConfigWatch(this._configFile);
 		}
 		if (!merge) {
 			this.config.clear(); //throw out old config
@@ -238,7 +162,7 @@ Bot.prototype.loadConfig = function loadConfig(config, merge) {
 		logger.error(error);
 		logger.info('Failed to load config!');
 	} else {
-		logger.info('Config loaded!');
+		logger.info('Config loaded' + (merge ? ' and merged to old config' : '') + '!');
 	}
 
 	if (!error) {
