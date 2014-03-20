@@ -110,6 +110,8 @@ function replyWithResult(source, args) {
 	var wantedNick = args[0].toLowerCase();
 	if (wantedNick === source.nick.toLowerCase()) {
 		source.mention('i see u right now...');
+	}else if(wantedNick === source.irc.currentNick){
+		source.mention('are you talking about me?');
 	} else if (typeof lasthash[wantedNick] !== 'undefined') {
 		source.reply(lasthash[wantedNick].words + ' ' + calcDiff(lasthash[wantedNick].last) + '.');
 	} else {
