@@ -177,11 +177,11 @@ module.exports.forEachAsync = function forEachAsync(items, callback) {
 	function doit() {
 		callback(todo.shift());
 		if (todo.length > 0) {
-			process.nextTick(doit);
+			setImmediate(doit);
 		}
 	}
 
-	process.nextTick(doit);
+	setImmediate(doit);
 };
 
 /**

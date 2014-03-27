@@ -117,7 +117,7 @@ Controls.prototype.processCommand = function (source, text) {
 			if (this.checkAccess(source, this.commands[name])) { //run the command only if the user has access
 				var execute = this.commands[name].action,
 					dispatcher = this.dispatcher;
-				process.nextTick(function () {
+				setImmediate(function () {
 					logger.debug('Processing Command \'' + name + '\'');
 					execute(source, args, text, command);
 					dispatcher.emit('controls/command', name, source, args, text, command);
@@ -142,7 +142,7 @@ Controls.prototype.processAction = function (source, text) {
 				if (this.checkAccess(source, this.actions[name])) { //run the action only if the user has access
 					var execute = this.actions[name].action,
 						dispatcher = this.dispatcher;
-					process.nextTick(function () {
+					setImmediate(function () {
 						logger.debug('Processing Action \'' + name + '\'');
 						execute(source, args, text);
 						dispatcher.emit('controls/action', name, source, args, text);

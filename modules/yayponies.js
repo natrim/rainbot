@@ -252,7 +252,7 @@ exports.init = function () {
 	this.addAction('refresh', refreshEpisodes, /^refresh$/, ['owner', 'operators']);
 
 	//first load eps
-	process.nextTick(function () {
+	setImmediate(function () {
 		refreshEpisodes(false);
 	});
 	//then refresh every day
