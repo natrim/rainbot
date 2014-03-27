@@ -11,10 +11,6 @@ if (!String.prototype.trim) {
 	};
 }
 
-function say() {
-	process.stdout.write(Array.prototype.join.call(arguments, ' ') + '\n');
-}
-
 function ShellSource() {
 	this.nick = 'shell';
 	this.user = 'shell';
@@ -27,7 +23,7 @@ ShellSource.prototype.valueOf = ShellSource.prototype.toString = function () {
 };
 
 ShellSource.prototype.reply = ShellSource.prototype.respond = ShellSource.prototype.mention = ShellSource.prototype.action = ShellSource.prototype.tell = ShellSource.prototype.message = ShellSource.prototype.note = ShellSource.prototype.notice = function (msg) {
-	say('[PONY] ' + msg);
+	process.stdout.write('[PONY] ' + msg + '\n');
 };
 
 function Shell(module, rl, c, irc) {
@@ -35,7 +31,14 @@ function Shell(module, rl, c, irc) {
 	this.rl = rl;
 	this.c = c;
 	this.irc = irc;
-	this.promptString = 'PONY> ';
+	this.promptString = 'PSHELL> ';
+	this.source = new ShellSource();
+	Object.defineProperty(this.source, 'irc', {
+		value: this.irc,
+		enumerable: false,
+		writable: false,
+		configurable: false
+	});
 
 	//clean what could be on before
 	rl.removeAllListeners();
@@ -56,44 +59,44 @@ function Shell(module, rl, c, irc) {
 
 Shell.prototype.parseLine = function (cmd) {
 	cmd = cmd.trim();
-	var source = new ShellSource();
-	switch (cmd) {
-	case '':
-		this.rl.prompt();
-		break;
-	case 'connect':
-		if (!this.irc.connected) {
-			this.irc.connect();
-		} else {
-			say('[SHELL] I\'m already connected to \'' + this.irc.server + '\'!');
-		}
-		break;
-	case 'disconnect':
-		if (this.irc.connected) {
-			this.irc.quit('Pony sleep...');
-		} else {
-			say('[SHELL] I\'m not connected to server!');
-		}
-		break;
-	case 'exit':
-	case '.exit':
-		process.emit('SIGINT');
-		break;
-	case 'help':
-		say('[SHELL] To exit press CTRL+C, otherwise use the same Actions u would PM me trough IRC.');
-		this.c.processAction(source, cmd); //process the help action
-		break;
-	default:
-		var handled = false;
-		if (cmd.substr(0, this.c.commandDelimiter.length) === this.c.commandDelimiter) { //command
-			handled = this.c.processCommand(source, cmd.substr(this.c.commandDelimiter.length));
-		} else { //by default try action
-			handled = this.c.processAction(source, cmd);
-		}
 
-		if (!handled) {
-			say('[SHELL] No valid action or command!');
-		}
+	switch (cmd) {
+		case '':
+			this.rl.prompt();
+			break;
+		case 'connect':
+			if (!this.irc.connected) {
+				this.irc.connect();
+			} else {
+				this.source.reply('I\'m already connected to \'' + this.irc.server + '\'!');
+			}
+			break;
+		case 'disconnect':
+			if (this.irc.connected) {
+				this.irc.quit('Pony sleep...');
+			} else {
+				this.source.reply('I\'m not connected to server!');
+			}
+			break;
+		case 'exit':
+		case '.exit':
+			process.emit('SIGINT');
+			break;
+		case 'help':
+			this.source.reply('To exit press CTRL+C, otherwise use the same Actions u would PM me trough IRC.');
+			this.c.processAction(this.source, cmd); //process the help action
+			break;
+		default:
+			var handled = false;
+			if (cmd.substr(0, this.c.commandDelimiter.length) === this.c.commandDelimiter) { //command
+				handled = this.c.processCommand(this.source, cmd.substr(this.c.commandDelimiter.length));
+			} else { //by default try action
+				handled = this.c.processAction(this.source, cmd);
+			}
+
+			if (!handled) {
+				this.source.reply('No valid action or command!');
+			}
 	}
 
 	//this.rl.prompt();
@@ -101,19 +104,21 @@ Shell.prototype.parseLine = function (cmd) {
 
 Shell.prototype.onClose = function () {
 	if (!this.module.ending) {
-		say('[SHELL] Uh oh, the Shell has been terminated!');
+		this.source.reply('Uh oh, the Shell has been terminated!');
 		this.module.mm.unload(this.module.name);
-		say('[SHELL] But i\'m still alive! To kill me you need to use CTRL+C combo!');
+		this.source.reply('But i\'m still alive! To kill me you need to use CTRL+C combo!');
 	}
 };
 
 Shell.prototype.onSigint = function () {
 	//var rl = this.rl;
-	this.rl.question('[SHELL] Are you sure you want to kill me? [y/n] ', function (answer) {
+	var sh = this;
+	this.rl.question('[SCARED PONY] Are you sure you want to kill me? [y/n] ', function (answer) {
 		if (answer.match(/^(y|a|sure)(es|no)?$/i)) {
+			sh.source.reply('noooooooo ... *splat*');
 			process.emit('SIGINT');
 		} else {
-			say('[SHELL] *phew*, that was close one...');
+			sh.source.reply('*phew*, that was close one...');
 			//rl.prompt();
 		}
 	});
@@ -128,15 +133,15 @@ module.exports.init = function (reload) {
 	}
 
 	var irc = this.require('irc');
+	this.shell = new Shell(this, this.rl, this.require('controls').controls, irc);
+
 	var module = this;
 	this.dispatcher.on('init', function (bot) {
 		module.mm = bot.modules;
 		if (!irc.config.autoconnect) {
-			say('[SHELL] You can connect to IRC using \'connect\'!');
+			module.shell.source.reply('You can connect to IRC using \'connect\'!');
 		}
 	});
-
-	this.shell = new Shell(this, this.rl, this.require('controls').controls, irc);
 };
 
 module.exports.halt = function (reload) {
