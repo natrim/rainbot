@@ -1,4 +1,3 @@
 config.json
-lastseen.json
 *.sublime*
 node_modules/*
