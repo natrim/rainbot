@@ -95,7 +95,7 @@ function scanPage(page, season, callback) {
 
 		var $ = cheerio.load(body);
 
-		var table = $('#container table');
+		var table = $('#container').find('table');
 		if (table.length > 1) {
 			table = $(table[0]);
 		}
