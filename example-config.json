@@ -46,5 +46,10 @@
 	},
 	"commands": {
 		"dateFormat": "DD.MM.YYYY HH:II:SS"
+	},
+	"quotes": {
+		"autoQuoteOnChannel": [],
+		"autoQuoteIntervalMin": 3600000,
+		"autoQuoteIntervalMax": 14400000
 	}
 }

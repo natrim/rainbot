@@ -42,7 +42,7 @@ function slug(word) {
 function getRandomQuote(pony) {
 	pony = slug(pony) || null;
 	if (!(quotes instanceof Array) || quotes.length <= 0) {
-		return 'Quotes have been not loaded!';
+		return '';
 	}
 
 	if (pony && typeof ponydex[pony] !== 'undefined') {
@@ -61,17 +61,54 @@ function quote(source, args) {
 	}
 
 	var q = getRandomQuote(pony);
-	if (q === lastQuote) {
+	if (q === '') {
+		source.respond('i did not found any quote!');
+	} else if (q === lastQuote) {
 		q = getRandomQuote();
 	}
 	source.respond(q);
 	lastQuote = q;
 }
 
+function randomChannelQuote(start, irc, min, max, channels) {
+	if (!start && irc.connected) {
+		var q = getRandomQuote();
+		if (q !== '') {
+			channels.forEach(function (chan) {
+				if (chan.substr(0, 1) === '#') { //TODO: add check to quote only to channels we are in
+					setTimeout(function () {
+						irc.privMsg(chan, q);
+					}, Math.floor(Math.random() * 5000) + 1000);
+				}
+			});
+		}
+	}
+
+	setTimeout(randomChannelQuote.bind(null, false, irc, min, max, channels), Math.floor(Math.random() * max) + min);
+}
+
 exports.init = function () {
+	if (typeof this.config.autoQuoteIntervalMin !== 'number') {
+		this.config.autoQuoteIntervalMin = 3600000;
+	}
 
-	loadQuotes();
+	if (typeof this.config.autoQuoteIntervalMax !== 'number') {
+		this.config.autoQuoteIntervalMax = 14400000;
+	}
 
+	if (!(this.config.autoQuoteOnChannel instanceof Array)) {
+		if (typeof this.config.autoQuoteOnChannel === 'string') {
+			this.config.autoQuoteOnChannel = [this.config.autoQuoteOnChannel];
+		} else {
+			this.config.autoQuoteOnChannel = [];
+		}
+	}
+
+	process.nextTick(loadQuotes);
+
+	if (this.config.autoQuoteOnChannel.length > 0 && this.config.autoQuoteIntervalMax > 0) {
+		randomChannelQuote(true, this.require('irc'), this.config.autoQuoteIntervalMin, this.config.autoQuoteIntervalMax, this.config.autoQuoteOnChannel);
+	}
 	this.addCommand('quote', quote).addCommand('quotes', quote).addCommand('q', quote);
 	this.addAction('quote', quote, /^(quotes|quote|q)[ ]?(.*)$/i, false);
 };
