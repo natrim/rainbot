@@ -18,7 +18,7 @@ botDomain.on('error', function (e) {
 });
 
 botDomain.run(function () {
-	var bot = new(require(LIBS_DIR + '/bot').Bot)();
+	var bot = new (require(LIBS_DIR + '/bot').Bot)();
 	// OR var bot = require('./libs/bot').create();
 	bot.loadConfig(); //load the config from file - default is config.json
 	bot.loadModules(); //preload all active modules - default is from config or modules.json

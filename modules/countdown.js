@@ -203,16 +203,16 @@ Countdown.prototype.createReplyWithCountdown = function (source, serial) {
 
 	if (serial instanceof Array) {
 		var broadcast = function () {
-				var w = cd.getSerial(serial.pop());
+			var w = cd.getSerial(serial.pop());
 
-				if (w) {
-					cd.createReplyWithCountdown(source, w);
-				}
+			if (w) {
+				cd.createReplyWithCountdown(source, w);
+			}
 
-				if (serial.length > 0) {
-					setTimeout(broadcast, 1000);
-				}
-			};
+			if (serial.length > 0) {
+				setTimeout(broadcast, 1000);
+			}
+		};
 
 		setTimeout(broadcast, 100);
 		return;

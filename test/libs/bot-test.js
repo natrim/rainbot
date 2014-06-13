@@ -12,7 +12,7 @@ describe('Bot class', function () {
 
 	var bot;
 	beforeEach(function () {
-		bot = new(require(LIBS_DIR + '/bot').Bot)();
+		bot = new (require(LIBS_DIR + '/bot').Bot)();
 	});
 
 	describe('config', function () {

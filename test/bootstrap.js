@@ -1,5 +1,5 @@
 /*
-	BOOTSTRAP FOR TESTS
+ BOOTSTRAP FOR TESTS
  */
 
 'use strict';

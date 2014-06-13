@@ -40,8 +40,10 @@ function Server(host, port, ssl) {
 	this.lastMsg = '';
 
 	this.socket = null;
-	this.write = function () {};
-	this.end = function () {};
+	this.write = function () {
+	};
+	this.end = function () {
+	};
 }
 
 Server.prototype.valueOf = Server.prototype.toString = function () {

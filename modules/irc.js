@@ -252,81 +252,81 @@ IRC.prototype.processLine = function (line) {
 		var handled = false;
 
 		switch (msg.command) {
-		case 'ERROR':
-			//handle error timeout
-			if (/(timeout|timed out)/i.test(args[0])) {
-				if (this.disconnecting) { //ignore timeout on quit - some servers remove clients using this
-					break;
+			case 'ERROR':
+				//handle error timeout
+				if (/(timeout|timed out)/i.test(args[0])) {
+					if (this.disconnecting) { //ignore timeout on quit - some servers remove clients using this
+						break;
+					}
+					var error = new Error('connection ETIMEDOUT');
+					error.code = 'ETIMEDOUT';
+					this.server.socket.emit('error', error); //mask it as socket error
+					handled = true;
 				}
-				var error = new Error('connection ETIMEDOUT');
-				error.code = 'ETIMEDOUT';
-				this.server.socket.emit('error', error); //mask it as socket error
-				handled = true;
-			}
-			break;
-		case 'NOTICE':
-			source.channel = args[0] === this.server.currentNick ? '' : args[0];
-			text = args[1] || '';
-			if (text.charCodeAt(0) === 1 && text.charCodeAt((text.length - 1)) === 1) {
-				text = text.slice(1);
-				text = text.slice(0, (text.length - 1));
-				if (this.processCTCP(source, text, 'notice')) {
-					this.dispatcher.emit('irc/CTCP', source, text, 'notice', this);
-				}
-			} else {
-				this.dispatcher.emit('irc/NOTICE', source, text, this);
-			}
-			handled = true;
-			break;
-		case 'PRIVMSG':
-			source.channel = args[0] === this.server.currentNick ? '' : args[0];
-			text = args[1] || '';
-			if (text.charCodeAt(0) === 1 && text.charCodeAt((text.length - 1)) === 1) {
-				text = text.slice(1);
-				text = text.slice(0, (text.length - 1));
-				if (this.processCTCP(source, text, 'privmsg')) {
-					this.dispatcher.emit('irc/CTCP', source, text, 'privmsg', this);
-				}
-			} else {
-				this.dispatcher.emit('irc/PRIVMSG', source, text, this);
-			}
-			handled = true;
-			break;
-		case 'PING':
-			//pingpong heartbeat
-			this.send('PONG :' + args[0], true);
-			handled = true;
-			break;
-		case 'NICK':
-			//nick change
-			if (source.nick === this.server.currentNick) {
-				this.server.lastNick = this.server.currentNick;
-				this.server.currentNick = args[0];
-			}
-			break;
-		case '001':
-			//done connecting
-			this.connecting = false;
-			//autojoin
-			if (this.shouldAutoJoin) {
-				setTimeout(this.tryAutoJoin.bind(this), 2000); //give it a sec or two
-			}
-			break;
-		case '430':
-		case '431':
-		case '432':
-		case '433':
-			//nick problem
-			if (this.connecting) {
-				if (this.tryNick.length > 0) { //if we still have some nicks then try them
-					this.nick(this.tryNick.shift());
+				break;
+			case 'NOTICE':
+				source.channel = args[0] === this.server.currentNick ? '' : args[0];
+				text = args[1] || '';
+				if (text.charCodeAt(0) === 1 && text.charCodeAt((text.length - 1)) === 1) {
+					text = text.slice(1);
+					text = text.slice(0, (text.length - 1));
+					if (this.processCTCP(source, text, 'notice')) {
+						this.dispatcher.emit('irc/CTCP', source, text, 'notice', this);
+					}
 				} else {
-					logger.error('No available nick found!');
-					this.quit('Nooo...');
+					this.dispatcher.emit('irc/NOTICE', source, text, this);
 				}
 				handled = true;
-			}
-			break;
+				break;
+			case 'PRIVMSG':
+				source.channel = args[0] === this.server.currentNick ? '' : args[0];
+				text = args[1] || '';
+				if (text.charCodeAt(0) === 1 && text.charCodeAt((text.length - 1)) === 1) {
+					text = text.slice(1);
+					text = text.slice(0, (text.length - 1));
+					if (this.processCTCP(source, text, 'privmsg')) {
+						this.dispatcher.emit('irc/CTCP', source, text, 'privmsg', this);
+					}
+				} else {
+					this.dispatcher.emit('irc/PRIVMSG', source, text, this);
+				}
+				handled = true;
+				break;
+			case 'PING':
+				//pingpong heartbeat
+				this.send('PONG :' + args[0], true);
+				handled = true;
+				break;
+			case 'NICK':
+				//nick change
+				if (source.nick === this.server.currentNick) {
+					this.server.lastNick = this.server.currentNick;
+					this.server.currentNick = args[0];
+				}
+				break;
+			case '001':
+				//done connecting
+				this.connecting = false;
+				//autojoin
+				if (this.shouldAutoJoin) {
+					setTimeout(this.tryAutoJoin.bind(this), 2000); //give it a sec or two
+				}
+				break;
+			case '430':
+			case '431':
+			case '432':
+			case '433':
+				//nick problem
+				if (this.connecting) {
+					if (this.tryNick.length > 0) { //if we still have some nicks then try them
+						this.nick(this.tryNick.shift());
+					} else {
+						logger.error('No available nick found!');
+						this.quit('Nooo...');
+					}
+					handled = true;
+				}
+				break;
 		}
 
 		if (!handled) {
@@ -358,18 +358,18 @@ IRC.prototype.send = function (msg, nolog) {
 	msg = msg.toString('utf8');
 
 	var callback = function () {
-			if (!nolog) {
-				this.dispatcher.emit('irc/SEND', msg, this);
-			}
+		if (!nolog) {
+			this.dispatcher.emit('irc/SEND', msg, this);
+		}
 
-			if (this.config.log) {
-				if (!nolog) {
-					console.log(date(undefined, this.config.logTimeFormat) + ' [SEND]> ' + msg);
-				}
-			} else {
-				logger.debug('[SEND]> ' + msg);
+		if (this.config.log) {
+			if (!nolog) {
+				console.log(date(undefined, this.config.logTimeFormat) + ' [SEND]> ' + msg);
 			}
-		};
+		} else {
+			logger.debug('[SEND]> ' + msg);
+		}
+	};
 
 	this.server.write(msg + '\r\n', callback.bind(this));
 
@@ -462,15 +462,15 @@ IRC.prototype.processCTCP = function (source, msg, type) {
 	if (type === 'privmsg') {
 		var parts = msg.split(' ');
 		switch (parts[0]) {
-		case 'VERSION':
-			this.ctcp(source.nick, 'VERSION Friendship Powered PonyBot', 'notice');
-			return false;
-		case 'TIME':
-			this.ctcp(source.nick, 'TIME ' + (new Date()).toUTCString(), 'notice');
-			return false;
-		case 'PING':
-			this.ctcp(source.nick, msg, 'notice');
-			return false;
+			case 'VERSION':
+				this.ctcp(source.nick, 'VERSION Friendship Powered PonyBot', 'notice');
+				return false;
+			case 'TIME':
+				this.ctcp(source.nick, 'TIME ' + (new Date()).toUTCString(), 'notice');
+				return false;
+			case 'PING':
+				this.ctcp(source.nick, msg, 'notice');
+				return false;
 		}
 	}
 	return true;

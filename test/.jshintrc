@@ -28,5 +28,15 @@
 	"indent": 4,
 
 	"node": true,
-	"globals": { "BOT_DIR": false, "LIBS_DIR": false, "MODULES_DIR": false, "describe": false, "it": false, "before": false, "after": false, "beforeEach": false, "afterEach": false }
+	"globals": {
+		"BOT_DIR": false,
+		"LIBS_DIR": false,
+		"MODULES_DIR": false,
+		"describe": false,
+		"it": false,
+		"before": false,
+		"after": false,
+		"beforeEach": false,
+		"afterEach": false
+	}
 }

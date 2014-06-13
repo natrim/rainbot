@@ -11,12 +11,12 @@ var logger = require(LIBS_DIR + '/logger');
 
 function Bot() {
 	//events
-	var dispatcher = new(require('events').EventEmitter)();
+	var dispatcher = new (require('events').EventEmitter)();
 	dispatcher.setMaxListeners(0); //remove listener limit
 	//add empty config
-	var config = new(require(LIBS_DIR + '/config').Config)();
+	var config = new (require(LIBS_DIR + '/config').Config)();
 	//add MM
-	var moduleManager = new(require(LIBS_DIR + '/moduleManager').ModuleManager)(dispatcher, config);
+	var moduleManager = new (require(LIBS_DIR + '/moduleManager').ModuleManager)(dispatcher, config);
 
 	//load module on new listener
 	dispatcher.on('newListener', function (event) {
@@ -71,7 +71,9 @@ function Bot() {
 	process.on('SIGINT', this.end.bind(this));
 
 	// This will override SIGTSTP and prevent the program from going to the background.
-	process.on('SIGTSTP', function () {});
+	process.on('SIGTSTP', function () {
+		process.stdout.write('[PONY] SIGTSTP DERP! Not stopping for you!\n');
+	});
 }
 
 Bot.prototype.addListener = function addListener() {

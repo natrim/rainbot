@@ -56,26 +56,26 @@ module.exports.init = function () {
 			source.respond('okey, ' + source.nick + '! Lemme see what goes in \'' + chans.join('\', \'') + '\'.');
 
 			var fail = function (s, args) {
-					source.mention('i cannot go to \'' + args[1] + '\'! Because ' + args[2]);
-					clean();
-				};
+				source.mention('i cannot go to \'' + args[1] + '\'! Because ' + args[2]);
+				clean();
+			};
 			var ok = function (s, args) {
-					if (s.nick === irc.currentNick) {
-						source.respond('*ding*, i am now in \'' + args[0] + '\' too!');
-						clean();
-					}
-				};
+				if (s.nick === irc.currentNick) {
+					source.respond('*ding*, i am now in \'' + args[0] + '\' too!');
+					clean();
+				}
+			};
 
 			var timer;
 			var clean = function () {
-					dispatcher.off('irc/405', fail);
-					dispatcher.off('irc/471', fail);
-					dispatcher.off('irc/473', fail);
-					dispatcher.off('irc/474', fail);
-					dispatcher.off('irc/475', fail);
-					dispatcher.off('irc/JOIN', ok);
-					clearTimeout(timer);
-				};
+				dispatcher.off('irc/405', fail);
+				dispatcher.off('irc/471', fail);
+				dispatcher.off('irc/473', fail);
+				dispatcher.off('irc/474', fail);
+				dispatcher.off('irc/475', fail);
+				dispatcher.off('irc/JOIN', ok);
+				clearTimeout(timer);
+			};
 			timer = setTimeout(clean, 5000);
 
 			irc.join.apply(irc, chans);
@@ -101,34 +101,34 @@ module.exports.init = function () {
 			source.respond('okey, ' + source.nick + '! Lemmy try this new name.');
 
 			var fail = function () {
-					source.mention('i failed in renaming myself!');
-					clean();
-				};
+				source.mention('i failed in renaming myself!');
+				clean();
+			};
 			var inuse = function () {
-					source.mention('i failed, somepony uses that name already!');
-					clean();
-				};
+				source.mention('i failed, somepony uses that name already!');
+				clean();
+			};
 			var toofast = function () {
-					source.mention('i failed, they told me i need to wait!');
-					clean();
-				};
+				source.mention('i failed, they told me i need to wait!');
+				clean();
+			};
 			var ok = function (s) {
-					if (s.nick === irc.lastNick) {
-						source.mention('success! Do u like my new name?');
-						clean();
-					}
-				};
+				if (s.nick === irc.lastNick) {
+					source.mention('success! Do u like my new name?');
+					clean();
+				}
+			};
 
 			var timer;
 			var clean = function () {
-					dispatcher.off('irc/430', fail);
-					dispatcher.off('irc/431', fail);
-					dispatcher.off('irc/432', fail);
-					dispatcher.off('irc/433', inuse);
-					dispatcher.off('irc/438', toofast);
-					dispatcher.off('irc/NICK', ok);
-					clearTimeout(timer);
-				};
+				dispatcher.off('irc/430', fail);
+				dispatcher.off('irc/431', fail);
+				dispatcher.off('irc/432', fail);
+				dispatcher.off('irc/433', inuse);
+				dispatcher.off('irc/438', toofast);
+				dispatcher.off('irc/NICK', ok);
+				clearTimeout(timer);
+			};
 			timer = setTimeout(clean, 5000);
 
 			irc.nick(nick);
@@ -157,7 +157,7 @@ module.exports.init = function () {
 	}
 
 	function commandList(source, args) {
-		if (args[0] === 'actions' ||  args[1] === ' actions') {
+		if (args[0] === 'actions' || args[1] === ' actions') {
 			actionList(source);
 			return;
 		}
@@ -251,28 +251,28 @@ module.exports.init = function () {
 			source.respond('you probadly should tell me what i should tell to \'' + target + '\'');
 		} else {
 			var resendreply = function (s, text) {
-					if (target === s.nick) {
-						source.respond(target + ' REPLY: ' + text);
-						clean();
-					}
-				};
+				if (target === s.nick) {
+					source.respond(target + ' REPLY: ' + text);
+					clean();
+				}
+			};
 			var wrongnick = function (s, argv) {
-					source.respond('Nick or channel with name \'' + argv[1] + '\' was not found.');
-					clean();
-				};
+				source.respond('Nick or channel with name \'' + argv[1] + '\' was not found.');
+				clean();
+			};
 			var noExternal = function (s, argv) {
-					source.respond('Channel \'' + argv[1] + '\' has blocked external messages.');
-					clean();
-				};
+				source.respond('Channel \'' + argv[1] + '\' has blocked external messages.');
+				clean();
+			};
 
 			var timer;
 			var clean = function () {
-					dispatcher.off('irc/PRIVMSG', resendreply);
-					dispatcher.off('irc/NOTICE', resendreply);
-					dispatcher.off('irc/401', wrongnick);
-					dispatcher.off('irc/404', noExternal);
-					clearTimeout(timer);
-				};
+				dispatcher.off('irc/PRIVMSG', resendreply);
+				dispatcher.off('irc/NOTICE', resendreply);
+				dispatcher.off('irc/401', wrongnick);
+				dispatcher.off('irc/404', noExternal);
+				clearTimeout(timer);
+			};
 			timer = setTimeout(clean, 5000);
 
 			//say it
@@ -307,17 +307,17 @@ module.exports.init = function () {
 
 		if (args[1]) {
 			var wrongcommand = function (s, args) {
-					if (args[0] === irc.currentNick) {
-						source.mention('my pony powers tells me that command \'' + args[1] + '\' is unknown!');
-						clean();
-					}
-				};
+				if (args[0] === irc.currentNick) {
+					source.mention('my pony powers tells me that command \'' + args[1] + '\' is unknown!');
+					clean();
+				}
+			};
 
 			var timer;
 			var clean = function () {
-					dispatcher.off('irc/421', wrongcommand);
-					clearTimeout(timer);
-				};
+				dispatcher.off('irc/421', wrongcommand);
+				clearTimeout(timer);
+			};
 			timer = setTimeout(clean, 5000);
 
 			irc.irc.send(args[1]);
