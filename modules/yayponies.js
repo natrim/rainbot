@@ -262,5 +262,9 @@ exports.init = function () {
 };
 
 exports.halt = function () {
-	clearInterval(this._refresh);
+	if (this._refresh) {
+		clearInterval(this._refresh);
+		this._refresh = null;
+	}
+	episodes = [];
 };

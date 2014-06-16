@@ -4,7 +4,7 @@
 
 'use strict';
 
-var quotes;
+var quotes = [];
 var ponydex = {};
 var lastQuote = '';
 
@@ -84,7 +84,7 @@ function randomChannelQuote(start, irc, min, max, channels) {
 		}
 	}
 
-	setTimeout(randomChannelQuote.bind(null, false, irc, min, max, channels), Math.floor(Math.random() * max) + min);
+	return setTimeout(randomChannelQuote.bind(null, false, irc, min, max, channels), Math.floor(Math.random() * max) + min);
 }
 
 exports.init = function () {
@@ -107,8 +107,18 @@ exports.init = function () {
 	process.nextTick(loadQuotes);
 
 	if (this.config.autoQuoteOnChannel.length > 0 && this.config.autoQuoteIntervalMax > 0) {
-		randomChannelQuote(true, this.require('irc'), this.config.autoQuoteIntervalMin, this.config.autoQuoteIntervalMax, this.config.autoQuoteOnChannel);
+		this._timer = randomChannelQuote(true, this.require('irc'), this.config.autoQuoteIntervalMin, this.config.autoQuoteIntervalMax, this.config.autoQuoteOnChannel);
 	}
 	this.addCommand('quote', quote).addCommand('quotes', quote).addCommand('q', quote);
 	this.addAction('quote', quote, /^(quotes|quote|q)[ ]?(.*)$/i, false);
+};
+
+exports.halt = function () {
+	if (this._timer) {
+		clearTimeout(this._timer);
+		this._timer = null;
+	}
+	ponydex = {};
+	quotes = [];
+	lastQuote = '';
 };

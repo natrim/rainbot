@@ -346,3 +346,7 @@ exports.init = function () {
 
 	this.addAction('countdown', this.countdown.actions.bind(this.countdown), /^countdown(([ ]+(\w+)([ ]+(.*)|))*)/, ['owner', 'operators']);
 };
+
+exports.halt = function () {
+	this.countdown.cache = {};
+};

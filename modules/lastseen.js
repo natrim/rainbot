@@ -139,4 +139,5 @@ exports.halt = function () {
 	} catch (e) {
 		logger.warn('Lastseen file save failed, i\'m now forgetting all the bronies i saw.');
 	}
+	lastSeenHashStorage = {};
 };
