@@ -1,13 +1,20 @@
 'use strict';
 
+//trim some strings
+if (!String.prototype.trim) {
+	String.prototype.trim = function () {
+		return this.replace(/^\s+|\s+$/g, '');
+	};
+}
+
 var Learning = function (m) {
 	this.module = m;
 };
 
 Learning.prototype.reply = function (source, text) {
 	if (text.substr(0, 1) === '?') {
-		if (typeof this.module.config.terms[text.substr(1)] === 'string') {
-			source.reply(this.module.config.terms[text.substr(1)]);
+		if (typeof this.module.config.terms[text.substr(1).trim()] === 'string') {
+			source.reply(this.module.config.terms[text.substr(1).trim()]);
 		} else {
 			source.mention('i\'m pretty sure i don\'t have this in my books');
 		}
