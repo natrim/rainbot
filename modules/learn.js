@@ -28,11 +28,17 @@ Learning.prototype.replyAction = function (source, args, text) {
 Learning.prototype.learnCommand = function (source, args) {
 	var word = args.shift();
 	var text = args.join(' ');
-	if (word) {
-		this.module.config.terms[word] = text;
-		source.mention('you sucessusfully managed to learn me "' + word + '"');
+	if (word !== '') {
+		if (text.trim() !== '') {
+			var old = (typeof this.module.config.terms[word] === 'string');
+			this.module.config.terms[word] = text;
+			source.mention('you successfully managed to ' + (old ? 're-' : '') + 'learn me "' + word + '"');
+		} else if (typeof this.module.config.terms[word] === 'string') {
+			delete this.module.config.terms[word];
+			source.mention('you successfully managed to unlearn me "' + word + '"');
+		}
 	} else {
-		source.mention('you need to learn me in: <word> <some text>');
+		source.mention('you need to learn me in with: <word> <some text>');
 	}
 };
 
@@ -51,6 +57,7 @@ exports.init = function () {
 	}
 	this.learning = new Learning(this);
 	this.addCommand('list', this.learning.list.bind(this.learning))
+		.addAction('list', this.learning.list.bind(this.learning), /^list$/)
 		.addCommand('learn', this.learning.learnCommand.bind(this.learning), ['owner', 'operators'])
 		.addAction('learn', this.learning.learnAction.bind(this.learning), /^learn (\w+){1} (.*)$/, ['owner', 'operators'])
 		.addAction('learnreply', this.learning.replyAction.bind(this.learning), /^\? (\w+){1}$/);
