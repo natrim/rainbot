@@ -5,9 +5,9 @@ var Learning = function (m) {
 };
 
 Learning.prototype.reply = function (source, text) {
-	if (text.substr(0, 2) === '? ') {
-		if (typeof this.module.config.terms[text.substr(2)] === 'string') {
-			source.reply(this.module.config.terms[text.substr(2)]);
+	if (text.substr(0, 1) === '?') {
+		if (typeof this.module.config.terms[text.substr(1)] === 'string') {
+			source.reply(this.module.config.terms[text.substr(1)]);
 		} else {
 			source.mention('i\'m pretty sure i don\'t have this in my books');
 		}
