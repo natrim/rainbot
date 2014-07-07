@@ -36,6 +36,8 @@ Learning.prototype.learnCommand = function (source, args) {
 		} else if (typeof this.module.config.terms[word] === 'string') {
 			delete this.module.config.terms[word];
 			source.mention('you successfully managed to unlearn me "' + word + '"');
+		} else {
+			source.mention('you need to learn me in with: <word> <some text>');
 		}
 	} else {
 		source.mention('you need to learn me in with: <word> <some text>');
