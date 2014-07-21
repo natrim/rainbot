@@ -12,7 +12,7 @@ var Learning = function (m) {
 };
 
 Learning.prototype.reply = function (source, text) {
-	if (text.substr(0, 1) === '?') {
+	if (text.substr(0, 1) === '?' && text.substr(1).trim() !== '') {
 		if (typeof this.module.config.terms[text.substr(1).trim()] === 'string') {
 			source.reply(this.module.config.terms[text.substr(1).trim()]);
 		} else {
