@@ -248,13 +248,20 @@ Countdown.prototype.createReplyWithCountdown = function (source, serial) {
 };
 
 Countdown.prototype.respond = function (source, error, what, airing, name, episode, now) {
+	now = now || new time.Date().getTime();
+
 	if (error) {
+		if((this.cache[what].date - now) > 0) { //use old record
+			source.mention(this.formatCountdown(this.cache[what].date, this.cache[what].name, this.cache[what].episode, now));
+			return;
+		}
+
 		source.mention(typeof error === 'string' ? error : error instanceof Error ? error.message : 'no next episode found!');
 		return;
 	}
 
 	this.cache[what].date = airing;
-	this.cache[what].lastCheck = now || new time.Date().getTime();
+	this.cache[what].lastCheck = now;
 	if (name && name !== '') {
 		this.cache[what].name = name;
 	}
