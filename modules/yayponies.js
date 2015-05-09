@@ -57,8 +57,8 @@ function scanFeed(page, callback) {
 						episode: episode,
 						name: match[1]
 					};
-					episodes[season - 1][episode - 1][type] = magnet;
 				}
+				episodes[season - 1][episode - 1][type] = magnet;
 			}
 
 		});
