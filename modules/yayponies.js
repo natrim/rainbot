@@ -19,10 +19,8 @@ var scanFeeds = [
 ];
 
 var formats = [];
-var formatsHash = {};
 scanFeeds.forEach(function(page) {
 	formats.push(page[1]);
-	formatsHash[page[1]] = page[1];
 });
 
 var episodes = [];
@@ -55,9 +53,11 @@ function scanFeed(page, callback) {
 					episodes[season - 1][episode - 1] = {
 						season: season,
 						episode: episode,
-						name: match[1]
+						name: match[1],
+						available: []
 					};
 				}
+				episodes[season - 1][episode - 1].available.push(type);
 				episodes[season - 1][episode - 1][type] = magnet;
 			}
 
@@ -93,6 +93,18 @@ function refreshEpisodes(source) {
 	});
 }
 
+function getFormats(search) {
+	if (typeof search !== 'undefined') {
+		search = search.toLowerCase();
+		return formats.filter(function(val) {
+			return val.search(search) !== -1;
+		});
+	}
+	else {
+		return [formats[0]];
+	}
+}
+
 function getPonies(source, arg) {
 	var episode;
 
@@ -125,23 +137,32 @@ function getPonies(source, arg) {
 		ep[1] = parseInt(ep[1], 10);
 		ep[2] = parseInt(ep[2], 10);
 
-		var format = formatsHash[typeof arg[1] !== 'undefined' ? arg[1].toLowerCase() : formats[0]];
+		var foundFormats = getFormats(arg[1]);
 
-		if (!format) {
+		if (!(typeof foundFormats === 'object' && foundFormats instanceof Array) || foundFormats.length <= 0) {
 			source.mention('wrong format! you can use: ' + formats.join(', '));
 			return;
 		}
 
-		if ((episode = episodes[ep[1] - 1]) && (episode = episode[ep[2] - 1]) && episode[format] && episode[format]) {
-			source.mention('episode S' + (episode.season < 10 ? '0' + episode.season : episode.season) + 'E' + (episode.episode < 10 ? '0' + episode.episode : episode.episode) + (episode.name ? ' (' + episode.name + ')' : '') + ' in format ' + format + ' - ' + episode[format]);
-		}
-		else {
+		var found = 0;
+		foundFormats.forEach(function(format) {
 			if ((episode = episodes[ep[1] - 1]) && (episode = episode[ep[2] - 1])) {
-				source.mention('episode S' + (ep[1] < 10 ? '0' + ep[1] : ep[1]) + 'E' + (ep[2] < 10 ? '0' + ep[2] : ep[2]) + ' in format ' + format + ' is not available, try different format (' + formats.join(', ') + ')');
+				if (episode[format] && episode[format]) {
+					found = 1;
+					source.mention('episode S' + (episode.season < 10 ? '0' + episode.season : episode.season) + 'E' + (episode.episode < 10 ? '0' + episode.episode : episode.episode) + (episode.name ? ' (' + episode.name + ')' : '') + ' in format ' + format + ' - ' + episode[format]);
+				}
+				else if (found === 0) {
+					found = 2;
+				}
 			}
-			else {
-				source.mention('i can\'t find ' + 'episode S' + (ep[1] < 10 ? '0' + ep[1] : ep[1]) + 'E' + (ep[2] < 10 ? '0' + ep[2] : ep[2]));
+		});
+		if (found === 2) {
+			if ((episode = episodes[ep[1] - 1]) && (episode = episode[ep[2] - 1])) {
+				source.mention('episode S' + (ep[1] < 10 ? '0' + ep[1] : ep[1]) + 'E' + (ep[2] < 10 ? '0' + ep[2] : ep[2]) + ' in this format is not available, try different format (' + episode.available.join(', ') + ')');
 			}
+		}
+		else if (found === 0) {
+			source.mention('i can\'t find ' + 'episode S' + (ep[1] < 10 ? '0' + ep[1] : ep[1]) + 'E' + (ep[2] < 10 ? '0' + ep[2] : ep[2]));
 		}
 	}
 	else {
