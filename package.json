@@ -10,9 +10,15 @@
 	},
 	"scripts": {
 		"start": "node ./app",
-		"pretest": "make jshint",
-		"test": "make test"
+		"pretest": "./node_modules/.bin/jshint --reporter=unix .",
+		"test": "./node_modules/.bin/mocha ./test",
+		"minified-test": "./node_modules/.bin/mocha ./test --reporter min",
+		"lint": "./node_modules/.bin/jshint --reporter=unix .; true"
 	},
+	"pre-commit" : [
+		"pretest",
+		"minified-test"
+	],
 	"dependencies": {
 		"request": "*",
 		"time": "*",

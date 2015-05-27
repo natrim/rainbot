@@ -27,10 +27,5 @@
 
 	"indent": 4,
 
-	"node": true,
-	"globals": {
-		"BOT_DIR": false,
-		"LIBS_DIR": false,
-		"MODULES_DIR": false
-	}
+	"node": true
 }
