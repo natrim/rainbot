@@ -64,6 +64,8 @@ function tryWiki(cmd, source) {
 		cmd = 'Archer_(TV_series)';
 	} else if (cmd === 'mlp' || cmd === 'pony' || cmd === 'p') {
 		cmd = 'My_Little_Pony:_Friendship_is_Magic';
+	} else if (cmd === 'mash' || cmd === 'm') {
+		cmd = 'M*A*S*H_(TV_series)';
 	} else {
 		cmd = cmd.replace(' ', '_');
 	}
