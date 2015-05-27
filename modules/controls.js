@@ -87,27 +87,31 @@ Controls.prototype.removeCommands = function (list) {
 };
 
 Controls.prototype.parse = function (source, text) {
-	if (typeof text !== 'string' || text.length <= 0) {
+	if (typeof text !== 'string') {
+		return;
+	}
+
+	text = text.trim();
+
+	if (text.length <= 0) {
 		return;
 	}
 
 	if (!source.channel) { //itz direct message
-		this.processAction(source, text.trim());
-	} else if (source.channel && text.substr(0, this.config.commandDelimiter.length) === this.config.commandDelimiter) { //itz command in channel
-		//remove the delimiter
-		text = text.substr(this.config.commandDelimiter.length);
-
-		this.processCommand(source, text.trim());
+		this.processAction(source, text);
+	} else if (source.channel && text.length > this.config.commandDelimiter.length && text.substr(0, this.config.commandDelimiter.length) === this.config.commandDelimiter) { //itz command in channel
+		this.processCommand(source, text.substr(this.config.commandDelimiter.length));
 	} else if ((new RegExp('^' + this._irc.currentNick + '[ ,;:]')).test(text.substr(0, this._irc.currentNick.length + 1))) { //itz higlight in channel
-		//remove the trigger
-		text = text.substr(this._irc.currentNick.length + 1);
-
-		this.processAction(source, text.trim());
+		this.processAction(source, text.substr(this._irc.currentNick.length + 1));
 	}
 };
 
 Controls.prototype.processCommand = function (source, text) {
-	var args = text.match(/[^\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'/g).map(function (v) {
+	var args = text.match(/[^\s\"\']+|\"([^\"]*)\"|\'([^\']*)\'/g);
+	if (args === null) {
+		return;
+	}
+	args = args.map(function (v) {
 		return v.replace(/\"|\'/g, '');
 	});
 	var command = args.shift();
