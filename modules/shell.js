@@ -88,9 +88,9 @@ Shell.prototype.parseLine = function (cmd) {
 			break;
 		default:
 			var handled = false;
-			if (cmd.substr(0, this.c.commandDelimiter.length) === this.c.commandDelimiter) { //command
+			if (cmd.length > this.c.commandDelimiter.length && cmd.substr(0, this.c.commandDelimiter.length) === this.c.commandDelimiter) { //command
 				handled = this.c.processCommand(this.source, cmd.substr(this.c.commandDelimiter.length));
-			} else { //by default try action
+			} else if (cmd.length > 0) { //action
 				handled = this.c.processAction(this.source, cmd);
 			}
 
