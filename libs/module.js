@@ -89,10 +89,10 @@ Module.prototype.halt = function halt() {
 			if (this.context !== null && typeof this.context.halt === 'function') {
 				this.context.halt.call(this, false);
 			}
-			this.__unload();
 			if (this.dispatcher && this.dispatcher.clearEvents) {
 				this.dispatcher.clearEvents();
 			}
+			this.__unload();
 		} catch (e) {
 			error = new Error('Failed unloading context of \'' + this.name + '\' module! ' + e.message);
 		}
@@ -117,10 +117,10 @@ Module.prototype.reload = function reload() {
 			if (this.context !== null && typeof this.context.halt === 'function') {
 				this.context.halt.call(this, true);
 			}
-			this.__unload();
 			if (this.dispatcher && this.dispatcher.clearEvents) {
 				this.dispatcher.clearEvents();
 			}
+			this.__unload();
 			this.__load();
 			if (this.context !== null && typeof this.context.init === 'function') {
 				this.context.init.call(this, true);
