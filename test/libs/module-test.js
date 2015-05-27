@@ -3,21 +3,10 @@
 //load assert lib
 var assert = require('chai').assert;
 
-var MODULE = require(LIBS_DIR + '/module');
+var MODULE = require('./../../libs/module');
 var EventEmitter = require('events').EventEmitter;
 
 describe('Module class', function () {
-	var OLD_MODULES_DIR;
-
-	before(function () {
-		OLD_MODULES_DIR = MODULES_DIR;
-		global.MODULES_DIR = require('path').resolve(BOT_DIR, 'test_modules');
-	});
-
-	after(function () {
-		global.MODULES_DIR = OLD_MODULES_DIR;
-	});
-
 	describe('creation', function () {
 		it('throws Error without name', function () {
 			assert.throws(function () {

@@ -12,7 +12,7 @@
 		"start": "node ./app",
 		"pretest": "./node_modules/.bin/jshint --reporter=unix .",
 		"test": "./node_modules/.bin/mocha ./test",
-		"minified-test": "./node_modules/.bin/mocha ./test --reporter min",
+		"minified-test": "./node_modules/.bin/mocha ./test --reporter dot",
 		"lint": "./node_modules/.bin/jshint --reporter=unix .; true"
 	},
 	"pre-commit" : [

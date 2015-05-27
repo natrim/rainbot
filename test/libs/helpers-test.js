@@ -3,7 +3,7 @@
 //load assert lib
 var assert = require('chai').assert;
 
-var helpers = require(LIBS_DIR + '/helpers');
+var helpers = require('./../../libs/helpers');
 
 describe('Helpers', function () {
 	describe('#dateFormat', function () {

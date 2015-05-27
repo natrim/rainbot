@@ -5,7 +5,7 @@
 
 'use strict';
 
-var logger = require(LIBS_DIR + '/logger');
+var logger = require('./../libs/logger');
 
 var Command = require('./controls/command').Command;
 var Action = require('./controls/action').Action;
@@ -228,8 +228,8 @@ module.exports.init = function (reload) {
 	}
 
 	//export some functions from Controls
-	//require(LIBS_DIR + '/helpers').export(this, this.controls, ['addCommand', 'addAction', 'removeCommand', 'removeAction', 'removeCommands', 'removeActions']);
-	require(LIBS_DIR + '/helpers').export(this, this.controls, ['removeCommand', 'removeAction', 'removeCommands', 'removeActions']);
+	//require('./../libs/helpers').export(this, this.controls, ['addCommand', 'addAction', 'removeCommand', 'removeAction', 'removeCommands', 'removeActions']);
+	require('./../libs/helpers').export(this, this.controls, ['removeCommand', 'removeAction', 'removeCommands', 'removeActions']);
 
 	/**
 	 * bind the controls to module core
@@ -240,7 +240,7 @@ module.exports.init = function (reload) {
 		this.moduleCommands = {};
 	}
 
-	var proto = require(LIBS_DIR + '/module').Module.prototype;
+	var proto = require('./../libs/module').Module.prototype;
 	proto.addCommand = function (name) {
 		name = name.replace(/[^a-zA-Z0-9_\-]+/g, '');
 		var args = arguments;
@@ -308,7 +308,7 @@ module.exports.init = function (reload) {
 };
 
 module.exports.halt = function () {
-	var proto = require(LIBS_DIR + '/module').Module.prototype;
+	var proto = require('./../libs/module').Module.prototype;
 	delete proto.addCommand;
 	delete proto.addAction;
 	delete proto.removeCommand;

@@ -4,19 +4,16 @@
 
 'use strict';
 
-//check main entry point path and resolve it
-require('./helpers').checkGlobals(true);
-
-var logger = require(LIBS_DIR + '/logger');
+var logger = require('./logger');
 
 function Bot() {
 	//events
 	var dispatcher = new (require('events').EventEmitter)();
 	dispatcher.setMaxListeners(0); //remove listener limit
 	//add empty config
-	var config = new (require(LIBS_DIR + '/config').Config)();
+	var config = new (require('./config').Config)();
 	//add MM
-	var moduleManager = new (require(LIBS_DIR + '/moduleManager').ModuleManager)(dispatcher, config);
+	var moduleManager = new (require('./moduleManager').ModuleManager)(dispatcher, config);
 
 	//load module on new listener
 	dispatcher.on('newListener', function (event) {
@@ -148,8 +145,9 @@ Bot.prototype.loadConfig = function loadConfig(config, merge) {
 
 	try {
 		if (this._configFile) {
-			require.cache[BOT_DIR + '/' + this._configFile] = null;
-			config = require(BOT_DIR + '/' + this._configFile);
+			var cpath = require.resolve('./../' + this._configFile);
+			require.cache[cpath] = null; //remove from require cache to reload
+			config = require(cpath);
 		}
 		if (!merge) {
 			this.config.clear(); //throw out old config
@@ -192,7 +190,8 @@ Bot.prototype.saveConfig = function saveConfig(savefile, asString) {
 
 	//blocking write
 	try {
-		require('fs').writeFileSync(BOT_DIR + '/' + savefile, JSON.stringify(this.config, null, 4));
+		var cpath = require('path').resolve(__dirname, '..', savefile);
+		require('fs').writeFileSync(cpath, JSON.stringify(this.config, null, 4));
 		logger.info('Config saved to \'' + savefile + '\'.');
 	} catch (err) {
 		error = new Error('Failed to save config with error: ' + err);
@@ -248,7 +247,9 @@ Bot.prototype.loadModules = function loadModules(modules) {
 	//load the file
 	if (Object.keys(modules).length <= 0) {
 		try {
-			modules = require(BOT_DIR + '/' + this.config.bot.modules);
+			var mpath = require.resolve('./../' + this.config.bot.modules);
+			require.cache[mpath] = null; //empty require cache for this file
+			modules = require(mpath);
 		} catch (e) {
 			modules = {};
 			error = new Error('Cannot load modules file \'' + this.config.bot.modules + '\'!');

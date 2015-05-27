@@ -10,7 +10,7 @@ module.exports.init = function () {
 	var controls = this.require('controls');
 	var module = this;
 
-	//get moduleManager and bot and save it for the commands
+
 	this.dispatcher.on('init', function (bot) {
 		module.mm = bot.modules;
 		module.bot = bot;
@@ -332,8 +332,8 @@ module.exports.init = function () {
 
 	this.addAction('update', function (source) {
 		source.action('is fetching updates...');
-
-		require('child_process').exec('cd ' + BOT_DIR + ' && git pull', function (error, stdout) {
+		
+		require('child_process').exec('cd ' + require('path').resolve(__dirname, '..') + ' && git pull', function (error, stdout) {
 			if (error) {
 				source.respond('Update failed!');
 				return;
@@ -393,7 +393,7 @@ module.exports.init = function () {
 				source.respond('example-config.json was updated, please use check your configuration');
 			}
 
-			updatedModules = require(LIBS_DIR + '/helpers').unique(updatedModules);
+			updatedModules = require('./../libs/helpers').unique(updatedModules);
 			if (updatedModules.length > 0) {
 				source.respond('Don\'t forget to reload updated modules: ' + updatedModules.join(', '));
 			}
@@ -405,7 +405,7 @@ module.exports.init = function () {
 	}, /^update$/i, ['owner']);
 
 	this.addAction('stats', function (source, args) {
-		var helpers = require(LIBS_DIR + '/helpers');
+		var helpers = require('./../libs/helpers');
 
 		if (args[0] === 'uptime') {
 			source.mention('i\'m running already ' + helpers.formatTime(process.uptime()));

@@ -1,6 +1,6 @@
 'use strict';
 
-var time = require('time'), logger = require(LIBS_DIR + '/logger');
+var time = require('time'), logger = require('./../libs/logger');
 
 //main data storage
 var lastSeenHashStorage = {};
@@ -121,7 +121,7 @@ function replyWithResult(source, args) {
 
 exports.init = function () {
 	try {
-		lastSeenHashStorage = JSON.parse(require('fs').readFileSync(MODULES_DIR + '/lastseen/hash.json'));
+		lastSeenHashStorage = JSON.parse(require('fs').readFileSync(require('path').resolve(__dirname, 'lastseen/hash.json')));
 	} catch (e) {
 		logger.warn('Lastseen file load failed, using empty file.');
 		lastSeenHashStorage = {};
@@ -135,7 +135,7 @@ exports.init = function () {
 
 exports.halt = function () {
 	try {
-		require('fs').writeFileSync(MODULES_DIR + '/lastseen/hash.json', JSON.stringify(lastSeenHashStorage, null, 4));
+		require('fs').writeFileSync(require('path').resolve(__dirname, 'lastseen/hash.json'), JSON.stringify(lastSeenHashStorage, null, 4));
 	} catch (e) {
 		logger.warn('Lastseen file save failed, i\'m now forgetting all the bronies i saw.');
 	}

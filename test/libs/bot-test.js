@@ -3,18 +3,9 @@
 //load assert lib
 var assert = require('chai').assert;
 
-var BOT = require(LIBS_DIR + '/bot').Bot;
+var BOT = require('./../../libs/bot').Bot;
 
 describe('Bot class', function () {
-	it('BOT_DIR should contain app.js', function () {
-		assert.isTrue(require('fs').existsSync(BOT_DIR + '/app.js'));
-	});
-
-	var bot;
-	beforeEach(function () {
-		bot = new (require(LIBS_DIR + '/bot').Bot)();
-	});
-
 	describe('config', function () {
 		it('loads config with object', function () {
 			var bot = new BOT();
@@ -94,10 +85,11 @@ describe('Bot class', function () {
 			assert.equal(bot.saveConfig(null, true), JSON.stringify(config, null, 4));
 		});
 		it('can save config to json file', function () {
+			var cpath = require('path').resolve(__dirname, '../..', 'test-config.json');
 			after(function () {
 				var fs = require('fs');
-				if (fs.existsSync(BOT_DIR + '/test-config.json')) {
-					fs.unlinkSync(BOT_DIR + '/test-config.json');
+				if (fs.existsSync(cpath)) {
+					fs.unlinkSync(cpath);
 				}
 			});
 
@@ -117,21 +109,40 @@ describe('Bot class', function () {
 
 			bot.saveConfig('test-config.json');
 
-			assert.equal(require('fs').readFileSync(BOT_DIR + '/test-config.json'), JSON.stringify(config, null, 4));
+			assert.equal(require('fs').readFileSync(cpath), JSON.stringify(config, null, 4));
+		});
+		
+		it('can load config from json file', function () {
+			var cpath = require('path').resolve(__dirname, '../..', 'test-config.json');
+			after(function () {
+				var fs = require('fs');
+				if (fs.existsSync(cpath)) {
+					fs.unlinkSync(cpath);
+				}
+			});
+
+			var bot = new BOT();
+			var config = {
+				'bot': {
+					'name': 'Dash',
+					'modules': 'dashing.json',
+					'autosave': false,
+					'debug': false
+				},
+				'superpony': {
+					'name': 'Trixie'
+				}
+			};
+			
+			require('fs').writeFileSync(cpath, JSON.stringify(config, null, 4));
+			
+			bot.loadConfig('test-config.json');
+
+			assert.deepEqual(config, bot.config);
 		});
 	});
 
 	describe('modules', function () {
-		var OLD_MODULES_DIR;
-		before(function () {
-			OLD_MODULES_DIR = MODULES_DIR;
-			global.MODULES_DIR = require('path').resolve(BOT_DIR, 'test_modules');
-		});
-
-		after(function () {
-			global.MODULES_DIR = OLD_MODULES_DIR;
-		});
-
 		var bot;
 		beforeEach(function () {
 			bot = new BOT();
@@ -210,16 +221,6 @@ describe('Bot class', function () {
 	});
 
 	describe('others', function () {
-		var OLD_MODULES_DIR;
-		before(function () {
-			OLD_MODULES_DIR = MODULES_DIR;
-			global.MODULES_DIR = require('path').resolve(BOT_DIR, 'test_modules');
-		});
-
-		after(function () {
-			global.MODULES_DIR = OLD_MODULES_DIR;
-		});
-
 		it('the config should be passed to module and back', function () {
 			var bot = new BOT();
 			var config = {

@@ -1,9 +1,6 @@
 'use strict';
 
-//check main entry point path
-require('./helpers').checkGlobals();
-
-var logger = require(LIBS_DIR + '/logger');
+var logger = require('./logger');
 var EventEmitter = require('events').EventEmitter;
 
 function Module(name) {
@@ -23,10 +20,19 @@ function Module(name) {
 			writable: false,
 			configurable: false,
 			enumerable: true,
-			value: require.resolve(MODULES_DIR + '/' + this.name)
+			value: require.resolve('./../modules/' + this.name)
 		});
 	} catch (e) {
-		throw new Error('Module \'' + this.name + '\' does not exists!');
+		try {
+			Object.defineProperty(this, 'filename', {
+				writable: false,
+				configurable: false,
+				enumerable: true,
+				value: require.resolve('./../test_modules/' + this.name)
+			});
+		} catch (e) {
+			throw new Error('Module \'' + this.name + '\' does not exists!');
+		}
 	}
 
 	this.loaded = false;

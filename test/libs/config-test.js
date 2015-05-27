@@ -3,7 +3,7 @@
 //load assert lib
 var assert = require('chai').assert;
 
-var Config = require(LIBS_DIR + '/config');
+var Config = require('./../../libs/config');
 
 describe('Config lib', function () {
 	describe('class construction', function () {

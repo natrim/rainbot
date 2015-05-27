@@ -1,26 +1,5 @@
 'use strict';
 
-module.exports.checkGlobals = function check(resolve) {
-	if (!global.BOT_DIR) {
-		if (!resolve) {
-			throw new Error('Wrong entry point! No \'BOT_DIR\' defined!');
-		}
-		global.BOT_DIR = require('path').resolve(__dirname, '..');
-	}
-	if (!global.LIBS_DIR) {
-		if (!resolve) {
-			throw new Error('Wrong entry point! No \'LIBS_DIR\' defined!');
-		}
-		global.LIBS_DIR = require('path').resolve(global.BOT_DIR, 'libs');
-	}
-	if (!global.MODULES_DIR) {
-		if (!resolve) {
-			throw new Error('Wrong entry point! No \'MODULES_DIR\' defined!');
-		}
-		global.MODULES_DIR = require('path').resolve(global.BOT_DIR, 'modules');
-	}
-};
-
 /**
  * date helper
  * @param {Date} d Date instance or nothing

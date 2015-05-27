@@ -11,8 +11,9 @@ var lastQuote = '';
 function loadQuotes() {
 	quotes = [];
 	var fs = require('fs');
-	var forEachAsync = require(LIBS_DIR + '/helpers').forEachAsync;
-	fs.readdir(MODULES_DIR + '/quotes', function (err, list) {
+	var forEachAsync = require('./../libs/helpers').forEachAsync;
+	var qdir = require('path').resolve(__dirname, 'quotes');
+	fs.readdir(qdir, function (err, list) {
 		if (err) {
 			return;
 		}
@@ -21,7 +22,7 @@ function loadQuotes() {
 			var ext = tmp.pop();
 			var pony = tmp.join('.');
 			if (ext === 'json') {
-				var data = require(MODULES_DIR + '/quotes/' + file);
+				var data = require(qdir + '/' + file);
 				if (typeof data === 'object' && data instanceof Array) {
 					quotes = quotes.concat(data);
 					ponydex[pony] = quotes.slice(quotes.length - data.length, quotes.length);

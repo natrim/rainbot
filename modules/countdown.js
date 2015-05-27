@@ -6,7 +6,7 @@
 
 var time = require('time');
 var http = require('http'), https = require('https');
-var formattedDate = require(LIBS_DIR + '/helpers').dateFormat;
+var formattedDate = require('./../libs/helpers').dateFormat;
 
 //trim some strings
 if (!String.prototype.trim) {

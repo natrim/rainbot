@@ -3,22 +3,11 @@
 //load assert lib
 var assert = require('chai').assert;
 
-var M = require(LIBS_DIR + '/module');
-var MM = require(LIBS_DIR + '/moduleManager');
+var M = require('./../../libs/module');
+var MM = require('./../../libs/moduleManager');
 var EventEmitter = require('events').EventEmitter;
 
 describe('ModuleManager class', function () {
-	var OLD_MODULES_DIR;
-
-	before(function () {
-		OLD_MODULES_DIR = MODULES_DIR;
-		global.MODULES_DIR = require('path').resolve(BOT_DIR, 'test_modules');
-	});
-
-	after(function () {
-		global.MODULES_DIR = OLD_MODULES_DIR;
-	});
-
 	describe('creation', function () {
 		it('throws error if no config', function () {
 			assert.throws(function () {

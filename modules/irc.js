@@ -5,12 +5,12 @@
 
 'use strict';
 
-var logger = require(LIBS_DIR + '/logger');
+var logger = require('./../libs/logger');
 
 var Server = require('./irc/server').Server;
 var Source = require('./irc/source').Source;
 
-var date = require(LIBS_DIR + '/helpers').dateFormat;
+var date = require('./../libs/helpers').dateFormat;
 
 //trim some strings
 if (!String.prototype.trim) {
@@ -539,7 +539,7 @@ exports.init = function (reload) {
 	}
 
 	//export functions
-	require(LIBS_DIR + '/helpers').export(this, this.irc, ['command', 'join', 'part', 'connect', 'quit', 'nick', 'ctcp', 'action', 'notice', 'privMsg']);
+	require('./../libs/helpers').export(this, this.irc, ['command', 'join', 'part', 'connect', 'quit', 'nick', 'ctcp', 'action', 'notice', 'privMsg']);
 
 	//check the autoconnect config
 	if (typeof this.config.autoconnect !== 'boolean') {

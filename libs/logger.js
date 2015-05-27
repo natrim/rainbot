@@ -6,6 +6,7 @@ function Logger() {
 	this.lastMessage = '';
 }
 
+Logger.prototype.__write = console.log;
 Logger.prototype.onBeforeLog = function onBeforeLog() {
 };
 Logger.prototype.onAfterLog = function onAfterLog() {
@@ -85,7 +86,7 @@ Logger.prototype.log = function log(msg, level) {
 				this.lastMessage = msg;
 		}
 		if (!handled) {
-			console.log(this.lastMessage);
+			this.__write(this.lastMessage);
 		}
 		handled = true;
 	}

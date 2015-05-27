@@ -3,12 +3,13 @@
 //load assert lib
 var assert = require('chai').assert;
 
-var logger = require(LIBS_DIR + '/logger');
+var logger = require('./../../libs/logger');
 
 describe('Logger', function () {
 	var loggr;
 	beforeEach(function () {
 		loggr = new logger.Logger();
+		loggr.__write = function() { };
 	});
 
 	describe('#log', function () {

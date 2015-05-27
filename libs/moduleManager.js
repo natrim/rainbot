@@ -1,10 +1,7 @@
 'use strict';
 
-//check main entry point path
-require('./helpers').checkGlobals();
-
-var MODULE = require(LIBS_DIR + '/module').Module;
-var logger = require(LIBS_DIR + '/logger');
+var MODULE = require('./module').Module;
+var logger = require('./logger');
 var EventEmitter = require('events').EventEmitter;
 
 function ModuleManager(dispatcher, config) {
