@@ -41,6 +41,9 @@ function slug(word) {
 }
 
 function getRandomQuote(pony) {
+	if (pony === '') { //random pony quote by def
+		return quotes[Math.floor(Math.random() * quotes.length)];
+	}
 	pony = slug(pony) || null;
 	if (!(quotes instanceof Array) || quotes.length <= 0) {
 		return '';
@@ -49,12 +52,46 @@ function getRandomQuote(pony) {
 	if (pony && typeof ponydex[pony] !== 'undefined') {
 		return ponydex[pony][Math.floor(Math.random() * ponydex[pony].length)];
 	}
+	
+	return '';
+}
 
-	return quotes[Math.floor(Math.random() * quotes.length)];
+var cheerio = require('cheerio'),
+	request = require('request');
+
+function tryWiki(cmd, source) {
+	if(cmd === 'archer' || cmd === 'a') {
+		cmd = 'Archer_(TV_series)';
+	} else if (cmd === 'mlp' || cmd === 'pony' || cmd === 'p') {
+		cmd = 'My_Little_Pony:_Friendship_is_Magic';
+	} else {
+		cmd = cmd.replace(' ', '_');
+	}
+	request('http://en.wikiquote.org/wiki/' + cmd, function(error, response, body) {
+		if (error || response.statusCode !== 200) {
+			source.respond('i did not found any quote!');
+			return;
+		}
+
+		var $ = cheerio.load(body, {
+			ignoreWhitespace: true
+		});
+		
+		var quotes = $('dl').toArray();
+		var quote = quotes[Math.floor(Math.random() * quotes.length)];
+		var dialog = $(quote).text().trim();
+		if (dialog.length > 0) {
+			source.respond(dialog);
+		} else {
+			source.respond('i did not found any quote!');
+		}
+	});
+    
+    return '';
 }
 
 function quote(source, args) {
-	var pony = null;
+	var pony = '';
 	if (typeof args.input !== 'undefined') {
 		pony = args[2];
 	} else {
@@ -63,9 +100,10 @@ function quote(source, args) {
 
 	var q = getRandomQuote(pony);
 	if (q === '') {
-		source.respond('i did not found any quote!');
+		tryWiki(pony, source);
+		return;
 	} else if (q === lastQuote) {
-		q = getRandomQuote();
+		q = getRandomQuote(pony);
 	}
 	source.respond(q);
 	lastQuote = q;
