@@ -62,6 +62,6 @@ exports.init = function () {
 		.addAction('list', this.learning.list.bind(this.learning), /^list$/)
 		.addCommand('learn', this.learning.learnCommand.bind(this.learning), ['owner', 'operators'])
 		.addAction('learn', this.learning.learnAction.bind(this.learning), /^learn (\w+){1} (.*)$/, ['owner', 'operators'])
-		.addAction('learnreply', this.learning.replyAction.bind(this.learning), /^\? (\w+){1}$/);
+		.addAction('learnreply', this.learning.replyAction.bind(this.learning), /^\?[ ]*(\w+){1}$/);
 	this.dispatcher.on('irc/PRIVMSG', this.learning.reply.bind(this.learning));
 };
