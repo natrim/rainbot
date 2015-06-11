@@ -24,11 +24,11 @@ module.exports.init = function () {
 
 		if (args[0]) {
 			source.respond('okey, ' + source.nick + '! I am sending the OP to ' + args[0] + '!');
-			irc.send('MODE ' + source.channel + ' -o ' + source.nick);
-			irc.send('MODE ' + source.channel + ' +o ' + args[0]);			
+			irc.irc.send('MODE ' + source.channel + ' -o ' + source.nick);
+			irc.irc.send('MODE ' + source.channel + ' +o ' + args[0]);			
 		} else {
 			source.respond('okey, ' + source.nick + '! The OP is coming your way!');
-			irc.send('MODE ' + source.channel + ' +o ' + source.nick);
+			irc.irc.send('MODE ' + source.channel + ' +o ' + source.nick);
 		}
 	}, ['owner', 'operators']);
 
