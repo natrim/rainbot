@@ -16,6 +16,22 @@ module.exports.init = function () {
 		module.bot = bot;
 	});
 
+	this.addCommand('op', function (source, args) {
+		if (!irc.connected) {
+			source.respond('I\'m not connected to server!');
+			return;
+		}
+
+		if (args[0]) {
+			source.respond('okey, ' + source.nick + '! I am sending the OP to ' + args[0] + '!');
+			irc.send('MODE ' + source.channel + ' -o ' + source.nick);
+			irc.send('MODE ' + source.channel + ' +o ' + args[0]);			
+		} else {
+			source.respond('okey, ' + source.nick + '! The OP is coming your way!');
+			irc.send('MODE ' + source.channel + ' +o ' + source.nick);
+		}
+	}, ['owner', 'operators']);
+
 	this.addAction('quit', function (source, args) {
 		if (!irc.connected) {
 			source.respond('I\'m not connected to server!');
