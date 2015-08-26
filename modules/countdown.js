@@ -5,7 +5,7 @@
 'use strict';
 
 var time = require('time');
-var http = require('http'), https = require('https');
+var http = require('http');
 var formattedDate = require('./../libs/helpers').dateFormat;
 
 //trim some strings
@@ -16,10 +16,9 @@ if (!String.prototype.trim) {
 }
 
 function TvCountDownFactory(what, serial, callback) {
-	https.get({
+	http.get({
 		host: 'tvcountdown.com',
-		path: '/s/' + what,
-		rejectUnauthorized: false
+		path: '/s/' + what
 	}, function (res) {
 		var data = '';
 		res.setEncoding('utf8');
