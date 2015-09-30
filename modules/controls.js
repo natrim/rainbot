@@ -101,8 +101,11 @@ Controls.prototype.parse = function (source, text) {
 		this.processAction(source, text);
 	} else if (source.channel && text.length > this.config.commandDelimiter.length && text.substr(0, this.config.commandDelimiter.length) === this.config.commandDelimiter) { //itz command in channel
 		this.processCommand(source, text.substr(this.config.commandDelimiter.length));
-	} else if ((new RegExp('^' + this._irc.currentNick + '[ ,;:]')).test(text.substr(0, this._irc.currentNick.length + 1))) { //itz higlight in channel
-		this.processAction(source, text.substr(this._irc.currentNick.length + 1));
+	} else {
+		var match = text.match(new RegExp('^' + this._irc.currentNick + '[ ;:,]+(.*)'));
+		if (match !== null) { //itz higlight in channel
+			this.processAction(source, match[1]);
+		}
 	}
 };
 
