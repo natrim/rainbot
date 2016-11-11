@@ -145,9 +145,12 @@ Bot.prototype.loadConfig = function loadConfig(config, merge) {
 
 	try {
 		if (this._configFile) {
-			var cpath = require.resolve('./../' + this._configFile);
-			require.cache[cpath] = null; //remove from require cache to reload
-			config = require(cpath);
+			var cpath = require('path').resolve(__dirname, '..', this._configFile);
+			try {
+				config = JSON.parse(require('fs').readFileSync(cpath).toString());
+			} catch (e) {
+				config = {};
+			}
 		}
 		if (!merge) {
 			this.config.clear(); //throw out old config
