@@ -33,7 +33,7 @@ function loadQuotes() {
 var cheerio = require('cheerio'),
 	request = require('request');
 
-function tryWiki(cmd, source) {
+function tryWiki(cmd, callback) {
 	if (cmd === 'archer' || cmd === 'a') {
 		cmd = 'Archer_(TV_series)';
 	}
@@ -64,16 +64,16 @@ function tryWiki(cmd, source) {
 			//try tv serie
 			request('http://en.wikiquote.org/wiki/' + cmd + '_(TV_series)', function(error, response, body) {
 				if (error || response.statusCode !== 200) {
-					source.respond('i did not found any quote!');
+					callback(false);
 					return;
 				}
 
 				var dialog = parse(body);
 				if (dialog.length > 0) {
-					source.respond(dialog);
+					callback(true, dialog);
 				}
 				else {
-					source.respond('i did not found any quote!');
+					callback(false);
 				}
 			});
 
@@ -82,14 +82,12 @@ function tryWiki(cmd, source) {
 
 		var dialog = parse(body);
 		if (dialog.length > 0) {
-			source.respond(dialog);
+			callback(true, dialog);
 		}
 		else {
-			source.respond('i did not found any quote!');
+			callback(false);
 		}
 	});
-
-	return '';
 }
 
 function getRandomQuote() {
@@ -106,7 +104,14 @@ function quote(source, args) {
 	}
 
 	if (serial.length > 0) { //get from wikiquote
-		tryWiki(serial, source);
+		tryWiki(serial, function(ok, result) {
+			if (ok) {
+				source.respond(result);
+			}
+			else {
+				source.respond('i did not found any quote!');
+			}
+		});
 		return;
 	}
 

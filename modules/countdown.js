@@ -88,8 +88,8 @@ function TvCountDownFactory(what, serial, callback) {
 
 function MLPCountDownFactory(what, serial, callback) {
 	http.get({
-		host: 'ponycountdown.com',
-		path: '/api.js'
+		host: 'api.ponycountdown.com',
+		path: '/next'
 	}, function (res) {
 		var data = '';
 		res.setEncoding('utf8');
@@ -99,29 +99,13 @@ function MLPCountDownFactory(what, serial, callback) {
 			}
 		}).on('end', function () {
 			var dnow = new time.Date().getTime();
-			var ponycountdowndates = data.match(new RegExp('([A-Za-z]+)([ \n\r\t]+)([0-9]+)([,]+)([ \n\r\t]+)([0-9]+)([ \n\r\t]+)([0-9]+)([:]+)([0-9]+)([:]+)([0-9]+)([ \n\r\t]?)([A-Z0-9+]*)([ \n\r\t]?)([)(A-Z]*)', 'g'));
-			if (ponycountdowndates !== null) {
-				var episodesnames = data.match(new RegExp('[,]{1}[0-9]+[,]{1}[0-9]+[,]{1}"{1}([^"]*)"{1}', 'g'));
-				var pt, eptext = '';
-				for (var i = 0; i < ponycountdowndates.length; i++) {
-					if (typeof ponycountdowndates[i] === 'undefined' || !ponycountdowndates[i]) {
-						continue;
-					}
-					pt = new time.Date(ponycountdowndates[i], 'UTC').getTime();
-					if (pt > dnow) {
-						if (typeof episodesnames[i] === 'string') {
-							var tep = episodesnames[i].split(',');
-							if (typeof tep[3] === 'string') {
-								tep[3] = tep[3].replace(/"/g, '').trim();
-							} else {
-								tep[3] = '';
-							}
-							eptext = 'S' + (tep[1] < 10 ? '0' + tep[1] : tep[1]) + 'E' + (tep[2] < 10 ? '0' + tep[2] : tep[2]) + (tep[3] !== '' ? ' (' + tep[3] + ')' : '');
-						}
-
-						callback(null, what, pt, 'MLP:FiM', eptext, dnow);
-						return;
-					}
+			var ep = JSON.parse(data || '{}');
+			if (ep) {
+				var pt = new time.Date(ep.time, 'UTC').getTime();
+				if (pt > dnow) {
+					var eptext = 'S' + (ep.season < 10 ? '0' + ep.season : ep.season) + 'E' + (ep.episode < 10 ? '0' + ep.episode : ep.episode) + (ep.name !== '' ? ' (' + ep.name + ')' : '');
+					callback(null, what, pt, 'MLP:FiM', eptext, dnow);
+					return;
 				}
 			}
 

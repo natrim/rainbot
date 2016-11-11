@@ -1,6 +1,6 @@
 {
 	"name": "rainbot",
-	"version": "1.3.2",
+	"version": "1.3.3",
 	"description": "Simple js IRC pony bot",
 	"author": "Natrim",
 	"main": "./libs/bot",
